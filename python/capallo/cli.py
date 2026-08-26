@@ -18,6 +18,9 @@ def main(argv: list[str] | None = None) -> int:
     p_macro.add_argument("--out", default="data/curated")
     p_eq = sub.add_parser("fetch-equities", help="baixa as series de renda variavel disponiveis")
     p_eq.add_argument("--out", default="data/curated")
+    p_b3 = sub.add_parser("fetch-b3", help="baixa e valida os precos da B3 (COTAHIST)")
+    p_b3.add_argument("--out", default="data/curated")
+    p_b3.add_argument("--raw", default="data/raw")
 
     args = parser.parse_args(argv)
 
@@ -68,6 +71,23 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"  - {p}")
             return 1
         print("\nvalidacao ok")
+        return 0
+
+    if args.command == "fetch-b3":
+        from pathlib import Path
+
+        from capallo.ingest.b3 import build, validate
+
+        out = Path(args.out)
+        for name, n in build(out, Path(args.raw)).items():
+            print(f"  {name:<8}{n:>6} pregoes")
+        problems = validate(out)
+        if problems:
+            print("\nPROBLEMAS:")
+            for p in problems:
+                print(f"  - {p}")
+            return 1
+        print("\nvalidacao ok  (ATENCAO: precos brutos, sem proventos)")
         return 0
 
     return 1

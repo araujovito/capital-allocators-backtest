@@ -337,8 +337,50 @@ de ser usado.
 |---|---|---|
 | CDI, IPCA, PTAX | ✅ completa e validada | Banco Central |
 | BRK-B, MKL, IVV, IEV, EWJ | ✅ total return, 240/240 meses | Twelve Data (grátis) |
-| ITSA4, BRAP4, PIBB11 | ⬜ preço bruto obtido; faltam proventos | B3 COTAHIST |
+| ITSA4, BRAP4, PIBB11 | ⬜ preço completo; faltam proventos | B3 COTAHIST |
 | INVE-B, GBLB, 8058, 8031 | ❌ indisponível de graça no período completo | — |
 
 **8 dos 12 ativos estão resolvidos ou a um passo de estar.** O bloqueio se
 concentrou nos 4 allocators de Europa e Japão.
+
+
+---
+
+## 6. Coleta da B3 concluída — e uma armadilha do layout
+
+Baixados os 20 arquivos anuais (550 MB) e extraídos os três tickers brasileiros:
+
+| Ticker | Pregões | Período | Preço bruto |
+|---|---|---|---|
+| ITSA4 | 4.953 | 2006-01-02 → 2025-12-30 | 7,45 → 11,68 |
+| BRAP4 | 4.953 | 2006-01-02 → 2025-12-30 | 58,50 → 19,90 |
+| PIBB11 | 4.953 | 2006-01-02 → 2025-12-30 | 48,00 → 284,25 |
+
+Contagem idêntica entre os três, sem nenhum ano com menos de 200 pregões.
+
+### A armadilha: PIBB11 não é CODBDI 02
+
+O filtro natural para cotação de ação é `CODBDI = 02` (lote padrão). Com ele,
+**PIBB11 retornava só 92 pregões de 2019** — e a série parecia simplesmente não
+existir.
+
+A B3 classifica ETF como **certificado de investimento, `CODBDI = 14`**. O PIBB11
+aparece sob 14 durante quase toda a série e migra para 02 no meio de 2019, quando
+os dois códigos convivem (156 + 92 = 248 pregões).
+
+Filtrar só por 02 teria perdido **13 dos 20 anos** da série — e o pior é que
+falharia em silêncio: o arquivo existe, o parser roda, o resultado sai. Só a
+checagem de que os três tickers da mesma bolsa precisam ter o mesmo número de
+pregões expôs o problema. Essa validação virou teste.
+
+### Os preços brutos ilustram por que proventos não são opcional
+
+ITSA4 sai de 7,45 para 11,68 em vinte anos — **+57% bruto**, o que faria a Itaúsa
+parecer um investimento medíocre. Mas a Itaúsa distribuiu dividendos e JCP e fez
+bonificações sucessivas ao longo de todo o período, e nada disso está no COTAHIST.
+BRAP4 chega a *cair* de 58,50 para 19,90 em preço bruto, por conta de
+desdobramento.
+
+Comparar esses números com o total return já obtido para os ativos americanos
+produziria uma conclusão completamente invertida. **O total return brasileiro está
+bloqueado até os proventos serem coletados** — é a próxima tarefa da perna Brasil.

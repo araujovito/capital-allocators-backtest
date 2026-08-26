@@ -89,3 +89,38 @@ def test_equities_us_reais_se_existirem():
     if not (curated / "equities_us.parquet").exists():
         pytest.skip("equities_us ainda nao materializado")
     assert eq_validate(curated) == []
+
+
+def test_b3_aceita_codbdi_de_etf():
+    """PIBB11 e classificado como certificado de investimento (14), nao lote padrao."""
+    from capallo.ingest.b3 import CODBDI_ACEITOS
+
+    assert CODBDI_ACEITOS == {"02", "14"}
+
+
+def test_b3_validate_detecta_divergencia_entre_tickers(tmp_path):
+    import pandas as pd
+
+    from capallo.ingest.b3 import validate as b3_validate
+
+    dias = pd.bdate_range("2006-01-02", "2025-12-30")
+    frames = []
+    for i, t in enumerate(["ITSA4", "BRAP4", "PIBB11"]):
+        n = len(dias) - (5 if i == 0 else 0)
+        frames.append(pd.DataFrame({"date": dias[:n], "ticker": t, "close": 10.0,
+                                    "volume": 1.0, "trades": 1}))
+    pd.concat(frames).to_parquet(tmp_path / "b3_prices.parquet")
+    assert any("diverge" in p for p in b3_validate(tmp_path))
+
+
+def test_b3_real_se_existir():
+    from pathlib import Path
+
+    import pytest
+
+    from capallo.ingest.b3 import validate as b3_validate
+
+    curated = Path(__file__).resolve().parents[1] / "data" / "curated"
+    if not (curated / "b3_prices.parquet").exists():
+        pytest.skip("b3_prices ainda nao materializado")
+    assert b3_validate(curated) == []
