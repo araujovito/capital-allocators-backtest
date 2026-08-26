@@ -1,0 +1,8 @@
+# Variações diárias acima do limite do detector que foram verificadas como
+# movimento de mercado genuíno, e não evento societário não registrado.
+#
+# Sem esta lista, a validação do total return acusaria erro para sempre em datas
+# corretas — e a tentação seria relaxar o limite, que é justamente o que faria o
+# detector parar de encontrar desdobramentos reais.
+ticker,date,return_pct,reason
+ITSA4,2008-10-13,25.1,"rali global após o anúncio coordenado de socorro bancário, dias depois da quebra do Lehman; nenhum evento societário na data"

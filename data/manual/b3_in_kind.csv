@@ -1,0 +1,14 @@
+# Proventos em espécie: ações de outra companhia distribuídas aos acionistas.
+# Nenhuma série de preço captura esse valor, e ignorá-lo subestima o total return.
+#
+# BRAP4 2021: a Bradespar distribuiu ações da Vale (REST CAP ACOES, factor 33,2373453%).
+# Valoração pela cotação de VALE3 no pregão ex, extraída do próprio COTAHIST.
+#
+# Conferência da data-ex (55,78 -> 23,14, queda de R$32,64):
+#     Vale     0,332373 x 79,17 = R$ 26,31
+#     dinheiro  dividendo do dia = R$  6,04
+#     soma                        R$ 32,35   residuo R$ 0,29 = mercado (-1,6% no dia)
+# O fator declarado pela B3 confere; a diferença aparente vinha do dividendo em
+# dinheiro com a mesma data-ex, que entra pela série de proventos.
+ticker,ex_date,asset,ratio,asset_price,value_per_share,source
+BRAP4,2021-12-16,VALE3,0.332373453,79.17,26.31,"B3 REST CAP ACOES; VALE3 no COTAHIST de 2021-12-17"

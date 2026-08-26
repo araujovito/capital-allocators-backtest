@@ -80,10 +80,11 @@ tests/              testes do pipeline
 | ITSA4, BRAP4, PIBB11 (preço) | ✅ 4.953 pregões cada, 2006-2025 | B3, arquivo `COTAHIST` |
 | Proventos Brasil (dinheiro) | ✅ 644 registros, dividendo × JCP separados | B3, proxy oficial |
 | Eventos em ações Brasil | ✅ ITSA4 completa; 2 desdobramentos de BRAP4 recuperados | B3 + detecção por salto |
+| **Total return Brasil** | ✅ **fechado e validado** | COTAHIST + eventos + proventos |
 | INVE-B, GBLB, 8058, 8031 | ❌ sem fonte gratuita no período completo | — |
 
-**8 dos 12 ativos resolvidos ou a um passo.** O bloqueio restante são os quatro
-allocators de Europa e Japão.
+**8 dos 12 ativos resolvidos.** Brasil e EUA completos, com total return validado.
+O bloqueio restante são os quatro allocators de Europa e Japão.
 
 Barra a ser batida, já quantificada: o **CDI rendeu 4,46% a.a. reais** entre 2006
 e 2025 (IPCA acumulado 192,0%; CDI nominal 10,20% a.a.). É o número que Allocators
@@ -111,6 +112,7 @@ capallo fetch-macro     # CDI, IPCA e PTAX do Banco Central
 capallo fetch-equities  # total return dos ativos listados nos EUA
 capallo fetch-b3        # precos da B3 (baixa ~550MB de COTAHIST)
 capallo fetch-b3-events # proventos e eventos societarios, com reconciliacao
+capallo build-br        # monta e valida o total return brasileiro
 capallo probe           # viabilidade das series ainda bloqueadas
 pytest tests/
 

@@ -23,6 +23,8 @@ def main(argv: list[str] | None = None) -> int:
     p_b3.add_argument("--raw", default="data/raw")
     p_ev = sub.add_parser("fetch-b3-events", help="proventos e eventos societarios da B3")
     p_ev.add_argument("--out", default="data/curated")
+    p_tr = sub.add_parser("build-br", help="monta o total return brasileiro")
+    p_tr.add_argument("--out", default="data/curated")
 
     args = parser.parse_args(argv)
 
@@ -104,6 +106,27 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"  ! {w}")
             return 0
         print("\nreconciliacao ok")
+        return 0
+
+    if args.command == "build-br":
+        from pathlib import Path
+
+        from capallo.transform.build_br import build, validate
+
+        out = Path(args.out)
+        df = build(out)
+        for t, g in df.groupby("ticker"):
+            g = g.sort_values("date")
+            tr = g.tr_index.iloc[-1] / g.tr_index.iloc[0]
+            print(f"  {t:<8}{g.units.iloc[-1]:>9.3f} unidades   "
+                  f"{(tr - 1) * 100:>8.1f}%   {(tr ** (1 / 20) - 1) * 100:>5.2f}% a.a.")
+        problems = validate(out)
+        if problems:
+            print("\nPROBLEMAS:")
+            for p in problems:
+                print(f"  - {p}")
+            return 1
+        print("\nvalidacao ok — nenhum salto residual")
         return 0
 
     return 1

@@ -476,3 +476,89 @@ causa de bonificações não coletadas.
 **O total return brasileiro continua bloqueado**, agora por um motivo preciso e
 localizado: validar os eventos em ações de ITSA4 e BRAP4 contra os RIs das
 empresas, e valorar a distribuição de ações da Vale de 2021.
+
+
+---
+
+## 8. Total return brasileiro fechado
+
+Série de retorno total montada a partir de preço bruto do COTAHIST mais todos os
+eventos, com validação de que **não sobra descontinuidade artificial**.
+
+| Ticker | Unidades finais | TR nominal | % a.a. nominal | % a.a. **real** |
+|---|---|---|---|---|
+| BRAP4 | 36,751 | +1.150,2% | 13,46% | **7,54%** |
+| ITSA4 | 2,834 | +344,4% | 7,74% | **2,12%** |
+| PIBB11 | 1,000 | +492,2% | 9,30% | **3,60%** |
+
+Referência: CDI 10,20% nominal / **4,46% real**. IPCA 5,50% a.a.
+
+### O modelo é de unidades acumuladas, não de fator retroativo
+
+Parte-se de 1 ação e acompanha-se quantas ações o investidor passa a ter:
+desdobramento multiplica, provento reinvestido soma. O índice é `unidades × preço`.
+Cada evento fica explícito e auditável, ao contrário de um fator de ajuste aplicado
+retroativamente sobre o preço.
+
+### A distribuição de ações da Vale, resolvida
+
+O fator declarado pela B3 parecia não fechar: 33,2373% × R$79,17 = R$26,31, contra
+uma queda observada de R$32,64 na data-ex.
+
+A diferença **não era erro do fator** — era um dividendo em dinheiro de R$6,0439
+com a mesma data-ex, que entra por outra série:
+
+```
+Vale        0,332373 × 79,17 = R$ 26,31
+dinheiro     dividendo do dia = R$  6,04
+                               ─────────
+                                R$ 32,35
+queda observada                 R$ 32,64
+resíduo                         R$  0,29   ← mercado caiu 1,6% no dia
+```
+
+### Semântica da B3 que quase passou batido
+
+O campo `lastDatePrior` é o **último pregão com direito**, não a data-ex — esta é o
+pregão seguinte. Verificado na bonificação de 12,95% da BRAP4, cujo efeito no preço
+aparece em 21/09/2021 e não em 20/09. Errar isso deslocaria todo evento em um dia.
+
+### Dois bugs encontrados pela desconfiança de um número
+
+O primeiro resultado deu **173 unidades** de BRAP4 partindo de uma ação. O número
+passava em todas as validações, mas não fechava com a conta de guardanapo
+(2 desdobramentos × bonificação × Vale × reinvestimento ≈ 40). Investigar a
+discrepância revelou dois erros:
+
+1. **Eventos anteriores à janela aplicados no primeiro pregão.** O desdobramento de
+   2005 da BRAP4 entrava em 02/01/2006, porque a busca pelo pregão seguinte pegava
+   o primeiro disponível. O investidor do estudo não detinha a ação em 2005 e não
+   recebeu aquele desdobramento.
+2. **Eventos contados duas vezes.** A B3 publica cada bonificação e desdobramento
+   uma vez para ON e outra para PN, com o mesmo fator. Aplicar as duas **dobrava
+   todo evento societário**.
+
+Ambos inflavam o retorno da Bradespar sem quebrar nada e sem disparar validação
+alguma. O que os pegou foi um número que não batia com a ordem de grandeza
+esperada. Os dois viraram teste.
+
+### A lista de exceções verificadas
+
+A alta de 25,1% do ITSA4 em 13/10/2008 é movimento de mercado real — o rali global
+que seguiu o anúncio coordenado de socorro bancário. Ela fica em
+`data/manual/verified_market_moves.csv` com justificativa.
+
+Isso importa metodologicamente: sem a lista, a validação acusaria erro para sempre
+numa data correta, e a saída tentadora seria **afrouxar o limite do detector** —
+que é exatamente o que o faria parar de encontrar desdobramentos reais.
+
+### Primeira leitura do resultado, com a ressalva devida
+
+Os allocators brasileiros em pesos iguais rendem ~10,6% a.a. nominais contra 9,30%
+do PIBB11 — e a Bradespar sozinha, 13,46%, carrega o par, enquanto a Itaúsa perde
+tanto do ETF quanto do CDI.
+
+É precisamente o cenário que a seção 20 do checkpoint antecipou: *"uma única empresa
+excepcional carregou a carteira inteira"*. **Nenhuma conclusão deve ser tirada
+disto ainda** — falta o backtest com aportes mensais, que é sensível ao momento das
+entradas de um jeito que a comparação ponta a ponta não é.
