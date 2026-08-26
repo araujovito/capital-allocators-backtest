@@ -154,17 +154,56 @@ A B3 é a exceção justamente por ser retrógrada no bom sentido — publica um
 de largura fixa por ano, como em 1998, e por isso é a fonte mais acessível do
 projeto inteiro.
 
+### Rodada 3: automação de navegador
+
+Se o dado só existe depois do JavaScript rodar, rodar o JavaScript é a resposta
+técnica adequada. Montado com **Playwright + Chromium headless próprio** — não usa
+o navegador pessoal, roda isolado, e é reproduzível em CI.
+
+**A automação funciona.** O Chromium resolveu a prova de trabalho do Stooq e
+carregou a página de 8058.JP com cotação real, onde o `curl` só via o desafio.
+Ferramenta validada.
+
+Mas ela esbarrou em outra coisa:
+
+| Fonte | Resultado com navegador |
+|---|---|
+| Stooq — página | ✅ carrega, prova de trabalho resolvida |
+| Stooq — CSV histórico | ❌ o download entrega `error.txt` com **"Access denied"** |
+| Euronext (GBLB) | ⚠️ endpoint devolve **628 KB de payload cifrado** (AES, `ct`/`iv`/`s`), decifrado no cliente |
+| WSJ | ❌ HTTP 401 |
+| API Nasdaq Nordic | ❌ erro de protocolo |
+| S&P Dow Jones | ❌ navegação recusada |
+
+### Onde a busca para, e por quê
+
+O Stooq não *falha* ao entregar o CSV — ele **recusa explicitamente**. Exportação
+em massa é recurso pago lá. O Euronext não expõe o histórico em claro: ele cifra o
+payload para que só o próprio front-end o leia.
+
+Nos dois casos existe caminho técnico para obter o dado assim mesmo — raspar a
+tabela renderizada, ou reimplementar a decifragem. **Não foi feito, por decisão.**
+São controles de acesso deliberados, e contorná-los é diferente de ler uma página
+pública. Um projeto que se apresenta como portfólio não deveria ter no histórico um
+commit que burla proteção de fonte de dados.
+
+A automação de navegador continua no projeto como ferramenta legítima — ela é a
+resposta certa para fontes que publicam o dado abertamente mas o renderizam no
+cliente. Só não é a resposta para fontes que decidiram não publicar.
+
 ### Caminhos restantes
 
-1. **Automação de navegador.** Se o dado só existe depois do JavaScript rodar,
-   rodar o JavaScript é a resposta técnica correta. Resolve Stooq (que exige prova
-   de trabalho em JS), os RIs e possivelmente os emissores. Custo zero, mas mais
-   frágil e mais lento que um endpoint estático.
-2. **Provedor pago, um mês.** As 9 séries são de um período fechado que nunca muda:
-   baixa uma vez, valida, congela em Parquet, cancela. Não é assinatura recorrente.
-3. **Download manual dos RIs.** Com 9 ativos é viável. Investor AB e GBL publicam
-   total return nos relatórios anuais — são investment companies, essa é *a* métrica
-   que elas divulgam.
+1. **Provedor pago, um mês** (~US$20–80). As 9 séries são de um período fechado que
+   nunca muda: baixa uma vez, valida, congela em Parquet, cancela. Não é assinatura
+   recorrente, é uma compra única de dado histórico. **Menor risco e menor esforço.**
+2. **Relatórios anuais e RIs.** Investor AB e GBL publicam total return nos próprios
+   relatórios — são investment companies, essa é *a* métrica que elas divulgam.
+   Parcialmente manual, mas com 9 ativos é viável, e é a fonte de maior qualidade
+   e melhor rastreabilidade de evento societário.
+3. **Combinação.** Provedor pago para as séries diárias, RI como validação cruzada
+   de INVE-B, GBLB, 8058 e 8031 — os quatro que a metodologia marcou como frágeis.
+   Duas fontes independentes discordando é exatamente o sinal que se quer ver antes
+   de confiar no número final.
 
 ### O risco continua sendo o previsto
 

@@ -78,15 +78,21 @@ tests/              testes do pipeline
 | CDI, IPCA, câmbio | ✅ resolvida e validada | Banco Central (SGS + Olinda/PTAX) |
 | Preços Brasil | ✅ resolvida | B3, arquivo `COTAHIST` |
 | Proventos Brasil | ⬜ a coletar | RI / CVM / B3 |
-| EUA, Europa, Japão | ⚠️ bloqueada | nenhuma fonte gratuita respondeu |
+| EUA, Europa, Japão | ⚠️ bloqueada | nenhuma fonte gratuita entrega o histórico |
 
 Barra a ser batida, já quantificada: o **CDI rendeu 4,46% a.a. reais** entre 2006
 e 2025 (IPCA acumulado 192,0%; CDI nominal 10,20% a.a.). É o número que Allocators
 e ETFs precisam superar para o risco ter compensado.
 
+Os dados internacionais são **essenciais** — sem eles não existem a comparação
+regional, o Allocator Premium nem a pergunta central. Três rodadas de busca estão
+documentadas em `docs/spike-dados.md`: agregadores, fontes primárias e automação
+de navegador. Conclusão: o histórico global exige fonte paga ou coleta via
+relatórios de RI.
+
 **Próximo passo:** montar o total return brasileiro (ITSA4 + BRAP4 × PIBB11) e
 rodar a comparação regional do Brasil. É um recorte completo do estudo, com dado
-oficial, que exercita o motor inteiro sem depender das fontes bloqueadas.
+oficial, que valida o motor inteiro enquanto a fonte internacional é resolvida.
 
 ## Setup
 

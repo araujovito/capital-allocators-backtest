@@ -12,6 +12,9 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "ruff>=0.5", "mypy>=1.10"]
+# Coleta de fontes que renderizam o dado no cliente. Nao e dependencia do
+# backtest: instale so quando for coletar.
+browser = ["playwright>=1.45"]
 
 [project.scripts]
 capallo = "capallo.cli:main"
