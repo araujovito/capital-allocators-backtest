@@ -191,19 +191,50 @@ A automação de navegador continua no projeto como ferramenta legítima — ela
 resposta certa para fontes que publicam o dado abertamente mas o renderizam no
 cliente. Só não é a resposta para fontes que decidiram não publicar.
 
-### Caminhos restantes
+## 2.3 Reformulando o problema — restrição: custo zero
 
-1. **Provedor pago, um mês** (~US$20–80). As 9 séries são de um período fechado que
-   nunca muda: baixa uma vez, valida, congela em Parquet, cancela. Não é assinatura
-   recorrente, é uma compra única de dado histórico. **Menor risco e menor esforço.**
+O projeto opera com **orçamento zero**. Isso é restrição de projeto, não obstáculo
+a contornar, e força duas perguntas que deveriam ter sido feitas antes.
+
+### Pergunta 1: de quantos ativos estamos mesmo falando?
+
+Dos 9 que faltam, **5 são listados nos EUA**: BRK.B, MKL, IVV, IEV e EWJ. Ações
+e ETFs americanos são o segmento mais coberto por planos gratuitos de qualquer
+provedor. Só **4** são de bolsa estrangeira: INVE-B (Estocolmo), GBLB (Bruxelas),
+8058 e 8031 (Tóquio).
+
+O problema difícil não tem 9 séries. Tem 4.
+
+### Pergunta 2: qual granularidade o estudo realmente exige?
+
+Revisando a metodologia: os aportes são **mensais**, o rebalanceamento é **anual**,
+as janelas móveis são de 1/3/5/10 anos e o drawdown é medido sobre o patrimônio,
+que só muda de forma relevante entre aportes.
+
+**Dado diário não é requisito — dado mensal fecha o estudo.** O que se perde é
+precisão na volatilidade e no drawdown intramês; ambos passam a ser medidos ponta
+a ponta do mês, o que é uma escolha metodológica defensável e precisa ser
+registrada como premissa, não escondida.
+
+Isso importa porque histórico **mensal ajustado de 20+ anos costuma caber em uma
+única chamada** nos planos gratuitos, enquanto o diário estoura qualquer limite.
+A mesma cota gratuita que não cobre o estudo em dado diário cobre com folga em
+mensal.
+
+### Caminhos restantes, todos gratuitos
+
+1. **Planos gratuitos com cadastro** (sem cartão). Cobrem com sobra os 5 ativos
+   americanos. Para os 4 estrangeiros, a cobertura varia por provedor e precisa
+   ser testada — é o próximo experimento.
 2. **Relatórios anuais e RIs.** Investor AB e GBL publicam total return nos próprios
-   relatórios — são investment companies, essa é *a* métrica que elas divulgam.
-   Parcialmente manual, mas com 9 ativos é viável, e é a fonte de maior qualidade
-   e melhor rastreabilidade de evento societário.
-3. **Combinação.** Provedor pago para as séries diárias, RI como validação cruzada
-   de INVE-B, GBLB, 8058 e 8031 — os quatro que a metodologia marcou como frágeis.
-   Duas fontes independentes discordando é exatamente o sinal que se quer ver antes
-   de confiar no número final.
+   relatórios — são investment companies, essa é *a* métrica que divulgam sobre si
+   mesmas. Granularidade anual, coleta parcialmente manual, mas é a fonte de melhor
+   rastreabilidade de evento societário e serve como **validação cruzada**.
+3. **Redução explícita de escopo, se necessário.** Se os 4 estrangeiros não forem
+   obteníveis, a alternativa honesta é publicar o estudo com o universo que existe e
+   **declarar a ausência**, em vez de trocar as empresas por outras mais fáceis de
+   achar. Trocar violaria a regra anti-cherry-picking da seção 4 — o universo foi
+   congelado antes, e conveniência de dado não é critério para alterá-lo.
 
 ### O risco continua sendo o previsto
 
