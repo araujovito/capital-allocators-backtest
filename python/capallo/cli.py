@@ -21,6 +21,8 @@ def main(argv: list[str] | None = None) -> int:
     p_b3 = sub.add_parser("fetch-b3", help="baixa e valida os precos da B3 (COTAHIST)")
     p_b3.add_argument("--out", default="data/curated")
     p_b3.add_argument("--raw", default="data/raw")
+    p_ev = sub.add_parser("fetch-b3-events", help="proventos e eventos societarios da B3")
+    p_ev.add_argument("--out", default="data/curated")
 
     args = parser.parse_args(argv)
 
@@ -88,6 +90,20 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"  - {p}")
             return 1
         print("\nvalidacao ok  (ATENCAO: precos brutos, sem proventos)")
+        return 0
+
+    if args.command == "fetch-b3-events":
+        from capallo.ingest.b3_events import build, reconcile
+
+        for name, n in build(args.out).items():
+            print(f"  {name:<20}{n:>5}")
+        warnings = reconcile(args.out)
+        if warnings:
+            print("\nRECONCILIACAO — dados suspeitos:")
+            for w in warnings:
+                print(f"  ! {w}")
+            return 0
+        print("\nreconciliacao ok")
         return 0
 
     return 1

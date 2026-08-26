@@ -384,3 +384,66 @@ desdobramento.
 Comparar esses números com o total return já obtido para os ativos americanos
 produziria uma conclusão completamente invertida. **O total return brasileiro está
 bloqueado até os proventos serem coletados** — é a próxima tarefa da perna Brasil.
+
+
+---
+
+## 7. Proventos brasileiros: metade resolvida, metade suspeita
+
+Fonte encontrada: o **proxy oficial da B3** que alimenta o site de companhias
+listadas. Público, gratuito, sem chave — o payload vai em base64 na própria URL.
+
+A CVM foi testada antes e descartada: `dados.cvm.gov.br/dados/CIA_ABERTA/EVENTOS/`
+só publica recompra de ações, não proventos por ação.
+
+### Proventos em dinheiro — completos ✅
+
+`GetListedCashDividends`, paginado, com histórico integral:
+
+| Ticker | Registros | Cobertura | Tipos |
+|---|---|---|---|
+| ITSA4 | 504 | 1996 → 2026 | 322 JCP, 182 dividendos |
+| BRAP4 | 140 | 2001 → 2025 | 74 JCP, 66 dividendos |
+
+A separação entre **dividendo e JCP importa**: JCP sofre 15% de retenção na fonte
+e dividendo é isento. Itaúsa paga majoritariamente JCP, então tratar tudo como
+dividendo superestimaria o retorno líquido dela.
+
+### Eventos em ações — provavelmente incompletos ⚠️
+
+`GetListedSupplementCompany` devolve bonificação, desdobramento e grupamento, mas
+o resultado não passa no teste de sanidade:
+
+| Ticker | Eventos na janela | Retorno ingênuo (preço + proventos) |
+|---|---|---|
+| ITSA4 | 3 | **5,89% a.a.** |
+| BRAP4 | 3 | **0,61% a.a.** |
+
+Ambos ficam **abaixo do CDI** (10,20% a.a. nominal), e a Itaúsa registra um único
+evento em ações — uma bonificação de 2% em 2025 — em vinte anos, sendo uma empresa
+conhecida por bonificar com regularidade.
+
+Não é impossível que um allocator perca do CDI por vinte anos; o estudo existe
+justamente para admitir esse resultado. **Mas é implausível como consequência de um
+histórico de eventos societários com três linhas.** A hipótese mais provável é dado
+faltando, não desempenho ruim.
+
+O BRAP4 tem uma complicação adicional e real: o evento `REST CAP ACOES` de
+dezembro/2021 distribuiu **ações da Vale** aos acionistas — um provento em espécie,
+de valor relevante, que nenhuma série de preço captura e que precisa ser avaliado
+pela cotação da Vale na data para entrar no total return.
+
+### Por que isso virou código, não só nota
+
+A função `reconcile()` compara o retorno ingênuo de cada ativo com o CDI do mesmo
+período e dispara aviso quando o resultado é implausível ou quando há poucos
+eventos societários. É uma **guarda contra o pior tipo de erro deste projeto**: o
+que não quebra nada, produz um número, e leva a uma conclusão invertida.
+
+Sem ela, ITSA4 entraria no backtest rendendo 5,89% a.a. e o estudo concluiria com
+confiança que capital allocators brasileiros perdem do CDI — possivelmente por
+causa de bonificações não coletadas.
+
+**O total return brasileiro continua bloqueado**, agora por um motivo preciso e
+localizado: validar os eventos em ações de ITSA4 e BRAP4 contra os RIs das
+empresas, e valorar a distribuição de ações da Vale de 2021.

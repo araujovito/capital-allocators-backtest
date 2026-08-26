@@ -124,3 +124,37 @@ def test_b3_real_se_existir():
     if not (curated / "b3_prices.parquet").exists():
         pytest.skip("b3_prices ainda nao materializado")
     assert b3_validate(curated) == []
+
+
+def test_b3_events_converte_numero_brasileiro():
+    from capallo.ingest.b3_events import _br_number
+
+    assert _br_number("0,13800000000") == 0.138
+    assert _br_number("1.234,56") == 1234.56
+    assert _br_number("") is None
+    assert _br_number(None) is None
+
+
+def test_b3_events_reconcile_flagra_retorno_implausivel(tmp_path):
+    import pandas as pd
+
+    from capallo.ingest.b3_events import reconcile
+
+    dias = pd.bdate_range("2006-01-02", "2025-12-30")
+    pd.DataFrame({"date": list(dias) * 2,
+                  "ticker": ["ITSA4"] * len(dias) + ["BRAP4"] * len(dias),
+                  "close": 10.0, "volume": 1.0, "trades": 1}
+                 ).to_parquet(tmp_path / "b3_prices.parquet")
+    pd.DataFrame({"ticker": ["ITSA4", "BRAP4"],
+                  "ex_date": [pd.Timestamp("2010-01-04")] * 2,
+                  "payment_date": [pd.Timestamp("2010-02-04")] * 2,
+                  "kind": "DIVIDENDO", "value": 0.1, "stock_type": "PN"}
+                 ).to_parquet(tmp_path / "b3_cash_dividends.parquet")
+    pd.DataFrame({"ticker": ["ITSA4"], "ex_date": [pd.Timestamp("2010-01-04")],
+                  "kind": ["BONIFICACAO"], "factor_pct": [2.0], "asset": [""]}
+                 ).to_parquet(tmp_path / "b3_stock_events.parquet")
+
+    w = reconcile(tmp_path)
+    # preco constante e um provento minusculo: tem de disparar os dois avisos
+    assert any("abaixo do CDI" in x for x in w)
+    assert any("eventos em ações" in x for x in w)

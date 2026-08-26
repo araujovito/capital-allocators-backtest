@@ -78,7 +78,8 @@ tests/              testes do pipeline
 | CDI, IPCA, câmbio | ✅ resolvida e validada | Banco Central (SGS + Olinda/PTAX) |
 | BRK-B, MKL, IVV, IEV, EWJ | ✅ total return, 240/240 meses | Twelve Data (plano gratuito) |
 | ITSA4, BRAP4, PIBB11 (preço) | ✅ 4.953 pregões cada, 2006-2025 | B3, arquivo `COTAHIST` |
-| Proventos Brasil | ⬜ a coletar — bloqueia o total return | RI / CVM / B3 |
+| Proventos Brasil (dinheiro) | ✅ 644 registros, dividendo × JCP separados | B3, proxy oficial |
+| Eventos em ações Brasil | ⚠️ coletados mas reprovados na reconciliação | B3 / RI |
 | INVE-B, GBLB, 8058, 8031 | ❌ sem fonte gratuita no período completo | — |
 
 **8 dos 12 ativos resolvidos ou a um passo.** O bloqueio restante são os quatro
@@ -109,6 +110,7 @@ cp .env.example .env  # preencha TWELVEDATA_API_KEY (chave gratuita)
 capallo fetch-macro     # CDI, IPCA e PTAX do Banco Central
 capallo fetch-equities  # total return dos ativos listados nos EUA
 capallo fetch-b3        # precos da B3 (baixa ~550MB de COTAHIST)
+capallo fetch-b3-events # proventos e eventos societarios, com reconciliacao
 capallo probe           # viabilidade das series ainda bloqueadas
 pytest tests/
 
