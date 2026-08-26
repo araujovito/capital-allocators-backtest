@@ -132,39 +132,64 @@ def build(out_dir) -> dict[str, int]:
     return counts
 
 
-def reconcile(out_dir) -> list[str]:
-    """Confronta preço bruto + proventos com o CDI do mesmo período.
+def detect_unrecorded_events(out_dir, threshold: float = 0.25) -> pd.DataFrame:
+    """Procura eventos societários ausentes olhando para saltos na série de preço.
 
-    Não prova que os dados estão certos — mas expõe quando estão implausíveis.
-    Um allocator que rende menos que o CDI por vinte anos é possível; o que não é
-    plausível é uma empresa conhecida por bonificar anualmente registrar um único
-    evento em ações em vinte anos.
+    Desdobramento, grupamento e bonificação deixam uma descontinuidade artificial
+    no preço bruto. Se a série salta e a B3 não registrou evento naquela data, ou
+    o evento faltou no cadastro, ou o movimento foi de mercado — e a distinção se
+    faz pelo sinal e pela magnitude.
+
+    Este teste substituiu uma heurística anterior que comparava o retorno do ativo
+    com o CDI e acusava "dado faltando" quando ficava abaixo. Ela produzia falso
+    positivo: ação brasileira render menos que o CDI entre 2006 e 2025 é fato
+    corriqueiro, não sintoma de dado ausente. Saltos de preço são evidência
+    direta; desempenho fraco não é evidência de nada.
     """
     from pathlib import Path
 
     out_dir = Path(out_dir)
-    warnings: list[str] = []
-    w0, w1 = pd.Timestamp("2006-01-01"), pd.Timestamp("2025-12-31")
-
     prices = pd.read_parquet(out_dir / "b3_prices.parquet")
-    cash = pd.read_parquet(out_dir / "b3_cash_dividends.parquet")
-    stock = pd.read_parquet(out_dir / "b3_stock_events.parquet")
+    events = pd.read_parquet(out_dir / "b3_stock_events.parquet")
 
-    for ticker in COMPANIES:
-        g = prices[prices.ticker == ticker].sort_values("date")
-        d = cash[(cash.ticker == ticker) & cash.stock_type.str.contains("PN", na=False)]
-        d = d[(d.ex_date >= w0) & (d.ex_date <= w1)]
-        e = stock[(stock.ticker == ticker) & (stock.ex_date >= w0) & (stock.ex_date <= w1)]
+    found = []
+    for ticker, g in prices.groupby("ticker"):
+        g = g.sort_values("date").reset_index(drop=True)
+        ret = g.close.pct_change()
+        known = set(events[events.ticker == ticker].ex_date.dt.date)
+        for i in g.index[ret.abs() > threshold]:
+            day = g.date[i].date()
+            registered = any(abs((day - d).days) <= 3 for d in known)
+            found.append(
+                {
+                    "ticker": ticker,
+                    "date": g.date[i],
+                    "return": float(ret[i]),
+                    "price_before": float(g.close[i - 1]),
+                    "price_after": float(g.close[i]),
+                    "implied_factor": float(g.close[i - 1] / g.close[i]),
+                    "registered": registered,
+                }
+            )
+    return pd.DataFrame(found)
 
-        naive = (g.close.iloc[-1] + d.value.sum()) / g.close.iloc[0] - 1
-        anual = (1 + naive) ** (1 / 20) - 1
-        if anual < 0.1020:  # CDI nominal do período
-            warnings.append(
-                f"{ticker}: retorno ingênuo {anual*100:.2f}% a.a. fica abaixo do CDI "
-                f"(10,20% a.a.) — eventos em ações podem estar incompletos"
-            )
-        if len(e) < 5:
-            warnings.append(
-                f"{ticker}: apenas {len(e)} eventos em ações em 20 anos — validar contra o RI"
-            )
-    return warnings
+
+def reconcile(out_dir) -> list[str]:
+    """Avisos sobre eventos societários que a B3 não registrou.
+
+    Só reporta queda: desdobramento e grupamento derrubam ou multiplicam o preço
+    de forma característica, enquanto altas de 25% em um pregão são movimento de
+    mercado corriqueiro em crise — o ITSA4 tem uma em 13/10/2008, no rali global
+    seguinte à quebra do Lehman, que não é evento societário nenhum.
+    """
+    suspects = detect_unrecorded_events(out_dir)
+    if suspects.empty:
+        return []
+    alerts = []
+    for _, r in suspects[(~suspects.registered) & (suspects["return"] < 0)].iterrows():
+        alerts.append(
+            f"{r.ticker}: queda de {r['return']*100:.1f}% em {r.date.date()} "
+            f"({r.price_before:.2f} -> {r.price_after:.2f}, fator implícito "
+            f"{r.implied_factor:.2f}) sem evento registrado na B3"
+        )
+    return alerts

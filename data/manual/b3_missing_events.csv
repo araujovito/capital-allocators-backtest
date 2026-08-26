@@ -1,0 +1,12 @@
+# Eventos societários ausentes do cadastro da B3, identificados por descontinuidade
+# na série de preço bruto do COTAHIST e confirmados pelo fator implícito.
+#
+# Metodologia: `capallo.ingest.b3_events.detect_unrecorded_events` sinaliza pregões
+# com variação superior a 25% sem evento correspondente registrado. Quedas próximas
+# de 50% com fator implícito ~2,0 são desdobramentos 1:2.
+#
+# Este arquivo é entrada de dado, não conclusão: cada linha precisa de confirmação
+# documental antes do backtest oficial. A coluna `status` registra esse estágio.
+ticker,ex_date,kind,factor,implied_factor,status,evidence
+BRAP4,2007-01-09,DESDOBRAMENTO,2.0,2.02,inferido,"queda de -50,4% (98,20 -> 48,70) sem evento na B3"
+BRAP4,2007-10-16,DESDOBRAMENTO,2.0,2.04,inferido,"queda de -51,0% (104,00 -> 50,93) sem evento na B3"

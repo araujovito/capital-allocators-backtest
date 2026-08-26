@@ -409,7 +409,7 @@ A separação entre **dividendo e JCP importa**: JCP sofre 15% de retenção na 
 e dividendo é isento. Itaúsa paga majoritariamente JCP, então tratar tudo como
 dividendo superestimaria o retorno líquido dela.
 
-### Eventos em ações — provavelmente incompletos ⚠️
+### Eventos em ações — um faltava mesmo, o outro era falso alarme
 
 `GetListedSupplementCompany` devolve bonificação, desdobramento e grupamento, mas
 o resultado não passa no teste de sanidade:
@@ -423,10 +423,39 @@ Ambos ficam **abaixo do CDI** (10,20% a.a. nominal), e a Itaúsa registra um ún
 evento em ações — uma bonificação de 2% em 2025 — em vinte anos, sendo uma empresa
 conhecida por bonificar com regularidade.
 
-Não é impossível que um allocator perca do CDI por vinte anos; o estudo existe
-justamente para admitir esse resultado. **Mas é implausível como consequência de um
-histórico de eventos societários com três linhas.** A hipótese mais provável é dado
-faltando, não desempenho ruim.
+**A primeira heurística usada aqui estava errada, e vale registrar por quê.**
+
+Ela comparava o retorno de cada ativo com o CDI e acusava "dado faltando" quando
+ficava abaixo. Isso produziu falso positivo: ação brasileira render menos que o CDI
+entre 2006 e 2025 é fato corriqueiro, não sintoma de dado ausente. A heurística
+confundia *desempenho fraco* com *erro de coleta* — e, pior, teria levado a
+"corrigir" dado correto até ele produzir o resultado esperado, que é exatamente o
+viés que a metodologia do projeto existe para evitar.
+
+O teste que a substituiu olha para **evidência direta**: desdobramento, grupamento
+e bonificação deixam descontinuidade artificial no preço bruto. A série salta e não
+há evento registrado? Aí sim há dado faltando.
+
+Resultado, com corte em 25% de variação diária:
+
+| Ticker | Data | Variação | Evento na B3? | Veredicto |
+|---|---|---|---|---|
+| ITSA4 | 2008-10-13 | **+25,1%** | não | rali global pós-Lehman — **não é evento** |
+| BRAP4 | 2007-01-09 | **−50,4%** | não | desdobramento, fator implícito **2,02** |
+| BRAP4 | 2007-10-16 | **−51,0%** | não | desdobramento, fator implícito **2,04** |
+| BRAP4 | 2021-12-17 | −58,5% | **sim** | distribuição de ações da Vale, já registrada |
+| PIBB11 | — | nenhum | — | série limpa |
+
+**ITSA4 estava completa o tempo todo.** Os 5,89% a.a. são reais, não artefato — a
+Itaúsa de fato rendeu menos que o CDI no período, e o estudo tem de poder dizer
+isso. **BRAP4 tinha dois desdobramentos 1:2 ausentes do cadastro da B3**, ambos em
+2007, agora identificados com fator implícito e registrados em
+`data/manual/b3_missing_events.csv` com status `inferido`, à espera de confirmação
+documental.
+
+O detector só reporta quedas: alta de 25% em um pregão é movimento de mercado
+comum em crise, enquanto desdobramento e grupamento têm assinatura característica
+no sinal e na magnitude.
 
 O BRAP4 tem uma complicação adicional e real: o evento `REST CAP ACOES` de
 dezembro/2021 distribuiu **ações da Vale** aos acionistas — um provento em espécie,

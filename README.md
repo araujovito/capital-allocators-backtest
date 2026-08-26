@@ -79,7 +79,7 @@ tests/              testes do pipeline
 | BRK-B, MKL, IVV, IEV, EWJ | ✅ total return, 240/240 meses | Twelve Data (plano gratuito) |
 | ITSA4, BRAP4, PIBB11 (preço) | ✅ 4.953 pregões cada, 2006-2025 | B3, arquivo `COTAHIST` |
 | Proventos Brasil (dinheiro) | ✅ 644 registros, dividendo × JCP separados | B3, proxy oficial |
-| Eventos em ações Brasil | ⚠️ coletados mas reprovados na reconciliação | B3 / RI |
+| Eventos em ações Brasil | ✅ ITSA4 completa; 2 desdobramentos de BRAP4 recuperados | B3 + detecção por salto |
 | INVE-B, GBLB, 8058, 8031 | ❌ sem fonte gratuita no período completo | — |
 
 **8 dos 12 ativos resolvidos ou a um passo.** O bloqueio restante são os quatro

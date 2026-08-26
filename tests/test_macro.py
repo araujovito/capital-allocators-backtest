@@ -135,26 +135,27 @@ def test_b3_events_converte_numero_brasileiro():
     assert _br_number(None) is None
 
 
-def test_b3_events_reconcile_flagra_retorno_implausivel(tmp_path):
+def test_detecta_desdobramento_e_ignora_alta_de_mercado(tmp_path):
+    """Queda de 50% e evento; alta de 25% em crise nao e."""
     import pandas as pd
 
-    from capallo.ingest.b3_events import reconcile
+    from capallo.ingest.b3_events import detect_unrecorded_events, reconcile
 
-    dias = pd.bdate_range("2006-01-02", "2025-12-30")
-    pd.DataFrame({"date": list(dias) * 2,
-                  "ticker": ["ITSA4"] * len(dias) + ["BRAP4"] * len(dias),
-                  "close": 10.0, "volume": 1.0, "trades": 1}
-                 ).to_parquet(tmp_path / "b3_prices.parquet")
-    pd.DataFrame({"ticker": ["ITSA4", "BRAP4"],
-                  "ex_date": [pd.Timestamp("2010-01-04")] * 2,
-                  "payment_date": [pd.Timestamp("2010-02-04")] * 2,
-                  "kind": "DIVIDENDO", "value": 0.1, "stock_type": "PN"}
-                 ).to_parquet(tmp_path / "b3_cash_dividends.parquet")
-    pd.DataFrame({"ticker": ["ITSA4"], "ex_date": [pd.Timestamp("2010-01-04")],
-                  "kind": ["BONIFICACAO"], "factor_pct": [2.0], "asset": [""]}
-                 ).to_parquet(tmp_path / "b3_stock_events.parquet")
+    dias = pd.bdate_range("2007-01-01", periods=10)
+    precos = [100.0] * 10
+    precos[5] = 49.0    # desdobramento 1:2
+    precos[6:] = [49.0] * 4
+    precos[8] = 62.0    # alta de ~26%, movimento de mercado
+    pd.DataFrame({"date": dias, "ticker": "BRAP4", "close": precos,
+                  "volume": 1.0, "trades": 1}).to_parquet(tmp_path / "b3_prices.parquet")
+    pd.DataFrame({"ticker": [], "ex_date": pd.to_datetime([]), "kind": [],
+                  "factor_pct": [], "asset": []}).to_parquet(tmp_path / "b3_stock_events.parquet")
 
-    w = reconcile(tmp_path)
-    # preco constante e um provento minusculo: tem de disparar os dois avisos
-    assert any("abaixo do CDI" in x for x in w)
-    assert any("eventos em ações" in x for x in w)
+    achados = detect_unrecorded_events(tmp_path)
+    assert len(achados) == 2                      # a queda e a alta
+    assert (achados["return"] < 0).sum() == 1
+
+    # reconcile so reporta a queda: alta nao e evento societario
+    alertas = reconcile(tmp_path)
+    assert len(alertas) == 1
+    assert "2007-01" in alertas[0]
