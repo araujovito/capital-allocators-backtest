@@ -71,14 +71,25 @@ tests/              testes do pipeline
 
 ## Estado
 
-**Concepção / pré-desenvolvimento.** Próximo passo: spike de viabilidade dos dados
-(ver `docs/methodology.md`, seção Riscos).
+**Pré-desenvolvimento.** Spike de dados concluído — ver `docs/spike-dados.md`.
+
+- ✅ **Macro resolvida:** CDI, IPCA e PTAX (USD/EUR/JPY/SEK) do Banco Central,
+  validados na janela inteira. `capallo fetch-macro`
+- ⚠️ **Renda variável bloqueada:** nenhuma fonte gratuita anônima entregou preços
+  das 8 ações e 4 ETFs. É o bloqueador do motor de backtest.
+
+Barra a ser batida, já quantificada: o **CDI rendeu 4,46% a.a. reais** entre 2006
+e 2025 (IPCA acumulado 192,0%; CDI nominal 10,20% a.a.).
 
 ## Setup
 
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
-pip install -e ./python[dev]
+pip install -e "./python[dev]"
+
+capallo fetch-macro   # baixa e valida CDI, IPCA e PTAX
+capallo probe         # spike de viabilidade das series de renda variavel
+pytest tests/
 
 # Rust (ainda não instalado nesta máquina)
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh

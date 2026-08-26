@@ -11,6 +11,11 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="capallo")
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("universe", help="lista o universo congelado de ativos")
+    p_probe = sub.add_parser("probe", help="spike de viabilidade dos dados")
+    p_probe.add_argument("tickers", nargs="*", help="subconjunto a testar (default: todos)")
+    p_probe.add_argument("--pause", type=float, default=1.5)
+    p_macro = sub.add_parser("fetch-macro", help="baixa e valida CDI, IPCA e PTAX")
+    p_macro.add_argument("--out", default="data/curated")
 
     args = parser.parse_args(argv)
 
@@ -21,6 +26,29 @@ def main(argv: list[str] | None = None) -> int:
             print(f"\n{label}")
             for a in group:
                 print(f"  {a.region.value}  {a.ticker:<8} {a.name:<28} {a.exposure_currency.value}")
+        return 0
+
+    if args.command == "probe":
+        from capallo.ingest.probe_report import render, run
+
+        print(render(run(args.tickers or None, pause=args.pause)))
+        return 0
+
+    if args.command == "fetch-macro":
+        from pathlib import Path
+
+        from capallo.ingest.macro import build, validate
+
+        out = Path(args.out)
+        for name, n in build(out).items():
+            print(f"  {name:<8}{n:>6} obs")
+        problems = validate(out)
+        if problems:
+            print("\nPROBLEMAS:")
+            for p in problems:
+                print(f"  - {p}")
+            return 1
+        print("\nvalidacao ok")
         return 0
 
     return 1

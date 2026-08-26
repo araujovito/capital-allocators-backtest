@@ -36,3 +36,26 @@ Ver `methodology.md` para as justificativas.
 - Fonte definitiva de total return para INVE-B, GBLB, 8058, 8031
 - Fonte de IPCA e CDI (SGS/Bacen vs. IBGE direto)
 - Tesouro IPCA+ fica para V2 (introduz duration e marcação a mercado)
+
+## 2026-08-26 — Câmbio via Olinda/PTAX, não SGS
+
+O SGS não expõe a coroa sueca, e Investor AB negocia em SEK. A API Olinda/PTAX
+cobre USD, EUR, JPY e SEK de forma uniforme. O coletor de câmbio usa Olinda.
+
+## 2026-08-26 — PTAX guarda compra e venda
+
+Spread médio na janela entre 0,159% (USD) e 0,204% (SEK). Em 240 aportes
+convertidos, escolher uma das pontas arbitrariamente introduz viés sistemático.
+O coletor persiste as duas; a escolha é do pipeline e ainda **não foi tomada**.
+
+## 2026-08-26 — Spike de dados: macro resolvida, renda variável bloqueada
+
+Ver `spike-dados.md`. A barra a ser batida está quantificada: **CDI rendeu 4,46%
+a.a. reais** entre 2006 e 2025.
+
+## Em aberto (atualizado)
+
+- **Fonte de preço e eventos societários** para as 8 ações e 4 ETFs — bloqueador
+  do motor de backtest
+- PTAX: usar compra, venda, ou média?
+- Tesouro IPCA+ fica para V2 (introduz duration e marcação a mercado)
