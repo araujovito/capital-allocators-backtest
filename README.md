@@ -73,13 +73,20 @@ tests/              testes do pipeline
 
 **Pré-desenvolvimento.** Spike de dados concluído — ver `docs/spike-dados.md`.
 
-- ✅ **Macro resolvida:** CDI, IPCA e PTAX (USD/EUR/JPY/SEK) do Banco Central,
-  validados na janela inteira. `capallo fetch-macro`
-- ⚠️ **Renda variável bloqueada:** nenhuma fonte gratuita anônima entregou preços
-  das 8 ações e 4 ETFs. É o bloqueador do motor de backtest.
+| Camada | Estado | Fonte |
+|---|---|---|
+| CDI, IPCA, câmbio | ✅ resolvida e validada | Banco Central (SGS + Olinda/PTAX) |
+| Preços Brasil | ✅ resolvida | B3, arquivo `COTAHIST` |
+| Proventos Brasil | ⬜ a coletar | RI / CVM / B3 |
+| EUA, Europa, Japão | ⚠️ bloqueada | nenhuma fonte gratuita respondeu |
 
 Barra a ser batida, já quantificada: o **CDI rendeu 4,46% a.a. reais** entre 2006
-e 2025 (IPCA acumulado 192,0%; CDI nominal 10,20% a.a.).
+e 2025 (IPCA acumulado 192,0%; CDI nominal 10,20% a.a.). É o número que Allocators
+e ETFs precisam superar para o risco ter compensado.
+
+**Próximo passo:** montar o total return brasileiro (ITSA4 + BRAP4 × PIBB11) e
+rodar a comparação regional do Brasil. É um recorte completo do estudo, com dado
+oficial, que exercita o motor inteiro sem depender das fontes bloqueadas.
 
 ## Setup
 

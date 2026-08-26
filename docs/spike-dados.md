@@ -65,24 +65,63 @@ deste ambiente.
 
 | Fonte | Resultado |
 |---|---|
-| Yahoo Finance (`query1`/`query2`) | **HTTP 429** em todos os símbolos, inclusive com User-Agent de navegador e cookie de sessão. O handshake de crumb (`fc.yahoo.com`) também responde 429. Bloqueio por IP, não rate-limit transitório. |
+| **B3 — arquivo COTAHIST** | ✅ **FUNCIONA.** Ver seção 2.1. |
+| Yahoo Finance (`query1`/`query2`) | **HTTP 429** em todos os símbolos, inclusive com User-Agent de navegador e cookie de sessão. O handshake de crumb (`fc.yahoo.com`) também responde 429. |
 | Stooq (`.com` e `.pl`) | Desafio anti-bot com prova de trabalho em JavaScript. Requer navegador. |
-| brapi.dev | Exige token (`MISSING_TOKEN`). Cadastro gratuito disponível. |
-| Frankfurter | Funciona, **mas só câmbio** — não resolve renda variável, e o PTAX é fonte melhor para a ótica brasileira. |
+| brapi.dev | Exige token (`MISSING_TOKEN`). Cadastro gratuito disponível, cobre só o Brasil. |
+| EODHD | Token `demo` funciona, mas só em símbolos de demonstração. `INVE-B.ST` → `Forbidden`. Cobertura global real é paga. |
+| Alpha Vantage | Chave `demo` funciona em símbolos fixos. Chave gratuita tem limite diário apertado e cobertura internacional fraca. |
+| Tiingo | 403 sem chave. |
+| Frankfurter | Funciona, mas só câmbio — e o PTAX é fonte melhor para a ótica brasileira. |
+
+### O bloqueio do Yahoo não é do ambiente
+
+Verificado: **sem variáveis de proxy**, IP de saída `45.170.152.180` — a rede real
+da máquina. O 429 persiste com 3 segundos de pausa entre requisições. Rodar de
+outro terminal na mesma máquina não muda nada. O caminho "tentar da própria rede"
+está esgotado.
+
+## 2.1 Brasil — RESOLVIDO com dado oficial ✅
+
+A B3 publica o arquivo histórico anual `COTAHIST_A<ANO>.ZIP`, sem chave e sem
+anti-bot:
+
+```
+https://bvmf.bmfbovespa.com.br/InstDados/SerHist/COTAHIST_A2006.ZIP
+```
+
+Verificado em 2006 — 8,9 MB compactados, 47 MB de texto, layout de largura fixa:
+
+| Ticker | Pregões em 2006 |
+|---|---|
+| ITSA4 | 246 |
+| BRAP4 | 246 |
+| PIBB11 | 246 |
+
+Campos relevantes do layout: posição 1-2 tipo de registro, 3-10 data, 11-12 CODBDI,
+13-24 código de negociação, 109-121 preço de fechamento (2 casas implícitas).
+
+⚠️ **Ressalva importante:** COTAHIST traz **preço bruto**, sem ajuste por
+proventos, splits ou bonificações. Ele resolve a série de preços, **não** o total
+return da seção 11 do checkpoint. Os eventos societários de Itaúsa, Bradespar e
+PIBB11 precisam vir à parte — RI das empresas, CVM, ou o próprio arquivo de
+proventos da B3.
 
 O código do probe (`capallo probe`) está pronto e testado; ele reporta por
 símbolo: moeda, data inicial, cobertura ano a ano, contagem de dividendos e
 splits, e presença de close ajustado. **Só falta uma fonte que responda.**
 
-### Caminhos, em ordem de preferência
+## 2.2 EUA, Europa e Japão — ainda bloqueados ⚠️
 
-1. **Rodar `capallo probe` da sua própria rede.** É plausível que o bloqueio seja
-   deste ambiente. Custo zero, resposta imediata, e é o primeiro teste a fazer.
-2. **Provedor com chave gratuita.** brapi.dev resolve só o Brasil. Para cobertura
-   global com histórico desde 2005 e eventos societários, os candidatos reais são
-   pagos ou têm limites apertados no plano gratuito.
-3. **Dado oficial por bolsa.** Mais trabalhoso, mas é a fonte de maior qualidade e
-   a única com rastreabilidade real de eventos societários.
+Restam **BRK.B, MKL, INVE-B, GBLB, 8058, 8031, IVV, IEV, EWJ**.
+
+O padrão da B3 sugere o caminho: **dado oficial por bolsa**. Nasdaq/NYSE, Nasdaq
+Stockholm, Euronext Brussels e JPX publicam históricos, com formatos e políticas
+de acesso distintos entre si. É trabalhoso, mas é a fonte de maior qualidade e a
+única com rastreabilidade real de eventos societários.
+
+A alternativa é um provedor pago com cobertura global desde 2005. Decisão de custo,
+não técnica — precisa da sua chamada.
 
 ### O risco continua sendo o previsto
 
@@ -98,12 +137,17 @@ Enquanto essas quatro séries não estiverem validadas, escrever o motor de back
 
 ## 3. Conclusão
 
-**Pode seguir:** tudo que depende só de macro — aporte real corrigido pelo IPCA,
-conta caixa remunerada ao CDI, conversão cambial, e a estratégia CDI inteira, que
-é executável hoje de ponta a ponta.
+**Pode seguir:**
+- Tudo que depende só de macro — aporte real corrigido pelo IPCA, caixa remunerado
+  ao CDI, conversão cambial. A estratégia **CDI é executável hoje** de ponta a ponta.
+- A **comparação regional do Brasil** (seção 14 do checkpoint): Itaúsa + Bradespar
+  × PIBB11, assim que os proventos forem coletados. É um recorte completo do estudo,
+  com dado oficial, e serve para validar o motor inteiro em escala reduzida.
 
-**Não pode seguir:** as estratégias Capital Allocators e Passive ETFs, até haver
-fonte confiável de preço e evento societário.
+**Não pode seguir:** as estratégias globais, até haver fonte para os nove ativos
+de EUA, Europa e Japão.
 
-**Próximo passo concreto:** rodar `capallo probe` de uma rede não bloqueada e
-comparar o resultado com esta tabela.
+**Próximo passo concreto:** coletar proventos e eventos societários de ITSA4, BRAP4
+e PIBB11, montar o total return brasileiro e rodar o primeiro backtest regional.
+Isso exercita aporte, caixa, dividendos, rebalanceamento e IPCA — todo o motor —
+sem depender das fontes bloqueadas.
