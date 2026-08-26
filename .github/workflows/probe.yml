@@ -1,0 +1,67 @@
+# Testa se as fontes de renda variável respondem de um IP do GitHub.
+#
+# O Yahoo bloqueia por IP a rede local do projeto (HTTP 429 mesmo com pausa e
+# User-Agent de navegador). Os runners do GitHub saem por faixas completamente
+# diferentes. Se passarem aqui, o coletor internacional roda em CI.
+
+name: probe
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Uma vez por semana: se o bloqueio for transitório, isso registra quando cedeu.
+    - cron: "17 6 * * 1"
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Instalar
+        run: pip install -e "./python[dev]"
+
+      - name: Diagnóstico de rede
+        run: |
+          echo "IP de saída: $(curl -sS -m 15 https://api.ipify.org || echo indisponivel)"
+          echo -n "Yahoo (chart IVV): "
+          curl -sS -m 20 -o /dev/null -w '%{http_code}\n' \
+            -A "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36" \
+            "https://query1.finance.yahoo.com/v8/finance/chart/IVV?range=5d&interval=1d" || true
+          echo -n "B3 (COTAHIST 2006): "
+          curl -sS -m 60 -o /dev/null -w '%{http_code}\n' \
+            "https://bvmf.bmfbovespa.com.br/InstDados/SerHist/COTAHIST_A2006.ZIP" || true
+
+      - name: Probe das séries de renda variável
+        run: |
+          python -m capallo.cli probe --pause 2.0 | tee probe.txt
+
+      - name: Resumo
+        if: always()
+        run: |
+          {
+            echo '## Probe de renda variável'
+            echo '```'
+            cat probe.txt 2>/dev/null || echo 'probe nao produziu saida'
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: probe-report
+          path: probe.txt
+
+      - name: Falhar se nenhuma série passou
+        run: |
+          if grep -q 'FALHA' probe.txt && ! grep -qE '^\S+\s+(USD|BRL|SEK|EUR|JPY)' probe.txt; then
+            echo "::warning::Nenhuma série obtida — o IP do runner também está bloqueado."
+            exit 1
+          fi
