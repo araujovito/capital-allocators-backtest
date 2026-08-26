@@ -33,3 +33,5 @@ outputs/
 .DS_Store
 .vscode/
 .idea/
+
+!data/**/.gitkeep
