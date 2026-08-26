@@ -125,13 +125,46 @@ splits, e presença de close ajustado. **Só falta uma fonte que responda.**
 
 Restam **BRK.B, MKL, INVE-B, GBLB, 8058, 8031, IVV, IEV, EWJ**.
 
-O padrão da B3 sugere o caminho: **dado oficial por bolsa**. Nasdaq/NYSE, Nasdaq
-Stockholm, Euronext Brussels e JPX publicam históricos, com formatos e políticas
-de acesso distintos entre si. É trabalhoso, mas é a fonte de maior qualidade e a
-única com rastreabilidade real de eventos societários.
+Estes dados são considerados **essenciais** para o projeto: sem eles não existem
+as seções 14 (comparação regional), 22 (Allocator Premium) nem a pergunta central
+do estudo. O Brasil sozinho não responde nada.
 
-A alternativa é um provedor pago com cobertura global desde 2005. Decisão de custo,
-não técnica — precisa da sua chamada.
+### Rodada 2: fontes primárias — emissores, bolsas e RIs
+
+Tentativa de ir direto à fonte, contornando agregadores. Resultado:
+
+| Fonte | Alvo | Resultado |
+|---|---|---|
+| iShares / BlackRock | IVV, IEV, EWJ | Endpoint de NAV histórico existe e responde **HTTP 200 com `content-type: text/csv`** — mas o corpo é a página HTML do produto. Gate de bot servido sob o content-type do arquivo. |
+| API Nasdaq (`api.nasdaq.com`) | IVV | JSON válido, `totalRecords: 0` para **toda** data testada (2006, 2010, 2015, 2020, 2026). Endpoint desativado ou fechado. |
+| Nasdaq Nordic (`DataFeedProxy.aspx`) | INVE-B | HTTP 301 → site novo, renderizado em JavaScript. O proxy de dados legado saiu do ar. |
+| RI Investor AB | INVE-B | Página fala explicitamente de *total return* como a métrica da casa, mas **nenhum link estático** de `.csv`/`.xls`. Dado renderizado no cliente. |
+| RI Markel | MKL | Idem — sem link estático de dado. |
+| JPX | 8058, 8031 | Página institucional responde; estatísticas são navegação em JavaScript. |
+
+**O padrão é consistente e vale registrar:** as fontes primárias não estão
+*bloqueando* por reputação, como o Yahoo. Elas simplesmente **não expõem mais
+arquivos estáticos** — migraram para front-ends que montam a tabela no cliente,
+consumindo APIs internas autenticadas por sessão de navegador.
+
+Isso muda a natureza do problema. Não é "achar a URL certa": as URLs certas foram
+encontradas e respondem. É que **o dado só existe do outro lado de um navegador**.
+
+A B3 é a exceção justamente por ser retrógrada no bom sentido — publica um arquivo
+de largura fixa por ano, como em 1998, e por isso é a fonte mais acessível do
+projeto inteiro.
+
+### Caminhos restantes
+
+1. **Automação de navegador.** Se o dado só existe depois do JavaScript rodar,
+   rodar o JavaScript é a resposta técnica correta. Resolve Stooq (que exige prova
+   de trabalho em JS), os RIs e possivelmente os emissores. Custo zero, mas mais
+   frágil e mais lento que um endpoint estático.
+2. **Provedor pago, um mês.** As 9 séries são de um período fechado que nunca muda:
+   baixa uma vez, valida, congela em Parquet, cancela. Não é assinatura recorrente.
+3. **Download manual dos RIs.** Com 9 ativos é viável. Investor AB e GBL publicam
+   total return nos relatórios anuais — são investment companies, essa é *a* métrica
+   que elas divulgam.
 
 ### O risco continua sendo o previsto
 
