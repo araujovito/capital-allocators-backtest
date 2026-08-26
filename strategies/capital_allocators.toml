@@ -1,0 +1,53 @@
+# Estratégia principal — gestão ativa.
+# 12,5% em cada uma das 8 empresas.
+
+[strategy]
+name = "Capital Allocators"
+start = "2006-01-01"
+end = "2025-12-31"
+base_currency = "BRL"
+dividends = "reinvest"
+
+[strategy.contribution]
+amount = 1000.0
+frequency = "monthly"
+mode = "real"
+inflation_index = "IPCA"
+adjustment = "annual"
+
+[strategy.rebalance]
+method = "via_contribution"
+frequency = "annual"
+allow_selling = false
+
+[[strategy.weights]]
+ticker = "ITSA4"
+weight = 0.125
+
+[[strategy.weights]]
+ticker = "BRAP4"
+weight = 0.125
+
+[[strategy.weights]]
+ticker = "BRK-B"
+weight = 0.125
+
+[[strategy.weights]]
+ticker = "MKL"
+weight = 0.125
+
+[[strategy.weights]]
+ticker = "INVE-B"
+weight = 0.125
+
+[[strategy.weights]]
+ticker = "GBLB"
+weight = 0.125
+
+[[strategy.weights]]
+ticker = "8058"
+weight = 0.125
+
+[[strategy.weights]]
+ticker = "8031"
+weight = 0.125

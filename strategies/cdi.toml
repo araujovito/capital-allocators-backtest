@@ -1,0 +1,24 @@
+# Custo de oportunidade do investidor brasileiro.
+# "Todo o risco adicional da bolsa realmente compensou?"
+
+[strategy]
+name = "CDI"
+start = "2006-01-01"
+end = "2025-12-31"
+base_currency = "BRL"
+dividends = "reinvest"
+
+[strategy.contribution]
+amount = 1000.0
+frequency = "monthly"
+mode = "real"
+inflation_index = "IPCA"
+adjustment = "annual"
+
+[strategy.rebalance]
+method = "none"
+allow_selling = false
+
+[[strategy.weights]]
+ticker = "CDI"
+weight = 1.0
