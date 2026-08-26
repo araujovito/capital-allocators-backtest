@@ -57,3 +57,35 @@ def test_curated_real_se_existir(path):
     if not (curated / path).exists():
         pytest.skip("data/curated ainda nao materializado")
     assert validate(curated) == []
+
+
+def test_equities_us_validate_detecta_meses_faltando(tmp_path):
+    import pandas as pd
+
+    from capallo.ingest.equities import US_LISTED, validate as eq_validate
+
+    meses = pd.date_range("2006-01-01", "2025-12-01", freq="MS")
+    frames = []
+    for i, t in enumerate(US_LISTED):
+        n = len(meses) - (1 if i == 0 else 0)  # o primeiro fica com um mes a menos
+        frames.append(
+            pd.DataFrame({"ticker": t, "date": meses[:n], "symbol": t,
+                          "currency": "USD", "close_adj": 100.0})
+        )
+    pd.concat(frames).to_parquet(tmp_path / "equities_us.parquet")
+
+    problems = eq_validate(tmp_path)
+    assert any("239 meses" in p for p in problems)
+
+
+def test_equities_us_reais_se_existirem():
+    from pathlib import Path
+
+    import pytest
+
+    from capallo.ingest.equities import validate as eq_validate
+
+    curated = Path(__file__).resolve().parents[1] / "data" / "curated"
+    if not (curated / "equities_us.parquet").exists():
+        pytest.skip("equities_us ainda nao materializado")
+    assert eq_validate(curated) == []

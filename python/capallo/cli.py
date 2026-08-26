@@ -16,6 +16,8 @@ def main(argv: list[str] | None = None) -> int:
     p_probe.add_argument("--pause", type=float, default=1.5)
     p_macro = sub.add_parser("fetch-macro", help="baixa e valida CDI, IPCA e PTAX")
     p_macro.add_argument("--out", default="data/curated")
+    p_eq = sub.add_parser("fetch-equities", help="baixa as series de renda variavel disponiveis")
+    p_eq.add_argument("--out", default="data/curated")
 
     args = parser.parse_args(argv)
 
@@ -42,6 +44,23 @@ def main(argv: list[str] | None = None) -> int:
         out = Path(args.out)
         for name, n in build(out).items():
             print(f"  {name:<8}{n:>6} obs")
+        problems = validate(out)
+        if problems:
+            print("\nPROBLEMAS:")
+            for p in problems:
+                print(f"  - {p}")
+            return 1
+        print("\nvalidacao ok")
+        return 0
+
+    if args.command == "fetch-equities":
+        from pathlib import Path
+
+        from capallo.ingest.equities import build, validate
+
+        out = Path(args.out)
+        for name, n in build(out).items():
+            print(f"  {name:<8}{n:>6} meses")
         problems = validate(out)
         if problems:
             print("\nPROBLEMAS:")

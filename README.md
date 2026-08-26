@@ -76,9 +76,13 @@ tests/              testes do pipeline
 | Camada | Estado | Fonte |
 |---|---|---|
 | CDI, IPCA, câmbio | ✅ resolvida e validada | Banco Central (SGS + Olinda/PTAX) |
+| BRK-B, MKL, IVV, IEV, EWJ | ✅ total return, 240/240 meses | Twelve Data (plano gratuito) |
 | Preços Brasil | ✅ resolvida | B3, arquivo `COTAHIST` |
 | Proventos Brasil | ⬜ a coletar | RI / CVM / B3 |
-| EUA, Europa, Japão | ⚠️ bloqueada | nenhuma fonte gratuita entrega o histórico |
+| INVE-B, GBLB, 8058, 8031 | ❌ sem fonte gratuita no período completo | — |
+
+**8 dos 12 ativos resolvidos ou a um passo.** O bloqueio restante são os quatro
+allocators de Europa e Japão.
 
 Barra a ser batida, já quantificada: o **CDI rendeu 4,46% a.a. reais** entre 2006
 e 2025 (IPCA acumulado 192,0%; CDI nominal 10,20% a.a.). É o número que Allocators
@@ -100,8 +104,11 @@ oficial, que valida o motor inteiro enquanto a fonte internacional é resolvida.
 python3 -m venv .venv && source .venv/bin/activate
 pip install -e "./python[dev]"
 
-capallo fetch-macro   # baixa e valida CDI, IPCA e PTAX
-capallo probe         # spike de viabilidade das series de renda variavel
+cp .env.example .env  # preencha TWELVEDATA_API_KEY (chave gratuita)
+
+capallo fetch-macro     # CDI, IPCA e PTAX do Banco Central
+capallo fetch-equities  # total return dos ativos listados nos EUA
+capallo probe           # viabilidade das series ainda bloqueadas
 pytest tests/
 
 # Rust (ainda não instalado nesta máquina)

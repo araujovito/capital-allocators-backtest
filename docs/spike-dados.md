@@ -264,3 +264,81 @@ de EUA, Europa e Japão.
 e PIBB11, montar o total return brasileiro e rodar o primeiro backtest regional.
 Isso exercita aporte, caixa, dividendos, rebalanceamento e IPCA — todo o motor —
 sem depender das fontes bloqueadas.
+
+
+---
+
+## 4. Rodada 4: Twelve Data no plano gratuito
+
+Chave gratuita (sem cartão), plano Basic: 8 requisições/minuto, 800/dia.
+
+### O que funcionou
+
+**Os 5 ativos listados nos EUA, com total return completo:**
+
+| Ticker | Meses | Total return 2006-2025 (USD) |
+|---|---|---|
+| BRK-B | 240/240 | +757,2% — 11,34% a.a. |
+| MKL | 240/240 | +543,6% — 9,76% a.a. |
+| IVV | 240/240 | +680,0% — 10,82% a.a. |
+| IEV | 240/240 | +183,2% — 5,34% a.a. |
+| EWJ | 240/240 | +101,1% — 3,56% a.a. |
+
+Os números conferem: 10,82% a.a. é o total return conhecido do S&P 500 no período.
+
+**A descoberta que destravou isso:** os endpoints `/dividends` e `/splits` são
+pagos (HTTP 403 explícito). Mas o `time_series` aceita **`adjust=all`**, que já
+devolve o fechamento ajustado por proventos e desdobramentos — e esse parâmetro
+funciona no plano gratuito.
+
+Validação do ajuste: IVV em jan/2006 fecha a **127,75 bruto** e **87,35 ajustado**.
+A razão de 0,684 corresponde a ~20 anos de dividendos do S&P 500 reinvestidos.
+O ajuste é real, não artefato.
+
+### O que não funcionou
+
+As bolsas de origem dos 4 estrangeiros são explicitamente pagas:
+
+| Ticker | Bolsa | Resposta |
+|---|---|---|
+| GBLB | Euronext | "available starting with the **Grow** or Venture plan" |
+| 8058 | JPX | "available starting with the **Pro** or Venture plan" |
+| 8031 | JPX | "available starting with the **Pro** or Venture plan" |
+| INVE.B | OMX | 404 — símbolo existe no catálogo, série indisponível |
+
+### A alternativa OTC, e por que ela não resolve
+
+As mesmas empresas negociam no mercado de balcão americano, coberto pelo plano
+gratuito. Mas o histórico não alcança o início do estudo:
+
+| Símbolo OTC | Empresa | Início | Meses |
+|---|---|---|---|
+| MITSF | Mitsui | **2006-01** | 240 ✅ |
+| GBLBF | GBL | 2010-01 | 193 |
+| IVSBF | Investor AB | 2010-02 | 192 |
+| MSBHF | Mitsubishi | 2010-06 | 187 |
+
+Três dos quatro só começam em 2010. **Isso descarta a crise de 2008**, que é um
+dos períodos de estresse que a seção 18 do checkpoint pede explicitamente para
+analisar — e é justamente onde uma holding se diferencia de um índice.
+
+Usar OTC significaria comparar allocators europeus e japoneses com ETFs em janelas
+diferentes, o que enviesa o resultado a favor de quem não viveu 2008. Não é opção
+para o experimento principal.
+
+Há ainda uma ressalva de qualidade: ações estrangeiras no balcão americano têm
+negociação rala e preços frequentemente defasados em relação à bolsa de origem.
+Mesmo no período coberto, MITSF precisaria de validação cruzada contra 8058 antes
+de ser usado.
+
+## 5. Estado consolidado
+
+| Camada | Estado | Fonte |
+|---|---|---|
+| CDI, IPCA, PTAX | ✅ completa e validada | Banco Central |
+| BRK-B, MKL, IVV, IEV, EWJ | ✅ total return, 240/240 meses | Twelve Data (grátis) |
+| ITSA4, BRAP4, PIBB11 | ⬜ preço bruto obtido; faltam proventos | B3 COTAHIST |
+| INVE-B, GBLB, 8058, 8031 | ❌ indisponível de graça no período completo | — |
+
+**8 dos 12 ativos estão resolvidos ou a um passo de estar.** O bloqueio se
+concentrou nos 4 allocators de Europa e Japão.
