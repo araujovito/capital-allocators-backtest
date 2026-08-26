@@ -59,9 +59,14 @@ jobs:
           name: probe-report
           path: probe.txt
 
-      - name: Falhar se nenhuma série passou
+      # Bloqueio é o estado esperado desde 2026-08-26: o Yahoo responde 429 tanto
+      # da rede local quanto do runner. O job não falha por isso — falhar toda
+      # semana seria ruído. O que interessa é o caso contrário: se alguma série
+      # voltar a passar, o Yahoo reabriu e vale reavaliar a fonte.
+      - name: Sinalizar se o bloqueio cedeu
         run: |
-          if grep -q 'FALHA' probe.txt && ! grep -qE '^\S+\s+(USD|BRL|SEK|EUR|JPY)' probe.txt; then
-            echo "::warning::Nenhuma série obtida — o IP do runner também está bloqueado."
-            exit 1
+          if grep -qE '^\S+\s+(USD|BRL|SEK|EUR|JPY)' probe.txt; then
+            echo "::warning::Alguma série passou — o bloqueio do Yahoo cedeu. Reavaliar a fonte."
+          else
+            echo "Bloqueio persiste, como esperado."
           fi

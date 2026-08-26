@@ -74,12 +74,22 @@ deste ambiente.
 | Tiingo | 403 sem chave. |
 | Frankfurter | Funciona, mas só câmbio — e o PTAX é fonte melhor para a ótica brasileira. |
 
-### O bloqueio do Yahoo não é do ambiente
+### O bloqueio do Yahoo não é de IP — a API está fechada
 
-Verificado: **sem variáveis de proxy**, IP de saída `45.170.152.180` — a rede real
-da máquina. O 429 persiste com 3 segundos de pausa entre requisições. Rodar de
-outro terminal na mesma máquina não muda nada. O caminho "tentar da própria rede"
-está esgotado.
+Testado de duas origens completamente distintas:
+
+| Origem | IP | Yahoo | B3 |
+|---|---|---|---|
+| Rede local | `45.170.152.180` | **429** | 200 |
+| Runner GitHub Actions | `20.57.47.228` | **429** | 200 |
+
+Sem variáveis de proxy no caminho, com User-Agent de navegador, cookie de sessão e
+3 segundos de pausa entre requisições. O handshake de crumb (`fc.yahoo.com`)
+também responde 429.
+
+**Conclusão: trocar de IP não resolve.** A API pública do Yahoo está fechada para
+acesso programático anônimo, de qualquer origem. O workflow `.github/workflows/probe.yml`
+fica como sentinela semanal — se o bloqueio ceder, ele avisa.
 
 ## 2.1 Brasil — RESOLVIDO com dado oficial ✅
 
