@@ -1,0 +1,28 @@
+# Comparação regional Japão — lado dos capital allocators.
+# Mitsubishi e Mitsui em pesos iguais, na ótica do investidor brasileiro (BRL).
+[strategy]
+name = "JP Allocators"
+start = "2006-01-01"
+end = "2025-12-31"
+base_currency = "BRL"
+dividends = "reinvest"
+
+[strategy.contribution]
+amount = 1000.0
+frequency = "monthly"
+mode = "real"
+inflation_index = "IPCA"
+adjustment = "annual"
+
+[strategy.rebalance]
+method = "via_contribution"
+frequency = "annual"
+allow_selling = false
+
+[[strategy.weights]]
+ticker = "8058"
+weight = 0.5
+
+[[strategy.weights]]
+ticker = "8031"
+weight = 0.5

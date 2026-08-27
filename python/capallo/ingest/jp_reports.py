@@ -264,3 +264,37 @@ def validate(out_dir: Path) -> list[str]:
     if (df.dps_jpy <= 0).any():
         problemas.append("dividendo não positivo")
     return problemas
+
+
+def conferir_irbank(out_dir: Path) -> list[str]:
+    """Confere a série dos relatórios contra o IR Bank, fonte independente.
+
+    O IR Bank foi descartado como fonte primária: depois das guardas contra
+    desalinhamento de coluna sobram quatro exercícios por empresa, de 2010 a 2013.
+    Quatro anos não montam a janela do estudo, mas montam uma conferência — e ela
+    vem de outro caminho inteiro, uma página japonesa de mercado, sem passar por
+    nenhum dos PDFs. Se os dois concordarem, o erro teria de estar nos dois.
+
+    Requer rede. Divergência vira mensagem, não exceção: a fonte é de terceiros e
+    pode mudar de forma sem aviso.
+    """
+    from capallo.ingest.irbank import fetch_dividends
+
+    nosso = pd.read_parquet(out_dir / "jp_dividends.parquet")
+    problemas = []
+    for ticker in ("8058", "8031"):
+        try:
+            deles = fetch_dividends(ticker)
+        except Exception as e:  # noqa: BLE001 — fonte de terceiros, indisponível não é erro nosso
+            problemas.append(f"{ticker}: IR Bank indisponível ({type(e).__name__})")
+            continue
+        meu = nosso[nosso.ticker == ticker].set_index("fiscal_year").dps_jpy
+        for _, r in deles.iterrows():
+            ano = pd.Timestamp(r.fiscal_year_end).year
+            if ano not in meu.index:
+                continue
+            # O IR Bank publica com duas casas; o relatório, com o arredondamento
+            # da própria companhia. Meio centavo de yen não é divergência.
+            if abs(float(r.dps_adjusted) - float(meu[ano])) > 0.01:
+                problemas.append(f"{ticker} {ano}: relatório {meu[ano]:.2f} vs IR Bank {r.dps_adjusted:.2f}")
+    return problemas

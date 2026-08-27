@@ -1,0 +1,23 @@
+# Comparação regional Japão — lado passivo. EWJ, o iShares MSCI Japan.
+# Replica o Japão, mas liquida em dólar: o câmbio do estudo cobre o USD.
+[strategy]
+name = "JP ETF"
+start = "2006-01-01"
+end = "2025-12-31"
+base_currency = "BRL"
+dividends = "reinvest"
+
+[strategy.contribution]
+amount = 1000.0
+frequency = "monthly"
+mode = "real"
+inflation_index = "IPCA"
+adjustment = "annual"
+
+[strategy.rebalance]
+method = "none"
+allow_selling = false
+
+[[strategy.weights]]
+ticker = "EWJ"
+weight = 1.0

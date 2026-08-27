@@ -25,6 +25,8 @@ def main(argv: list[str] | None = None) -> int:
     p_ev.add_argument("--out", default="data/curated")
     p_tr = sub.add_parser("build-br", help="monta o total return brasileiro")
     p_tr.add_argument("--out", default="data/curated")
+    p_ti = sub.add_parser("build-intl", help="monta o total return de Europa e Japao")
+    p_ti.add_argument("--out", default="data/curated")
     p_ds = sub.add_parser("export-dataset", help="prepara o dataset para o motor Rust")
     p_ds.add_argument("--curated", default="data/curated")
     p_ds.add_argument("--out", default="data/engine")
@@ -140,6 +142,31 @@ def main(argv: list[str] | None = None) -> int:
         print("\nvalidacao ok — nenhum salto residual")
         return 0
 
+    if args.command == "build-intl":
+        from pathlib import Path
+
+        from capallo.transform.build_intl import build, sensibilidade, validate
+
+        out = Path(args.out)
+        df = build(out)
+        for t, g in df.groupby("ticker"):
+            g = g.sort_values("date")
+            tr = g.tr_index.iloc[-1] / g.tr_index.iloc[0]
+            print(f"  {t:<8}{g.units.iloc[-1]:>7.3f} unidades   "
+                  f"{(tr - 1) * 100:>8.1f}%   {(tr ** (1 / 20) - 1) * 100:>5.2f}% a.a. em moeda local")
+        print("\ncusto da convencao de data-ex japonesa, em 20 anos:")
+        for _, r in sensibilidade(out).iterrows():
+            print(f"  {r.ticker}  duas parcelas {r.duas_parcelas:.2f}x  "
+                  f"parcela unica {r.parcela_unica:.2f}x  diferenca {r.diferenca_pp:+.2f}%")
+        problems = validate(out)
+        if problems:
+            print("\nPROBLEMAS:")
+            for p in problems:
+                print(f"  - {p}")
+            return 1
+        print("\nvalidacao ok")
+        return 0
+
     if args.command == "export-dataset":
         from pathlib import Path
 
@@ -169,13 +196,17 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "fetch-jp-dividends":
         from pathlib import Path
 
-        from capallo.ingest.jp_reports import build, validate
+        from capallo.ingest.jp_reports import build, conferir_irbank, validate
 
         out = Path(args.out)
         df = build(out, Path(args.raw))
         for ticker, g in df.groupby("ticker"):
             cruzados = int((g.fontes > 1).sum())
             print(f"  {ticker}  {len(g):>3} exercicios   {cruzados:>2} conferidos em duas fontes")
+        divergencias = conferir_irbank(out)
+        print("\nconferencia independente contra o IR Bank (2010-2013):")
+        for d in divergencias or ["  sem divergencia"]:
+            print(f"  {d}" if divergencias else d)
         problems = validate(out)
         if problems:
             print("\nPROBLEMAS:")
@@ -193,7 +224,9 @@ def main(argv: list[str] | None = None) -> int:
         from capallo.analysis.scoreboard import build, win_rate
 
         names = {"br_allocators": "BR Alloc", "br_etf": "BR ETF",
-                 "us_allocators": "US Alloc", "us_etf": "US ETF", "cdi": "CDI"}
+                 "us_allocators": "US Alloc", "us_etf": "US ETF",
+                 "eu_allocators": "EU Alloc", "eu_etf": "EU ETF",
+                 "jp_allocators": "JP Alloc", "jp_etf": "JP ETF", "cdi": "CDI"}
         results, curated = Path(args.results), Path(args.curated)
         df = build(results, curated, names)
         fmt = {"patrimonio_nominal": "{:,.0f}", "aportado_real": "{:,.0f}",
@@ -210,7 +243,9 @@ def main(argv: list[str] | None = None) -> int:
 
         print("\nvitorias dos allocators sobre o ETF, em janelas moveis:")
         for region, a, b in (("Brasil", "br_allocators", "br_etf"),
-                             ("EUA", "us_allocators", "us_etf")):
+                             ("EUA", "us_allocators", "us_etf"),
+                             ("Europa", "eu_allocators", "eu_etf"),
+                             ("Japao", "jp_allocators", "jp_etf")):
             for years in (1, 3, 5, 10):
                 w = win_rate(results / f"{a}.csv", results / f"{b}.csv", years)
                 print(f"   {region:<7}{years:>3} anos: {w:.0%}")

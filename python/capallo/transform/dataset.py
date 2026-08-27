@@ -21,10 +21,13 @@ from pathlib import Path
 
 import pandas as pd
 
-#: Moeda de exposição de cada ativo já coletado.
+#: Moeda de **negociação** de cada ativo — a que o investidor precisa comprar.
+#: Não confundir com a moeda de exposição do `universe`: IEV e EWJ replicam Europa
+#: e Japão, mas são liquidados em dólar, e é o dólar que o câmbio precisa cobrir.
 CURRENCY = {
     "ITSA4": "BRL", "BRAP4": "BRL", "PIBB11": "BRL",
     "BRK-B": "USD", "MKL": "USD", "IVV": "USD", "IEV": "USD", "EWJ": "USD",
+    "GBLB": "EUR", "INVE-B": "SEK", "8058": "JPY", "8031": "JPY",
 }
 
 
@@ -44,19 +47,31 @@ def build(curated: Path) -> pd.DataFrame:
     frames.append(_monthly_last(br, "tr_index"))
 
     us = pd.read_parquet(curated / "equities_us.parquet")
-    us_m = _monthly_last(us, "close_adj")
-    frames.append(us_m)
+    frames.append(_monthly_last(us, "close_adj"))
+
+    intl = pd.read_parquet(curated / "intl_total_return.parquet")
+    frames.append(_monthly_last(intl, "tr_index"))
 
     panel = pd.concat(frames, ignore_index=True)
     panel["currency"] = panel.ticker.map(CURRENCY)
 
-    # Conversão para BRL pela PTAX de venda da mesma data.
+    # Conversão para BRL pela PTAX de venda da mesma data, moeda a moeda.
+    # O `merge_asof` volta no tempo até a última PTAX publicada: o fim de mês de
+    # um mercado cai em feriado brasileiro sem que isso invente uma cotação.
     ptax = pd.read_parquet(curated / "ptax.parquet")
-    usd = ptax[ptax.currency == "USD"][["date", "ask"]].sort_values("date")
-    panel = panel.sort_values("date")
-    panel = pd.merge_asof(panel, usd, on="date", direction="backward")
+    panel = panel.sort_values("date").reset_index(drop=True)
+    partes = []
+    for moeda, g in panel.groupby("currency", sort=False):
+        if moeda == "BRL":
+            partes.append(g.assign(fx=1.0))
+            continue
+        cot = ptax[ptax.currency == moeda][["date", "ask"]].sort_values("date")
+        if cot.empty:
+            raise ValueError(f"PTAX não cobre {moeda}")
+        m = pd.merge_asof(g.sort_values("date"), cot, on="date", direction="backward")
+        partes.append(m.rename(columns={"ask": "fx"}))
+    panel = pd.concat(partes, ignore_index=True).sort_values(["ticker", "month"])
 
-    panel["fx"] = panel.ask.where(panel.currency != "BRL", 1.0)
     panel["tr_brl"] = panel.tr_local * panel.fx
 
     missing = panel[panel.tr_brl.isna()]

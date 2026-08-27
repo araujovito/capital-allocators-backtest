@@ -85,3 +85,43 @@ navegador ou sob Playwright. Não é anti-bot, é geografia — o mesmo padrão 
 tinha derrubado o Yahoo Finance. Os PDFs vêm do Internet Archive, com o snapshot
 **fixado por timestamp**: sem timestamp o Archive redireciona para a captura mais
 recente, e uma das capturas de 2025 está truncada em 5 MB.
+
+## 2026-08-27 — Data-ex de Europa e Japão é convenção declarada, não inferida
+
+Os relatórios anuais publicam o **valor** do provento, não a data-ex. No lado
+brasileiro, evento societário foi recuperado por salto de preço; com dividendo
+isso não funciona — o provento do GBL vale 3% a 6% do preço e a volatilidade
+diária é da mesma ordem. Procurando, em cada ano, o dia de abril a junho cuja
+queda mais se aproxima do dividendo, o candidato pula de 7 de abril a 26 de junho
+sem padrão. **O sinal não existe**, e inferir produziria data plausível e errada.
+
+Entra calendário declarado:
+
+- **GBLB** — 1º de maio de N+1 para o exercício N. O relatório de 2015 diz
+  *"payable as from 5 May 2016"*; o de 2025 marca a Assembleia em 7 de maio de
+  2026. As duas pontas da janela apontam começo de maio.
+- **8058, 8031** — metade em 30 de setembro, metade em 31 de março, as duas datas
+  de registro da prática japonesa. Os relatórios publicam só o total do exercício.
+
+O custo da convenção é **medido, não afirmado**: `sensibilidade()` refaz a série
+com o dividendo inteiro na data final e a diferença em vinte anos é de +1,37%
+(8058) e +1,88% (8031) acumulados — cerca de 0,08 p.p. ao ano. A convenção não
+decide o resultado do estudo.
+
+## 2026-08-27 — Duas omissões de borda ficam declaradas, não estimadas
+
+O calendário de provento não coincide com o da janela. Falta o dividendo do GBL
+pago em maio de 2006 (exercício de 2005; nenhum relatório publicado alcança) e a
+parcela interina japonesa de setembro de 2025 (exercício que fecha em março de
+2026, anunciada depois do último relatório). As duas empurram o resultado para
+baixo — viés conservador justamente para os allocators, que é o lado que o estudo
+poderia ser acusado de favorecer. Nenhuma é corrigida por estimativa.
+
+## 2026-08-27 — A janela é recortada antes de acumular unidades
+
+Kabutan começa em 2001 e Avanza em 2005. Acumular sobre a série inteira e recortar
+depois faria o índice de janeiro de 2006 já embutir reinvestimento que o investidor
+do estudo não fez, e tornaria a guarda de provento pré-série uma comparação com
+2001 em vez de com janeiro de 2006. O teste que pega isso é
+`test_provento_anterior_ao_inicio_da_serie_e_descartado` — é o mesmo erro que
+dobrava a quantidade inicial de BRAP4.
