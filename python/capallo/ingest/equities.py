@@ -33,7 +33,12 @@ def build(out_dir: Path) -> dict[str, int]:
     quota = Quota()
     frames, counts = [], {}
     for ticker, symbol in US_LISTED.items():
-        df = fetch_monthly(symbol, quota=quota)
+        # Duas séries do mesmo papel: total return bruto e preço puro. A diferença
+        # é o provento reinvestido, e sem ela a retenção na fonte americana não
+        # tem sobre o que incidir — ver `transform.net_of_tax`.
+        bruto = fetch_monthly(symbol, quota=quota, adjust="all")
+        preco = fetch_monthly(symbol, quota=quota, adjust="splits")
+        df = bruto.merge(preco[["date", "close_px"]], on="date", how="inner")
         df.insert(0, "ticker", ticker)
         frames.append(df)
         counts[ticker] = len(df)
@@ -56,6 +61,10 @@ def validate(out_dir: Path) -> list[str]:
             problems.append(f"{ticker}: contém nulos")
         if (g.close_adj <= 0).any():
             problems.append(f"{ticker}: preço não positivo")
+        if "close_px" not in g.columns:
+            problems.append(f"{ticker}: falta a série de preço puro (adjust=splits)")
+        elif (g.close_px <= 0).any():
+            problems.append(f"{ticker}: preço puro não positivo")
         if g.date.duplicated().any():
             problems.append(f"{ticker}: datas duplicadas")
     return problems

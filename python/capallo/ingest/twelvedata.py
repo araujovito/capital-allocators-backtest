@@ -58,12 +58,19 @@ def fetch_monthly(
     start: str = "2006-01-01",
     end: str = "2025-12-31",
     quota: Quota | None = None,
+    adjust: str = "all",
 ) -> pd.DataFrame:
-    """Série mensal ajustada por proventos e splits.
+    """Série mensal, ajustada conforme `adjust`.
 
     Mensal, não diária, é decisão metodológica: os aportes do estudo são mensais e
     o histórico mensal de 20 anos cabe em uma chamada, enquanto o diário estoura a
     cota gratuita.
+
+    `adjust="all"` traz o fechamento ajustado por proventos e desdobramentos — o
+    total return **bruto**. `adjust="splits"` traz o mesmo papel ajustado só por
+    desdobramento, ou seja, **preço puro**. A diferença entre as duas séries é o
+    provento reinvestido, e é dela que sai a retenção na fonte: sem a segunda
+    chamada não há como tributar um dividendo que a fonte já embutiu no preço.
     """
     (quota or Quota()).wait()
     params = {
@@ -71,7 +78,7 @@ def fetch_monthly(
         "interval": "1month",
         "start_date": start,
         "end_date": end,
-        "adjust": "all",
+        "adjust": adjust,
         "outputsize": 5000,
         "apikey": api_key(),
     }
@@ -81,10 +88,11 @@ def fetch_monthly(
         raise TwelveDataError(f"{symbol}: {payload.get('code')} {payload.get('message')}")
 
     df = pd.DataFrame(payload["values"])
+    coluna = "close_adj" if adjust == "all" else "close_px"
     out = pd.DataFrame(
         {
             "date": pd.to_datetime(df["datetime"]),
-            "close_adj": pd.to_numeric(df["close"]),
+            coluna: pd.to_numeric(df["close"]),
         }
     ).sort_values("date").reset_index(drop=True)
     out.insert(1, "symbol", symbol)

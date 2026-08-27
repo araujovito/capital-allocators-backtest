@@ -25,6 +25,8 @@ def main(argv: list[str] | None = None) -> int:
     p_ev.add_argument("--out", default="data/curated")
     p_tr = sub.add_parser("build-br", help="monta o total return brasileiro")
     p_tr.add_argument("--out", default="data/curated")
+    p_un = sub.add_parser("build-us-net", help="aplica a retencao na fonte a serie americana")
+    p_un.add_argument("--curated", default="data/curated")
     p_ti = sub.add_parser("build-intl", help="monta o total return de Europa e Japao")
     p_ti.add_argument("--out", default="data/curated")
     p_ds = sub.add_parser("export-dataset", help="prepara o dataset para o motor Rust")
@@ -151,6 +153,26 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"  - {p}")
             return 1
         print("\nvalidacao ok — nenhum salto residual")
+        return 0
+
+    if args.command == "build-us-net":
+        from pathlib import Path
+
+        from capallo.transform.us_net import build, custo_da_retencao, validate
+
+        curated = Path(args.curated)
+        build(curated)
+        print(f"  {'ativo':<8}{'aliquota':>9}{'yield bruto':>13}{'bruto':>9}{'liquido':>9}{'custo a.a.':>12}")
+        for _, r in custo_da_retencao(curated).iterrows():
+            print(f"  {r.ticker:<8}{r.aliquota:>8.0%}{r.yield_bruto_aa:>13.2%}"
+                  f"{r.bruto:>8.2f}x{r.liquido:>8.2f}x{r.custo_pp_aa:>11.2f}p")
+        problems = validate(curated)
+        if problems:
+            print("\nPROBLEMAS:")
+            for p in problems:
+                print(f"  - {p}")
+            return 1
+        print("\n  BRK-B e MKL nao pagam dividendo: custo zero confirma o metodo")
         return 0
 
     if args.command == "build-intl":

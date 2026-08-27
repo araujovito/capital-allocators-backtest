@@ -193,3 +193,41 @@ janela ou outro aporte, o recorte compararia carteiras diferentes em condições
 diferentes e nada denunciaria. `regras_congeladas()` confere que todos os arquivos
 em `strategies/` compartilham `start`, `end`, `base_currency`, `dividends` e o
 bloco de aporte — diferindo só na composição.
+
+## 2026-08-27 — A retenção americana faltava, e o viés era contra os allocators
+
+A seção 4 da metodologia congela 30% de retenção para papel americano e explica
+por quê: ignorar retenção favoreceria artificialmente ativos de alto payout.
+Brasil, Bélgica e Japão aplicavam a alíquota; os Estados Unidos, não — a série
+vinha do fechamento ajustado da Twelve Data, que reinveste o dividendo **bruto**.
+
+O viés não era simétrico, e o motivo só aparece nos dados: **Berkshire e Markel
+não pagam dividendo**. Ajustado e preço puro coincidem casa a casa nos dois, com
+1,000x de provento acumulado em vinte anos. Quem se beneficiava da isenção
+indevida era o **lado passivo** — IVV rendeu 1,89% ao ano de dividendo, IEV 2,88%
+e EWJ 1,69%, todos sem imposto.
+
+O plano gratuito da Twelve Data não expõe `/dividends`, mas expõe o mesmo papel
+com `adjust=all` (total return bruto) e `adjust=splits` (preço puro). O provento
+do mês é o que sobra entre os dois, e é sobre ele que a alíquota incide. Custo
+medido: 0,89 p.p. ao ano no IEV, 0,62 no IVV, 0,52 no EWJ, **zero** em BRK-B e
+MKL — e esse zero é a conferência que sustenta o método.
+
+Uma conclusão mudou de sinal. Os EUA saíram de "mesmo risco, sem prêmio"
+(−0,13 p.p.) para "mesmo risco, com prêmio" (+0,49 p.p.), e o prêmio global subiu
+de +2,72 para +3,26 p.p. ao ano. A correção favorece a tese do estudo, o que
+obriga a registrar que a alíquota foi congelada em `methodology.md` **antes** de
+qualquer resultado — não escolhida depois de ver o número.
+
+## 2026-08-27 — Em aberto: a retenção sueca do INVE-B
+
+Fechada a americana, resta uma assimetria na direção oposta. A série da Avanza já
+é total return **bruto**, e a Investor AB não publica série de dividendo
+acessível para os vinte anos: a página de histórico renderiza no cliente e volta
+vazia sob Playwright, e o relatório anual traz tabela de cinco anos, o que exigiria
+quatro documentos e o desdobramento 4:1 de 2021.
+
+Pelo rendimento observado de 2020 a 2024 (1,8% a 2,6% ao ano), os 30% suecos
+valem de 0,5 a 0,8 p.p. ao ano no ativo — cerca de 0,3 p.p. no prêmio europeu e
+0,1 p.p. no global. Não inverte veredito nenhum, e **favorece os allocators**.
+Fica declarado no README como item aberto, não corrigido por estimativa.

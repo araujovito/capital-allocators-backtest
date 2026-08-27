@@ -112,12 +112,12 @@ brasileiro, dividendos reinvestidos líquidos de retenção na fonte.
 | Estratégia | R$ por R$1 aportado | Retorno real a.a. | Vol. | Máx. drawdown | Sharpe |
 |---|---|---|---|---|---|
 | JP Allocators (8058 + 8031) | **4,90** | 8,79% | 21,97% | −33,8% | 0,29 |
-| US ETF (IVV) | 4,88 | 9,54% | 22,13% | −32,0% | 0,32 |
+| US ETF (IVV) | 4,54 | 8,93% | 22,10% | −32,1% | 0,30 |
 | US Allocators (BRK-B + MKL) | 4,06 | 9,42% | 22,14% | −23,6% | 0,32 |
 | EU Allocators (INVE-B + GBLB) | 3,19 | 6,63% | 17,86% | −40,5% | 0,20 |
-| EU ETF (IEV) | 2,27 | 4,11% | 24,14% | −32,4% | 0,10 |
-| JP ETF (EWJ) | 2,12 | 2,34% | 22,02% | −31,6% | 0,01 |
+| EU ETF (IEV) | 2,06 | 3,23% | 24,12% | −32,7% | 0,07 |
 | BR Allocators (ITSA4 + BRAP4) | 2,05 | 5,03% | 27,93% | −41,7% | 0,16 |
+| JP ETF (EWJ) | 1,98 | 1,82% | 21,97% | −31,7% | −0,01 |
 | CDI | 1,52 | 4,43% | 0,94% | 0,0% | 0,00 |
 | BR ETF (PIBB11) | 1,45 | 2,77% | 21,31% | −40,5% | 0,03 |
 
@@ -126,9 +126,9 @@ Vitórias dos allocators sobre o ETF da mesma região, em janelas móveis:
 | Região | 1 ano | 3 anos | 5 anos | 10 anos |
 |---|---|---|---|---|
 | Brasil | 49% | 57% | 62% | 62% |
-| EUA | 50% | 49% | 41% | **24%** |
-| Europa | 59% | 75% | 89% | **100%** |
-| Japão | 61% | 70% | 69% | 64% |
+| EUA | 52% | 51% | 49% | **38%** |
+| Europa | 63% | 82% | 94% | **100%** |
+| Japão | 61% | 72% | 72% | 71% |
 
 O resultado **não é uniforme entre regiões**, e é essa a descoberta: nos EUA o
 índice venceu os allocators em janelas longas; na Europa e no Japão, o contrário.
@@ -152,13 +152,13 @@ resultado de EWJ e IEV.
 | INVE-B | SEK | 12,23% | 3,69% | **10,33%** |
 | BRK-B | USD | 10,88% | 4,65% | 10,02% |
 | 8031 | JPY | 12,08% | 3,14% | 9,60% |
-| IVV | USD | 10,36% | 4,65% | 9,50% |
+| IVV | USD | 9,74% | 4,65% | 8,89% |
 | MKL | USD | 9,30% | 4,65% | 8,45% |
 | 8058 | JPY | 10,07% | 3,14% | 7,64% |
 | BRAP4 | BRL | 12,07% | — | 6,25% |
-| IEV | EUR* | 5,06% | 4,50% | 4,09% |
+| IEV | EUR* | 4,18% | 4,50% | 3,21% |
 | PIBB11 | BRL | 8,38% | — | 2,76% |
-| EWJ | JPY* | 4,64% | 3,14% | 2,33% |
+| EWJ | JPY* | 4,11% | 3,14% | 1,82% |
 | ITSA4 | BRL | 6,73% | — | 1,19% |
 | GBLB | EUR | 1,53% | 4,50% | **0,59%** |
 
@@ -171,12 +171,12 @@ perna ativa em euro e iene, carregando as duas a mesma economia.
 | Região | Allocators | ETF | Prêmio | Vol. extra | Δ Sharpe | Veredito |
 |---|---|---|---|---|---|---|
 | Brasil | 5,03% | 2,77% | +2,26 p.p. | +6,62 p.p. | +0,12 | prêmio com risco extra |
-| EUA | 9,42% | 9,54% | −0,13 p.p. | +0,00 p.p. | −0,00 | mesmo risco, sem prêmio |
-| Europa | 6,63% | 4,11% | +2,52 p.p. | −6,29 p.p. | +0,10 | **dominância** |
-| Japão | 8,79% | 2,34% | +6,46 p.p. | −0,05 p.p. | +0,28 | mesmo risco, com prêmio |
-| **Global** | **8,47%** | **5,76%** | **+2,72 p.p.** | −6,33 p.p. | +0,19 | **dominância** |
+| EUA | 9,42% | 8,93% | +0,49 p.p. | +0,03 p.p. | +0,02 | mesmo risco, com prêmio |
+| Europa | 6,63% | 3,23% | +3,40 p.p. | −6,26 p.p. | +0,14 | **dominância** |
+| Japão | 8,79% | 1,82% | +6,97 p.p. | −0,00 p.p. | +0,30 | mesmo risco, com prêmio |
+| **Global** | **8,47%** | **5,21%** | **+3,26 p.p.** | −6,25 p.p. | +0,22 | **dominância** |
 
-A carteira ativa entregou 3,58x o poder de compra aportado contra 2,66x da
+A carteira ativa entregou 3,58x o poder de compra aportado contra 2,49x da
 passiva, com **menos** volatilidade (13,3% contra 19,7%) — oito empresas em quatro
 regiões diversificam mais que quatro índices regionais.
 
@@ -185,9 +185,19 @@ E o resultado **não depende de uma empresa excepcional**: o maior peso final é
 o pior ativo do universo — GBL, com 0,59% real ao ano — permaneceu na carteira,
 como a regra anti-cherry-picking exige.
 
-⚠️ Nos EUA o índice empatou com os allocators, e em janelas de 10 anos venceu em
-76% delas. Quem olhasse só o mercado americano concluiria o oposto de quem
-olhasse só o japonês. **É essa a descoberta, não o placar global.**
+⚠️ Nos EUA a vantagem é de 0,49 p.p. ao ano — dentro do que qualquer premissa de
+custo ou tributação move —, e em janelas de 10 anos o índice ainda venceu em 62%
+delas. Quem olhasse só o mercado americano concluiria bem menos do que quem
+olhasse o Japão. **A dispersão entre regiões é a descoberta, não o placar
+global.**
+
+⚠️ **Assimetria residual conhecida.** A retenção na fonte incide sobre Brasil,
+Estados Unidos, Bélgica e Japão, mas **não sobre INVE-B**: a série da Avanza já
+vem como total return bruto e a companhia não publica série de dividendo
+acessível para os vinte anos. Pelo rendimento observado de 2020 a 2024 (1,8% a
+2,6% ao ano), os 30% suecos valeriam de 0,5 a 0,8 p.p. ao ano no ativo — cerca de
+0,3 p.p. no prêmio europeu e 0,1 p.p. no global. Não inverte nenhum veredito, e
+**favorece os allocators**: é o próximo item a fechar.
 
 ### Como cada estratégia atravessou as crises
 
@@ -198,24 +208,23 @@ arquivos de estratégia compartilham janela, aporte e regra de dividendo.
 
 | Crise | Allocators | ETFs | CDI | Recuperação |
 |---|---|---|---|---|
-| Crise financeira global (2007-12 → 2009-06) | −39,4% | −32,9% | +9,1% | 68 meses |
-| Crise da dívida do euro (2011-08 → 2013-02) | +13,0% | +17,5% | +4,4% | — |
-| Recessão brasileira (2014-04 → 2016-12) | +31,2% | +25,6% | +14,0% | — |
-| COVID-19 (2020-02 → 2020-04) | +1,9% | +5,4% | +0,9% | — |
-| Aperto monetário (2022) | −5,7% | −24,0% | +6,2% | 11 vs 19 meses |
+| Crise financeira global (2007-12 → 2009-06) | −39,4% | −33,6% | +9,1% | 68 meses |
+| Crise da dívida do euro (2011-08 → 2013-02) | +13,0% | +16,4% | +4,4% | — |
+| Recessão brasileira (2014-04 → 2016-12) | +31,2% | +23,6% | +14,0% | — |
+| COVID-19 (2020-02 → 2020-04) | +1,9% | +5,0% | +0,9% | — |
+| Aperto monetário (2022) | −5,7% | −24,2% | +6,2% | 11 vs 19 meses |
 
 **A gestão ativa não protegeu de forma consistente.** Venceu o índice da mesma
 região em apenas 2 das 5 crises no agregado global, e caiu **mais** que o passivo
-em 2008 — a crise mais profunda da janela. Protegeu bem em 2022 (−5,7% contra
-−24,0%, recuperando em 11 meses contra 19) e na Europa (4 de 5 crises), e mal no
-Japão (1 de 5).
+em 2008 — a crise mais profunda da janela. Protegeu bem em 2022 e na Europa (4 de
+5 crises), e mal no Brasil e no Japão (2 de 5 cada).
 
-É um contrapeso ao placar de vinte anos: o prêmio global de +2,72 p.p. ao ano veio
+É um contrapeso ao placar de vinte anos: o prêmio global de +3,26 p.p. ao ano veio
 mais de acumular vantagem na alta do que de perder menos na queda — e um investidor
 que abandona a estratégia no fundo do poço só vive a segunda metade.
 
-**Próximo passo:** os experimentos de sensibilidade da metodologia (PTAX compra vs
-venda, retenção na fonte, data do aporte).
+**Próximo passo:** fechar a retenção sueca do INVE-B e rodar os experimentos de
+sensibilidade que restam (PTAX compra vs venda, data do aporte).
 
 ## Setup
 
@@ -226,7 +235,8 @@ pip install -e "./python[dev]"
 cp .env.example .env  # preencha TWELVEDATA_API_KEY (chave gratuita)
 
 capallo fetch-macro     # CDI, IPCA e PTAX do Banco Central
-capallo fetch-equities  # total return dos ativos listados nos EUA
+capallo fetch-equities  # total return bruto e preco puro dos ativos dos EUA
+capallo build-us-net    # aplica os 30% de retencao a serie americana
 capallo fetch-b3        # precos da B3 (baixa ~550MB de COTAHIST)
 capallo fetch-b3-events # proventos e eventos societarios, com reconciliacao
 capallo build-br        # monta e valida o total return brasileiro

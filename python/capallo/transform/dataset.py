@@ -47,7 +47,12 @@ def build(curated: Path) -> pd.DataFrame:
     frames.append(_monthly_last(br, "tr_index"))
 
     us = pd.read_parquet(curated / "equities_us.parquet")
-    frames.append(_monthly_last(us, "close_adj"))
+    # `close_net`, não `close_adj`: o fechamento ajustado reinveste o dividendo
+    # bruto, e a retenção de 30% da seção 4 da metodologia precisa incidir também
+    # sobre o papel americano. Ver `transform.us_net`.
+    if "close_net" not in us.columns:
+        raise ValueError("equities_us.parquet sem close_net — rode `capallo build-us-net`")
+    frames.append(_monthly_last(us, "close_net"))
 
     intl = pd.read_parquet(curated / "intl_total_return.parquet")
     frames.append(_monthly_last(intl, "tr_index"))
