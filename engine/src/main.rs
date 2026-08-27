@@ -27,9 +27,13 @@ enum Command {
         strategy: PathBuf,
         #[arg(long, default_value = "../data/engine")]
         data: PathBuf,
-        /// Arquivo CSV de saída. Sem ele, imprime um resumo.
+        /// Arquivo CSV com a série mensal da carteira.
         #[arg(long)]
         out: Option<PathBuf>,
+        /// Arquivo CSV com a posição por ativo, mês a mês. Sem isto não é
+        /// possível calcular contribuição individual nem Allocator Premium.
+        #[arg(long)]
+        positions: Option<PathBuf>,
     },
 }
 
@@ -48,7 +52,7 @@ fn main() -> anyhow::Result<()> {
             let s = load(&strategy)?;
             println!("ok: {} ({} ativos, {} → {})", s.name, s.weights.len(), s.start, s.end);
         }
-        Command::Run { strategy, data, out } => {
+        Command::Run { strategy, data, out, positions } => {
             let s = load(&strategy)?;
             let ds = data::Dataset::load(&data)?;
             let states = engine::run(&s, &ds)?;
@@ -66,6 +70,25 @@ fn main() -> anyhow::Result<()> {
                 }
                 w.flush()?;
                 println!("{} meses gravados em {}", states.len(), path.display());
+            }
+
+            if let Some(path) = &positions {
+                let mut w = csv::Writer::from_path(path)?;
+                w.write_record(["month", "ticker", "units", "price", "value", "invested"])?;
+                for st in &states {
+                    for p in &st.positions {
+                        w.write_record([
+                            &st.month,
+                            &p.ticker,
+                            &format!("{:.10}", p.units),
+                            &format!("{:.6}", p.price),
+                            &format!("{:.6}", p.value),
+                            &format!("{:.6}", p.invested),
+                        ])?;
+                    }
+                }
+                w.flush()?;
+                println!("posições gravadas em {}", path.display());
             }
 
             let last = states.last().expect("janela não vazia");

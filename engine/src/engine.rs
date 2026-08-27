@@ -14,6 +14,24 @@ pub struct MonthState {
     pub contribution: f64,
     pub contributed_cum: f64,
     pub value: f64,
+    /// Posição por ativo no fim do mês.
+    ///
+    /// O motor emite isto desde a primeira versão porque as seções 20, 21 e 22 do
+    /// estudo dependem disso e **não podem ser derivadas da série agregada**:
+    /// contribuição individual de cada ativo, remoção do melhor e do pior, e
+    /// Allocator Premium por região. Adicionar depois obrigaria a mexer no motor
+    /// com o estudo já em produção.
+    pub positions: Vec<Position>,
+}
+
+#[derive(Debug, Clone)]
+pub struct Position {
+    pub ticker: String,
+    pub units: f64,
+    pub price: f64,
+    pub value: f64,
+    /// Quanto foi aportado neste ativo neste mês.
+    pub invested: f64,
 }
 
 /// Quantas unidades de cada ativo o investidor detém.
@@ -146,9 +164,9 @@ pub fn run(strategy: &Strategy, ds: &Dataset) -> Result<Vec<MonthState>> {
         }
         let total_before = portfolio_value(&holdings, ds, month, cash)?;
 
-        for (ticker, amount) in
-            split_contribution(strategy, &values, total_before, contribution, rebalancing)
-        {
+        let invested_now =
+            split_contribution(strategy, &values, total_before, contribution, rebalancing);
+        for (ticker, amount) in invested_now.clone() {
             if amount <= 0.0 {
                 continue;
             }
@@ -166,11 +184,33 @@ pub fn run(strategy: &Strategy, ds: &Dataset) -> Result<Vec<MonthState>> {
         }
         contributed_cum += contribution;
 
+        let mut positions: Vec<Position> = strategy
+            .weights
+            .iter()
+            .map(|w| {
+                let units = holdings.get(&w.ticker).copied().unwrap_or(0.0);
+                let price = if w.ticker == CASH_TICKER {
+                    1.0
+                } else {
+                    ds.price(month, &w.ticker).unwrap_or(0.0)
+                };
+                Position {
+                    ticker: w.ticker.clone(),
+                    units,
+                    price,
+                    value: units * price,
+                    invested: invested_now.get(&w.ticker).copied().unwrap_or(0.0),
+                }
+            })
+            .collect();
+        positions.sort_by(|a, b| a.ticker.cmp(&b.ticker));
+
         states.push(MonthState {
             month: month.clone(),
             contribution,
             contributed_cum,
             value: portfolio_value(&holdings, ds, month, cash)?,
+            positions,
         });
     }
     Ok(states)
@@ -236,6 +276,48 @@ mod tests {
         let total: f64 = split.values().sum();
         assert!((total - 100.0).abs() < 1e-9, "o aporte inteiro precisa ser alocado");
         assert!(split["B"] > split["A"], "o subponderado recebe mais");
+    }
+
+    /// Dataset mínimo: dois ativos, preço constante, sem inflação nem CDI.
+    fn dataset_plano(meses: &[&str], tickers: &[&str], preco: f64) -> Dataset {
+        let mut ds = Dataset::default();
+        for m in meses {
+            for t in tickers {
+                ds.tr.insert((m.to_string(), t.to_string()), preco);
+            }
+            ds.cdi.insert(m.to_string(), 1.0);
+            ds.ipca.insert(m.to_string(), 1.0);
+        }
+        ds.months = meses.iter().map(|m| m.to_string()).collect();
+        ds.months.sort();
+        ds
+    }
+
+    #[test]
+    fn posicoes_somam_o_patrimonio() {
+        // Invariante: o patrimônio publicado tem de ser a soma das posições.
+        // Sem isso, a contribuição individual de cada ativo (seção 20) não
+        // reconciliaria com o resultado da carteira.
+        let s = strategy(vec![("A", 0.5), ("B", 0.5)], RebalanceMethod::ViaContribution);
+        let ds = dataset_plano(&["2006-01", "2006-02", "2006-03"], &["A", "B"], 10.0);
+        let states = run(&s, &ds).expect("simulação");
+        for st in &states {
+            let soma: f64 = st.positions.iter().map(|p| p.value).sum();
+            assert!((soma - st.value).abs() < 1e-6, "mês {}: {} != {}", st.month, soma, st.value);
+        }
+    }
+
+    #[test]
+    fn sem_valorizacao_o_patrimonio_iguala_o_aportado() {
+        // Preço constante e nenhuma remuneração: patrimônio == total aportado.
+        // Pega erro de dupla contagem de aporte, que foi como o bug das 173
+        // unidades apareceu do lado do Python.
+        let s = strategy(vec![("A", 1.0)], RebalanceMethod::None);
+        let ds = dataset_plano(&["2006-01", "2006-02", "2006-03"], &["A"], 10.0);
+        let states = run(&s, &ds).expect("simulação");
+        let last = states.last().unwrap();
+        assert!((last.value - last.contributed_cum).abs() < 1e-6);
+        assert!((last.contributed_cum - 3000.0).abs() < 1e-6);
     }
 
     #[test]
