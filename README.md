@@ -82,10 +82,11 @@ tests/              testes do pipeline
 | Eventos em ações Brasil | ✅ ITSA4 completa; 2 desdobramentos de BRAP4 recuperados | B3 + detecção por salto |
 | **Total return Brasil** | ✅ **fechado e validado** | COTAHIST + eventos + proventos |
 | 8058, 8031 (preço) | ✅ 240/240 meses | Kabutan 株探 (japonês) |
-| INVE-B (preço) | ✅ 240/240 meses | Avanza (sueco) |
+| **INVE-B (total return)** | ✅ 240/240 meses — série já ajustada | Avanza (sueco) |
 | Proventos JP | ⬜ parcial: 2010+ | IR Bank (japonês) |
-| Proventos SE | ⬜ parcial: 2019+ | Avanza (sueco) |
+| Proventos SE | ✅ desnecessários — já no preço | — |
 | GBLB (preço) | ✅ 240/240 meses, Bruxelas em EUR | onvista (alemão) |
+| Proventos BE | ⬜ faltam — série é bruta (medido) | — |
 
 **Os 12 ativos têm série de preço.** Brasil e EUA completos, com total return validado.
 O bloqueio restante são os quatro allocators de Europa e Japão.

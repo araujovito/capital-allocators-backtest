@@ -721,3 +721,69 @@ outro mais fácil de coletar é um critério de seleção aplicado **depois** de
 Vale registrar que a alternativa foi considerada e descartada por método, não por
 teimosia: se a coleta tivesse falhado, a saída correta seria declarar a ausência,
 não substituir.
+
+
+---
+
+## 12. As três fontes internacionais são ajustadas? Medido, não assumido
+
+Antes de caçar séries de proventos, valia responder a pergunta anterior: **essas
+fontes já incluem dividendo no preço?** A suposição de que não incluem estava sendo
+carregada desde a coleta, sem verificação.
+
+O teste é direto: se a série for bruta, o preço cai na data-ex pelo valor do
+provento. Se já for ajustada, não cai.
+
+### Avanza / Investor AB — **já é total return** ✅
+
+Cinco datas-ex conhecidas, com a série diária:
+
+```
+retorno médio na data-ex : +0,146%
+retorno médio geral      : +0,087%
+se a série fosse bruta   : −1,603%
+```
+
+O retorno nas datas-ex é indistinguível de um dia comum. **INVE-B não precisa de
+série de proventos** — o que a Avanza entrega já é retorno total.
+
+### onvista / GBL — **é preço bruto** ❌
+
+Datas-ex de 2024 e 2025, com quedas de **−2,71%** e **−3,92%** exatamente no dia,
+contra um yield na faixa de 4%. Inequívoco.
+
+### Kabutan / Mitsubishi e Mitsui — provavelmente bruto ⚠️
+
+Sem série diária longa (o Kabutan guarda ~14 meses no diário), o teste teve de ser
+feito na série mensal. Proventos japoneses têm data-ex no fim de março e de
+setembro, que são fronteiras de mês:
+
+| Ticker | mar/set | demais meses | diferença | t |
+|---|---|---|---|---|
+| 8058 | −0,019% | +1,084% | **−1,10 p.p.** | −0,74 |
+| 8031 | −0,447% | +1,317% | **−1,76 p.p.** | −1,11 |
+
+As duas diferenças são negativas e de magnitude compatível com o provento semestral
+típico de ~1,5%, mas o ruído mensal é grande demais para significância. **É
+sugestivo, não conclusivo.**
+
+Somado ao fato de a coluna de ajuste do Kabutan dizer 分割 — desdobramento — sem
+mencionar dividendo, a leitura adotada é **preço bruto**, e a série de proventos
+japonesa continua necessária. A premissa fica registrada como premissa.
+
+### Um subproduto: a série de balcão americano é ruim
+
+Tentou-se validar o Kabutan contra MITSF, o Mitsui negociado no balcão dos EUA, que
+a Twelve Data entrega com `adjust=all` e portanto seria total return. O resultado
+foi o oposto do esperado:
+
+```
+MITSF (suposto total return, USD):  2,37x   4,41% a.a.
+Kabutan 8031 em USD              :  4,12x   7,33% a.a.
+```
+
+O preço bruto japonês **cresce quase 3 p.p. ao ano a mais** do que o suposto retorno
+total americano. Isso não diz nada sobre o Kabutan — diz que a série de balcão é
+inconfiável, com preços defasados, exatamente a ressalva levantada quando ela foi
+descartada por não cobrir 2006-2009. Fica o registro de que ela também não serviria
+como validação cruzada.
