@@ -86,7 +86,7 @@ tests/              testes do pipeline
 | Proventos JP | ❌ só 4 exercícios confiáveis | IR Bank (japonês) |
 | Proventos SE | ✅ desnecessários — já no preço | — |
 | GBLB (preço) | ✅ 240/240 meses, Bruxelas em EUR | onvista (alemão) |
-| Proventos BE | ⬜ faltam — série é bruta (medido) | — |
+| **Proventos BE** | ✅ 20/20 exercícios | relatórios anuais do GBL (PDF) |
 
 **Os 12 ativos têm série de preço.** Brasil e EUA completos, com total return validado.
 O bloqueio restante são os quatro allocators de Europa e Japão.

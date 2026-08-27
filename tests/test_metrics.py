@@ -168,3 +168,39 @@ def test_normalize_table_expande_rowspan():
     assert grid[1] == ["2010", "17", "21", "12.67"]
     # a segunda linha herda o ano e mantem o alinhamento das demais colunas
     assert grid[2] == ["2010", "26", "39", "21.67"]
+
+
+def test_gbl_extrai_dez_anos_em_ordem_decrescente(tmp_path, monkeypatch):
+    """A tabela do relatorio lista os anos do mais recente para o mais antigo."""
+    import pandas as pd
+
+    from capallo.ingest import gbl_reports as g
+
+    class FakePage:
+        def extract_text(self):
+            return ("Consolidated result 1 2 3\n"
+                    "Gross dividend (in EUR) 2.86 2.79 2.72 2.65 2.60 2.54 2.42 2.30 2.09 1.90\n")
+
+    class FakeReader:
+        def __init__(self, _path):
+            self.pages = [FakePage()]
+
+    monkeypatch.setattr(g, "PdfReader", FakeReader)
+    df = g.extract(tmp_path / "x.pdf", 2015)
+    assert list(df.fiscal_year) == list(range(2015, 2005, -1))
+    assert df[df.fiscal_year == 2006].gross_dividend.iloc[0] == pytest.approx(1.90)
+    assert df[df.fiscal_year == 2015].gross_dividend.iloc[0] == pytest.approx(2.86)
+
+
+def test_gbl_validate_flagra_desalinhamento(tmp_path):
+    """Salto acima de 3x entre anos consecutivos denuncia coluna errada."""
+    import pandas as pd
+
+    from capallo.ingest.gbl_reports import validate
+
+    anos = list(range(2006, 2026))
+    valores = [2.0] * 20
+    valores[10] = 20.0
+    pd.DataFrame({"ticker": "GBLB", "fiscal_year": anos, "gross_dividend": valores}
+                 ).to_parquet(tmp_path / "be_dividends.parquet")
+    assert any("implausível" in p for p in validate(tmp_path))
