@@ -59,3 +59,29 @@ a.a. reais** entre 2006 e 2025.
   do motor de backtest
 - PTAX: usar compra, venda, ou média?
 - Tesouro IPCA+ fica para V2 (introduz duration e marcação a mercado)
+
+## 2026-08-27 — Proventos japoneses vêm do relatório anual, não do mercado
+
+Nenhuma fonte de mercado gratuita cobre 2006-2025 para 8058 e 8031: o IR Bank
+começa em 2010 e, depois das guardas contra desalinhamento, sobram quatro
+exercícios por empresa. As companhias publicam a tabela de dez anos no relatório
+anual, e três a quatro documentos por empresa cobrem a janela com sobreposição.
+
+Duas consequências de método ficam registradas:
+
+- **A sobreposição é de propósito.** Cada exercício lido em dois documentos é uma
+  conferência independente do alinhamento de coluna. Onde ela não existe
+  (8031 2015-2017, 8058 2011-2015), o dado é de fonte única — e isso está no
+  arquivo, na coluna `fontes`.
+- **O desdobramento de 2024 é medido, não assumido.** Mitsubishi 3:1 em
+  01/01/2024 e Mitsui 2:1 em julho de 2024. O fator sai da razão entre documentos
+  de cada lado do evento e só é aplicado se bater com o que a companhia declara em
+  nota. Sem sobreposição, a coleta falha em vez de adivinhar.
+
+## 2026-08-27 — mitsubishicorp.com recusa o Brasil; o Internet Archive serve
+
+O site da Mitsubishi devolve 403 do Akamai para esta rede, com cabeçalho de
+navegador ou sob Playwright. Não é anti-bot, é geografia — o mesmo padrão que já
+tinha derrubado o Yahoo Finance. Os PDFs vêm do Internet Archive, com o snapshot
+**fixado por timestamp**: sem timestamp o Archive redireciona para a captura mais
+recente, e uma das capturas de 2025 está truncada em 5 MB.

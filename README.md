@@ -83,13 +83,15 @@ tests/              testes do pipeline
 | **Total return Brasil** | ✅ **fechado e validado** | COTAHIST + eventos + proventos |
 | 8058, 8031 (preço) | ✅ 240/240 meses | Kabutan 株探 (japonês) |
 | **INVE-B (total return)** | ✅ 240/240 meses — série já ajustada | Avanza (sueco) |
-| Proventos JP | ❌ só 4 exercícios confiáveis | IR Bank (japonês) |
+| **Proventos JP** | ✅ 20/20 exercícios, 8058 e 8031 | relatórios anuais das companhias (PDF) |
 | Proventos SE | ✅ desnecessários — já no preço | — |
 | GBLB (preço) | ✅ 240/240 meses, Bruxelas em EUR | onvista (alemão) |
 | **Proventos BE** | ✅ 20/20 exercícios | relatórios anuais do GBL (PDF) |
 
-**Os 12 ativos têm série de preço.** Brasil e EUA completos, com total return validado.
-O bloqueio restante são os quatro allocators de Europa e Japão.
+**Os 12 ativos têm preço e provento.** Nenhum buraco de dado restante: a última
+lacuna — dividendo de Mitsubishi e Mitsui, 2006-2025 — fechou pelos relatórios
+anuais das próprias companhias. Falta montar o total return de Europa e Japão
+sobre esses insumos.
 
 Barra a ser batida, já quantificada: o **CDI rendeu 4,46% a.a. reais** entre 2006
 e 2025 (IPCA acumulado 192,0%; CDI nominal 10,20% a.a.). É o número que Allocators

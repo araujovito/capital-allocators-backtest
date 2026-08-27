@@ -30,6 +30,9 @@ def main(argv: list[str] | None = None) -> int:
     p_ds.add_argument("--out", default="data/engine")
     p_intl = sub.add_parser("fetch-intl", help="precos de Japao (Kabutan) e Suecia (Avanza)")
     p_intl.add_argument("--out", default="data/curated")
+    p_jp = sub.add_parser("fetch-jp-dividends", help="proventos de 8058 e 8031, dos relatorios anuais")
+    p_jp.add_argument("--out", default="data/curated")
+    p_jp.add_argument("--raw", default="data/raw/reports")
     p_sb = sub.add_parser("scoreboard", help="placar comparativo entre estrategias")
     p_sb.add_argument("--results", default="data/results")
     p_sb.add_argument("--curated", default="data/curated")
@@ -161,6 +164,25 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"  - {p}")
             return 1
         print("\nvalidacao ok  (ATENCAO: preco, ainda sem proventos)")
+        return 0
+
+    if args.command == "fetch-jp-dividends":
+        from pathlib import Path
+
+        from capallo.ingest.jp_reports import build, validate
+
+        out = Path(args.out)
+        df = build(out, Path(args.raw))
+        for ticker, g in df.groupby("ticker"):
+            cruzados = int((g.fontes > 1).sum())
+            print(f"  {ticker}  {len(g):>3} exercicios   {cruzados:>2} conferidos em duas fontes")
+        problems = validate(out)
+        if problems:
+            print("\nPROBLEMAS:")
+            for p in problems:
+                print(f"  - {p}")
+            return 1
+        print("\nvalidacao ok — 2006-2025 completo, em acoes pos-desdobramento")
         return 0
 
     if args.command == "scoreboard":

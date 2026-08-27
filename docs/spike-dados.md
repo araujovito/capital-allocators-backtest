@@ -850,3 +850,81 @@ série histórica de TSR nesses documentos.
 | GBLB | ✅ | ❌ | não |
 | 8058 | ✅ | ❌ (4 de 20 anos) | não |
 | 8031 | ✅ | ❌ (4 de 20 anos) | não |
+
+## 14. Proventos japoneses: os relatórios anuais fecham a janela
+
+O buraco da seção 13 fechou pelo mesmo caminho do GBL — a companhia publica o
+dado sobre si mesma —, mas com duas dificuldades que o caso belga não tinha.
+
+### O site da Mitsubishi recusa o Brasil
+
+`mitsubishicorp.com` devolve **403 do Akamai** para qualquer requisição desta
+rede: `curl` puro, `curl` com cabeçalho completo de Chrome e Playwright headless
+recebem a mesma página de *Access Denied*, inclusive na raiz do domínio. Não é
+anti-bot, é geografia — a mesma barreira que derrubou o Yahoo Finance na seção 4,
+e que nenhuma quantidade de cabeçalho resolve.
+
+O **Internet Archive** serve os mesmos PDFs. Duas armadilhas na coleta:
+
+1. **Fixe o timestamp.** A URL sem timestamp redireciona para a captura mais
+   recente, que muda; e há uma captura de 2025 truncada em **exatamente 5 MB**,
+   que o `pdftotext` rejeita com *Couldn't find trailer dictionary*. A captura
+   completa do mesmo arquivo tem 10,5 MB.
+2. **Peça `id_`.** Sem o sufixo, o Archive injeta seu próprio cabeçalho no
+   conteúdo servido.
+
+O caminho é enumerável pela API CDX, que aceita curinga e devolve tamanho e
+status de cada captura — dá para escolher a maior antes de baixar.
+
+### As duas desdobraram as ações em 2024
+
+Depois do fim da janela de preço do estudo, e **por fatores diferentes**:
+Mitsubishi 3:1 em 01/01/2024, Mitsui 2:1 em julho de 2024. Relatórios anteriores
+trazem o valor por ação antiga; posteriores reexpressam a série inteira.
+
+Aplicar o fator de memória seria repetir o erro que a seção 13 documenta: número
+plausível, ordem de grandeza certa, invisível num gráfico. O coletor **mede** o
+fator na razão entre documentos de cada lado do evento e só o aplica se bater com
+o que a companhia declara em nota. Na Mitsubishi a medida é 3,0 nos cinco
+exercícios comuns; na Mitsui, 2,0 em dois.
+
+Onde há duas leituras do mesmo exercício, fica a da companhia **depois** do
+desdobramento: 50 ÷ 3 daria 16,6667 onde a Mitsubishi publica 16,67.
+
+### A tabela que repete um ano
+
+A Mitsubishi migrou de US GAAP para IFRS no exercício de 2013 e apresenta
+**2013 em duas colunas** na tabela de dez anos, uma por norma. Ler os anos como
+intervalo colocaria 2014 onde há 2013 e deslocaria toda a metade direita. Por
+isso a especificação de cada documento lista os exercícios explicitamente, em vez
+de derivá-los de um ano inicial mais uma contagem.
+
+### O que sustenta a coleta
+
+Sete documentos, com sobreposição deliberada:
+
+| Documento | Exercícios | Observação |
+|---|---|---|
+| Mitsui AR2015 | 2006-2014 | |
+| Mitsui AR2020 | 2014-2020 | |
+| Mitsui IR2022 | 2018-2022 | confirma o split 2:1 |
+| Mitsui Fact Data 2025 | 2021-2025 | pós-split |
+| Mitsubishi AR2015 | 2006-2010 | |
+| Mitsubishi AR2020 | 2011-2020 | 2013 repetido |
+| Mitsubishi AR2025 | 2016-2025 | pós-split, confirma o 3:1 |
+
+Onze exercícios saem conferidos em duas fontes. Cinco anos da Mitsui (2015-2017)
+e cinco da Mitsubishi (2011-2015) ficam com fonte única — está registrado na
+coluna `fontes` do arquivo, e não escondido.
+
+### Situação dos quatro ativos internacionais
+
+| Ativo | Preço | Proventos | Pronto? |
+|---|---|---|---|
+| INVE-B | ✅ | ✅ já incluídos | **sim** |
+| GBLB | ✅ | ✅ | **sim** |
+| 8058 | ✅ | ✅ | **sim** |
+| 8031 | ✅ | ✅ | **sim** |
+
+Não há mais buraco de dado. O que falta é transformação: montar o total return de
+Europa e Japão sobre preço e provento já coletados.
