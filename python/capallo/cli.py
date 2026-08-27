@@ -30,6 +30,9 @@ def main(argv: list[str] | None = None) -> int:
     p_ds.add_argument("--out", default="data/engine")
     p_intl = sub.add_parser("fetch-intl", help="precos de Japao (Kabutan) e Suecia (Avanza)")
     p_intl.add_argument("--out", default="data/curated")
+    p_sb = sub.add_parser("scoreboard", help="placar comparativo entre estrategias")
+    p_sb.add_argument("--results", default="data/results")
+    p_sb.add_argument("--curated", default="data/curated")
 
     args = parser.parse_args(argv)
 
@@ -158,6 +161,37 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"  - {p}")
             return 1
         print("\nvalidacao ok  (ATENCAO: preco, ainda sem proventos)")
+        return 0
+
+    if args.command == "scoreboard":
+        from pathlib import Path
+
+        import pandas as pd
+
+        from capallo.analysis.scoreboard import build, win_rate
+
+        names = {"br_allocators": "BR Alloc", "br_etf": "BR ETF",
+                 "us_allocators": "US Alloc", "us_etf": "US ETF", "cdi": "CDI"}
+        results, curated = Path(args.results), Path(args.curated)
+        df = build(results, curated, names)
+        fmt = {"patrimonio_nominal": "{:,.0f}", "aportado_real": "{:,.0f}",
+               "reais_por_real": "{:.2f}", "retorno_real_aa": "{:.2%}",
+               "volatilidade": "{:.2%}", "max_drawdown": "{:.1%}",
+               "recuperacao_meses": "{:.0f}", "sharpe": "{:.2f}",
+               "sortino": "{:.2f}", "melhor_12m": "{:.1%}", "pior_12m": "{:.1%}"}
+        out = pd.DataFrame(index=df.index, columns=df.columns, dtype=object)
+        for k in df.index:
+            for c in df.columns:
+                v = df.loc[k, c]
+                out.loc[k, c] = "—" if pd.isna(v) else fmt.get(k, "{}").format(v)
+        print(out.to_string())
+
+        print("\nvitorias dos allocators sobre o ETF, em janelas moveis:")
+        for region, a, b in (("Brasil", "br_allocators", "br_etf"),
+                             ("EUA", "us_allocators", "us_etf")):
+            for years in (1, 3, 5, 10):
+                w = win_rate(results / f"{a}.csv", results / f"{b}.csv", years)
+                print(f"   {region:<7}{years:>3} anos: {w:.0%}")
         return 0
 
     return 1
