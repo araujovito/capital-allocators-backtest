@@ -83,7 +83,7 @@ tests/              testes do pipeline
 | **Total return Brasil** | ✅ **fechado e validado** | COTAHIST + eventos + proventos |
 | 8058, 8031 (preço) | ✅ 240/240 meses | Kabutan 株探 (japonês) |
 | **INVE-B (total return)** | ✅ 240/240 meses — série já ajustada | Avanza (sueco) |
-| Proventos JP | ⬜ parcial: 2010+ | IR Bank (japonês) |
+| Proventos JP | ❌ só 4 exercícios confiáveis | IR Bank (japonês) |
 | Proventos SE | ✅ desnecessários — já no preço | — |
 | GBLB (preço) | ✅ 240/240 meses, Bruxelas em EUR | onvista (alemão) |
 | Proventos BE | ⬜ faltam — série é bruta (medido) | — |

@@ -149,3 +149,22 @@ def test_sharpe_de_estrategia_contra_ela_mesma_e_zero():
     ruido = pd.Series(rng.normal(0, 1e-11, 24), index=idx)
     assert m.sharpe(cdi + ruido, cdi) == 0.0
     assert m.sortino(cdi + ruido, cdi) == 0.0
+
+
+def test_normalize_table_expande_rowspan():
+    """Sem expandir rowspan, as colunas deslizam e o valor lido e o da coluna vizinha."""
+    from lxml import html as LH
+
+    from capallo.ingest.irbank import normalize_table
+
+    doc = LH.fromstring("""
+      <table>
+        <tr><th>ano</th><th>meio</th><th>fim</th><th>ajustado</th></tr>
+        <tr><td rowspan="2">2010</td><td>17</td><td>21</td><td>12.67</td></tr>
+        <tr><td>26</td><td>39</td><td>21.67</td></tr>
+      </table>""")
+    grid = normalize_table(doc.xpath("//table")[0])
+    assert grid[0] == ["ano", "meio", "fim", "ajustado"]
+    assert grid[1] == ["2010", "17", "21", "12.67"]
+    # a segunda linha herda o ano e mantem o alinhamento das demais colunas
+    assert grid[2] == ["2010", "26", "39", "21.67"]

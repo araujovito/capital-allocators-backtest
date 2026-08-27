@@ -787,3 +787,66 @@ total americano. Isso não diz nada sobre o Kabutan — diz que a série de balc
 inconfiável, com preços defasados, exatamente a ressalva levantada quando ela foi
 descartada por não cobrir 2006-2009. Fica o registro de que ela também não serviria
 como validação cruzada.
+
+
+---
+
+## 13. Proventos de GBL e Japão: não fechados
+
+Depois do resultado da seção 12, restaram dois buracos. **Nenhum dos dois fechou**,
+e vale registrar exatamente onde cada um parou.
+
+### Japão — IR Bank entrega 4 exercícios confiáveis, não 20
+
+A página `irbank.net/{code}/dividend` tem a coluna **分割調整**, dividendo por ação
+já ajustado por desdobramento — o campo certo. Mas duas limitações a inviabilizam:
+
+1. **Começa em 2010.** Os exercícios de 2006 a 2009 não estão na página, e o CSV de
+   download (`fy-stock-dividend.csv`) traz só cinco anos.
+2. **Não é uma série anual, é um log de anúncios.** Cada linha é um comunicado, com
+   `区分` igual a 実績, 修正 ou 予想, e linhas referenciam mais de um exercício
+   usando `rowspan` de forma irregular.
+
+O segundo ponto rendeu a lição mais útil desta rodada. O parse ingênuo devolvia
+16 exercícios e **números errados**: numa linha com `rowspan` na primeira célula, as
+colunas seguintes deslizam uma posição, e o valor lido como "dividendo ajustado" era
+na verdade o **dividendo semestral da coluna anterior** — metade do valor correto,
+plausível, na ordem de grandeza certa, e impossível de notar num gráfico.
+
+Foram escritas duas defesas:
+
+- **`normalize_table`**, que expande `rowspan` e `colspan` numa grade retangular.
+  Correto e testado; fica no repositório como utilitário reutilizável.
+- **Uma guarda de sanidade** que descarta qualquer linha cujo `区分` não seja um dos
+  três valores válidos. Linha desalinhada exibe um ano nessa coluna, e o descarte é
+  obrigatório justamente porque o número resultante seria crível.
+
+Com as duas defesas, o que resta é **4 exercícios confiáveis por empresa** —
+2010 a 2013. Insuficiente.
+
+### GBL — nenhuma fonte gratuita com a janela
+
+| Fonte | Resultado |
+|---|---|
+| onvista (`cnDps`) | 6 anos |
+| stockanalysis.com | 5 anos no acesso livre |
+| wallstreet-online | 2021 em diante |
+| ariva.de | tabela de dividendos não exposta |
+| dividendmax | HTTP 404 |
+| **gbl.com** | páginas `/en/dividend` e `/en/total-shareholder-return` existem e carregam, mas renderizam só anos recentes mesmo após aceitar cookies |
+
+O achado da rodada é que **o GBL publica `/en/total-shareholder-return`**. Se essa
+página tiver série longa, resolve o ativo inteiro de uma vez — não só os proventos,
+mas o retorno total já calculado pela companhia. Ela não entregou os dados via
+navegação automatizada, mas o **relatório anual em PDF** está aberto
+(`gbl.com/en/media/.../annual_report_2025.pdf`), e investment companies publicam
+série histórica de TSR nesses documentos.
+
+### Situação dos quatro ativos internacionais
+
+| Ativo | Preço | Proventos | Pronto? |
+|---|---|---|---|
+| INVE-B | ✅ | ✅ já incluídos | **sim** |
+| GBLB | ✅ | ❌ | não |
+| 8058 | ✅ | ❌ (4 de 20 anos) | não |
+| 8031 | ✅ | ❌ (4 de 20 anos) | não |
