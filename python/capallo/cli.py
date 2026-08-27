@@ -35,6 +35,13 @@ def main(argv: list[str] | None = None) -> int:
     p_jp = sub.add_parser("fetch-jp-dividends", help="proventos de 8058 e 8031, dos relatorios anuais")
     p_jp.add_argument("--out", default="data/curated")
     p_jp.add_argument("--raw", default="data/raw/reports")
+    p_dc = sub.add_parser("decompose", help="retorno de cada ativo entre ativo, cambio e inflacao")
+    p_dc.add_argument("--curated", default="data/curated")
+    p_dc.add_argument("--engine", default="data/engine")
+    p_dc.add_argument("--results", default="data/results")
+    p_pr = sub.add_parser("premium", help="Allocator Premium por regiao, ao lado do risco")
+    p_pr.add_argument("--results", default="data/results")
+    p_pr.add_argument("--curated", default="data/curated")
     p_sb = sub.add_parser("scoreboard", help="placar comparativo entre estrategias")
     p_sb.add_argument("--results", default="data/results")
     p_sb.add_argument("--curated", default="data/curated")
@@ -214,6 +221,61 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"  - {p}")
             return 1
         print("\nvalidacao ok — 2006-2025 completo, em acoes pos-desdobramento")
+        return 0
+
+    if args.command == "decompose":
+        from pathlib import Path
+
+        from capallo.analysis.decomposition import by_asset, validate
+
+        curated, engine = Path(args.curated), Path(args.engine)
+        df = by_asset(curated, engine)
+        print(f"  {'ativo':<8}{'moeda':<7}{'ativo':>9}{'cambio':>9}{'nominal':>10}"
+              f"{'real':>9}   {'ativo a.a.':>10}{'cambio a.a.':>12}{'real a.a.':>10}")
+        for _, r in df.iterrows():
+            wrapper = "*" if r.moeda_exposicao != r.moeda_negociacao else " "
+            print(f"  {r.ticker:<8}{r.moeda_exposicao}{wrapper:<5} {r.local:>8.2f}x{r.cambio:>8.2f}x"
+                  f"{r.nominal_brl:>9.2f}x{r.real_brl:>8.2f}x   {r.local_aa:>9.2%}"
+                  f"{r.cambio_aa:>11.2%}{r.real_brl_aa:>10.2%}")
+        print("\n  * wrapper em dolar: o cambio e atribuido a moeda do mercado subjacente")
+        problems = validate(Path(args.results), curated, engine)
+        if problems:
+            print("\nPROBLEMAS:")
+            for p in problems:
+                print(f"  - {p}")
+            return 1
+        print("  identidade ativo x cambio = retorno em BRL fecha em todos os ativos")
+        return 0
+
+    if args.command == "premium":
+        from pathlib import Path
+
+        from capallo.analysis.decomposition import (
+            contribuicao_por_ativo,
+            premium,
+            resumo_global,
+            sem_o_melhor,
+        )
+
+        results, curated = Path(args.results), Path(args.curated)
+        print(f"  {'regiao':<8}{'alloc':>8}{'etf':>8}{'premio':>9}{'vol extra':>11}"
+              f"{'d sharpe':>10}{'d maxDD':>9}   veredito")
+        for _, r in premium(results, curated).iterrows():
+            print(f"  {r.regiao:<8}{r.alloc_real_aa:>7.2%}{r.etf_real_aa:>8.2%}"
+                  f"{r.premio_pp:>8.2f}p{r.vol_extra_pp:>10.2f}p{r.delta_sharpe:>10.2f}"
+                  f"{r.delta_max_dd_pp:>8.1f}p   {r.veredito}")
+
+        g = resumo_global(results, curated)
+        print(f"\n  global: allocators {g['allocators_reais_por_real']:.2f}x contra "
+              f"{g['etfs_reais_por_real']:.2f}x do passivo, "
+              f"{g['premio_pp']:+.2f} p.p. ao ano")
+
+        print("\n  concentracao da carteira ativa (peso final):")
+        for _, r in contribuicao_por_ativo(results, "capital_allocators").iterrows():
+            print(f"    {r.ticker:<8}{r.peso_final:>7.1%}")
+        c = sem_o_melhor(results, curated, "capital_allocators")
+        print(f"    maior peso {c['ativo_dominante']} com {c['peso_final']:.1%}; "
+              f"HHI {c['concentracao_hhi']:.3f}")
         return 0
 
     if args.command == "scoreboard":

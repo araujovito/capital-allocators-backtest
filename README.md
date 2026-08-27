@@ -140,8 +140,57 @@ allocators: falta o dividendo do GBL pago em maio de 2006 (exercício de 2005, s
 relatório publicado) e a parcela interina japonesa de setembro de 2025 (exercício
 que fecha em março de 2026). Ver `build_intl.py`.
 
-**Próximo passo:** decomposição do retorno entre ativo e câmbio, e o Allocator
-Premium por região.
+### De onde veio o retorno
+
+`retorno real em BRL = retorno local do ativo × efeito da moeda ÷ inflação`. Os
+três fatores se multiplicam, e separá-los muda a leitura: o câmbio contribuiu com
+3% a 4,7% ao ano para todo ativo estrangeiro, e sozinho responde por metade do
+resultado de EWJ e IEV.
+
+| Ativo | Moeda | Ativo a.a. | Câmbio a.a. | Real em BRL a.a. |
+|---|---|---|---|---|
+| INVE-B | SEK | 12,23% | 3,69% | **10,33%** |
+| BRK-B | USD | 10,88% | 4,65% | 10,02% |
+| 8031 | JPY | 12,08% | 3,14% | 9,60% |
+| IVV | USD | 10,36% | 4,65% | 9,50% |
+| MKL | USD | 9,30% | 4,65% | 8,45% |
+| 8058 | JPY | 10,07% | 3,14% | 7,64% |
+| BRAP4 | BRL | 12,07% | — | 6,25% |
+| IEV | EUR* | 5,06% | 4,50% | 4,09% |
+| PIBB11 | BRL | 8,38% | — | 2,76% |
+| EWJ | JPY* | 4,64% | 3,14% | 2,33% |
+| ITSA4 | BRL | 6,73% | — | 1,19% |
+| GBLB | EUR | 1,53% | 4,50% | **0,59%** |
+
+\* IEV e EWJ liquidam em dólar, mas o câmbio é atribuído à moeda do mercado
+subjacente — sem isso a perna passiva apareceria como aposta em dólar contra uma
+perna ativa em euro e iene, carregando as duas a mesma economia.
+
+### Allocator Premium, sempre ao lado do risco
+
+| Região | Allocators | ETF | Prêmio | Vol. extra | Δ Sharpe | Veredito |
+|---|---|---|---|---|---|---|
+| Brasil | 5,03% | 2,77% | +2,26 p.p. | +6,62 p.p. | +0,12 | prêmio com risco extra |
+| EUA | 9,42% | 9,54% | −0,13 p.p. | +0,00 p.p. | −0,00 | mesmo risco, sem prêmio |
+| Europa | 6,63% | 4,11% | +2,52 p.p. | −6,29 p.p. | +0,10 | **dominância** |
+| Japão | 8,79% | 2,34% | +6,46 p.p. | −0,05 p.p. | +0,28 | mesmo risco, com prêmio |
+| **Global** | **8,47%** | **5,76%** | **+2,72 p.p.** | −6,33 p.p. | +0,19 | **dominância** |
+
+A carteira ativa entregou 3,58x o poder de compra aportado contra 2,66x da
+passiva, com **menos** volatilidade (13,3% contra 19,7%) — oito empresas em quatro
+regiões diversificam mais que quatro índices regionais.
+
+E o resultado **não depende de uma empresa excepcional**: o maior peso final é
+19,0% (Mitsui), o HHI da carteira é 0,144 contra 0,125 do equilíbrio perfeito, e
+o pior ativo do universo — GBL, com 0,59% real ao ano — permaneceu na carteira,
+como a regra anti-cherry-picking exige.
+
+⚠️ Nos EUA o índice empatou com os allocators, e em janelas de 10 anos venceu em
+76% delas. Quem olhasse só o mercado americano concluiria o oposto de quem
+olhasse só o japonês. **É essa a descoberta, não o placar global.**
+
+**Próximo passo:** recortes de crise (2008, dívida europeia, recessão brasileira,
+COVID) sobre as regras já congeladas.
 
 ## Setup
 
@@ -157,10 +206,22 @@ capallo fetch-b3        # precos da B3 (baixa ~550MB de COTAHIST)
 capallo fetch-b3-events # proventos e eventos societarios, com reconciliacao
 capallo build-br        # monta e valida o total return brasileiro
 capallo fetch-intl      # precos de Japao (Kabutan) e Suecia (Avanza)
-capallo probe           # viabilidade das series ainda bloqueadas
+capallo fetch-jp-dividends  # proventos de 8058 e 8031, dos relatorios anuais
+capallo build-intl      # monta e valida o total return de Europa e Japao
+capallo export-dataset  # painel mensal em BRL para o motor Rust
 pytest tests/
 
-# Rust (ainda não instalado nesta máquina)
+# Motor
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 cd engine && cargo build --release
+for s in br_allocators br_etf us_allocators us_etf eu_allocators eu_etf \
+         jp_allocators jp_etf capital_allocators passive_etfs cdi; do
+  ./target/release/backtest run ../strategies/$s.toml \
+    --out ../data/results/$s.csv --positions ../data/results/${s}_positions.csv
+done
+
+# Analise
+capallo scoreboard      # placar multi-metrica das nove estrategias
+capallo decompose       # retorno entre ativo, cambio e inflacao
+capallo premium         # Allocator Premium por regiao, ao lado do risco
 ```

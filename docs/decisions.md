@@ -125,3 +125,38 @@ do estudo não fez, e tornaria a guarda de provento pré-série uma comparação
 2001 em vez de com janeiro de 2006. O teste que pega isso é
 `test_provento_anterior_ao_inicio_da_serie_e_descartado` — é o mesmo erro que
 dobrava a quantidade inicial de BRAP4.
+
+## 2026-08-27 — O wrapper em dólar cancela, e o cancelamento é exato
+
+IEV e EWJ replicam Europa e Japão e liquidam em dólar. A seção 5 da metodologia
+manda atribuir o câmbio à moeda do mercado subjacente; a implementação faz isso
+sem inventar cotação, porque a identidade se lê nas duas ordens:
+
+    tr_brl = tr_usd × USD/BRL = (tr_brl ÷ EUR/BRL) × EUR/BRL
+
+O retorno local em euro é **derivado** do resultado em real dividido pelo câmbio
+da moeda de exposição. `validate()` confere que `local × câmbio` reproduz o
+retorno em BRL em todos os doze ativos.
+
+## 2026-08-27 — Diferença de volatilidade tem piso de materialidade
+
+O prêmio por unidade de risco extra dividia o prêmio pela diferença de
+volatilidade entre as carteiras. Nos EUA essa diferença é de **0,005 p.p.**, e a
+divisão devolvia −26,6: número de aparência plausível saído de divisão por ruído.
+É a mesma armadilha que o `EPS` de `metrics.py` já documenta, na escala da
+volatilidade.
+
+Abaixo de `VOL_MINIMA_PP` (0,5 p.p.) as duas carteiras correram o **mesmo** risco,
+o quociente não é calculado, e o veredito diz isso em vez de fingir precisão.
+Foi essa guarda que separou o Japão — prêmio de 6,46 p.p. com risco praticamente
+igual — de um falso "prêmio com menos risco".
+
+## 2026-08-27 — Robustez é medida por concentração, não por remoção de ativo
+
+A metodologia pede o teste "remover o melhor ativo". Remover e refazer o backtest
+depois de ver o resultado é escolher a carteira pelo resultado — exatamente o que
+a regra anti-cherry-picking proíbe. `sem_o_melhor()` responde à mesma pergunta sem
+mexer na carteira: mede quanto do patrimônio final veio do ativo de maior peso.
+
+Maior peso 19,0% (Mitsui), HHI 0,144 contra 0,125 do equilíbrio perfeito entre
+oito ativos. O resultado não depende de uma empresa excepcional.
