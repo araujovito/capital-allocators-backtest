@@ -35,3 +35,7 @@ outputs/
 .idea/
 
 !data/**/.gitkeep
+
+# Resultados: reproduzíveis a partir do dataset, não versionados.
+data/results/
+data/engine/

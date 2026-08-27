@@ -96,9 +96,25 @@ documentadas em `docs/spike-dados.md`: agregadores, fontes primárias e automaç
 de navegador. Conclusão: o histórico global exige fonte paga ou coleta via
 relatórios de RI.
 
-**Próximo passo:** montar o total return brasileiro (ITSA4 + BRAP4 × PIBB11) e
-rodar a comparação regional do Brasil. É um recorte completo do estudo, com dado
-oficial, que valida o motor inteiro enquanto a fonte internacional é resolvida.
+## Primeiros resultados — parciais
+
+Motor Rust rodando sobre dado real. Aportes mensais de R$1.000 corrigidos pelo
+IPCA, jan/2006 a dez/2025, ótica do investidor brasileiro.
+
+| Estratégia | R$ por R$1 de poder de compra aportado |
+|---|---|
+| US ETF (IVV) | **4,88** |
+| US Allocators (BRK-B + MKL) | 4,06 |
+| BR Allocators (ITSA4 + BRAP4) | 2,05 |
+| CDI | 1,52 |
+| BR ETF (PIBB11) | 1,45 |
+
+⚠️ **Parcial e não conclusivo.** Faltam Europa e Japão, que são metade do universo
+de allocators. Faltam também as métricas de risco da seção 15 — volatilidade,
+drawdown, Sharpe, Sortino, janelas móveis —, sem as quais patrimônio final
+isolado não decide nada. Ver `docs/methodology.md`, seção 11.
+
+**Próximo passo:** métricas de risco e janelas móveis; destravar Europa e Japão.
 
 ## Setup
 

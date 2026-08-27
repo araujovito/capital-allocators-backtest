@@ -25,6 +25,9 @@ def main(argv: list[str] | None = None) -> int:
     p_ev.add_argument("--out", default="data/curated")
     p_tr = sub.add_parser("build-br", help="monta o total return brasileiro")
     p_tr.add_argument("--out", default="data/curated")
+    p_ds = sub.add_parser("export-dataset", help="prepara o dataset para o motor Rust")
+    p_ds.add_argument("--curated", default="data/curated")
+    p_ds.add_argument("--out", default="data/engine")
 
     args = parser.parse_args(argv)
 
@@ -127,6 +130,15 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"  - {p}")
             return 1
         print("\nvalidacao ok — nenhum salto residual")
+        return 0
+
+    if args.command == "export-dataset":
+        from pathlib import Path
+
+        from capallo.transform.dataset import export
+
+        for k, v in export(Path(args.curated), Path(args.out)).items():
+            print(f"  {k:<10}{v:>7}")
         return 0
 
     return 1
