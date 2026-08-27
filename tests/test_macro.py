@@ -159,3 +159,26 @@ def test_detecta_desdobramento_e_ignora_alta_de_mercado(tmp_path):
     alertas = reconcile(tmp_path)
     assert len(alertas) == 1
     assert "2007-01" in alertas[0]
+
+
+def test_kabutan_converte_ano_de_dois_digitos():
+    """Kabutan usa AA/MM/DD: 06/01/31 e janeiro de 2006, nao de 1906."""
+    import pandas as pd
+
+    from capallo.ingest.kabutan import _to_date
+
+    assert _to_date("06/01/31") == pd.Timestamp("2006-01-31")
+    assert _to_date("25/12/30") == pd.Timestamp("2025-12-30")
+
+
+def test_intl_validate_flagra_mes_faltando(tmp_path):
+    import pandas as pd
+
+    from capallo.ingest.international import validate as intl_validate
+
+    meses = pd.date_range("2006-01-31", periods=239, freq="ME")
+    pd.DataFrame({"date": meses, "ticker": "8058", "close": 100.0}
+                 ).to_parquet(tmp_path / "jp_prices.parquet")
+    pd.DataFrame({"date": meses, "ticker": "INVE-B", "close": 100.0}
+                 ).to_parquet(tmp_path / "se_prices.parquet")
+    assert any("239 meses" in p for p in intl_validate(tmp_path))

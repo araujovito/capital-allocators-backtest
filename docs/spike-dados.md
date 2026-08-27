@@ -562,3 +562,61 @@ tanto do ETF quanto do CDI.
 excepcional carregou a carteira inteira"*. **Nenhuma conclusão deve ser tirada
 disto ainda** — falta o backtest com aportes mensais, que é sensível ao momento das
 entradas de um jeito que a comparação ponta a ponta não é.
+
+
+---
+
+## 9. Fontes locais destravam Japão e Suécia
+
+A hipótese: agregadores internacionais **revendem caro** o que a fonte da praça de
+origem publica aberto, e a barreira real costuma ser o idioma, não a licença.
+
+Confirmada em dois dos quatro casos.
+
+| Ativo | Fonte | Idioma | Cobertura |
+|---|---|---|---|
+| 8058 Mitsubishi | **Kabutan** (株探) | japonês | **240/240 meses** |
+| 8031 Mitsui | **Kabutan** (株探) | japonês | **240/240 meses** |
+| INVE-B Investor AB | **Avanza** | sueco | **240/240 meses** |
+| GBLB GBL | — | — | ainda sem fonte |
+
+O Kabutan publica visão mensal (`ashi=mon`) desde 2001, em HTML de tabela simples,
+sem JavaScript — a mesma qualidade de acesso da B3. A Avanza expõe a API de
+gráfico da corretora, que aceita `timePeriod=infinity` e devolve série desde 1984.
+
+Nenhuma das duas pede chave, cadastro ou pagamento. As mesmas séries custam plano
+Pro na Twelve Data.
+
+### Verificações que passaram
+
+Os saltos mensais acima de 25% nas séries japonesas concentram-se todos em
+**setembro a novembro de 2008** — as *sogo shosha* desabando na crise, movimento de
+mercado real. Nenhum salto compatível com desdobramento, o que confirma que o
+Kabutan já entrega preço ajustado por evento societário. A série sueca não tem
+salto algum.
+
+Duas armadilhas de formato, ambas viraram teste:
+
+- **Kabutan usa ano de dois dígitos** (`06/01/31`). Interpretar como 1906
+  destruiria a série inteira.
+- **A Avanza rotula cada barra pelo último pregão do mês.** Pedir a partir de
+  2006-01-01 devolve 2005-12-31 como primeira barra; a janela é buscada folgada e
+  filtrada por período depois.
+
+### O que ainda falta nestes três
+
+**Preço não é total return.** As duas fontes ajustam por desdobramento, mas não por
+dividendo. Sem a série de proventos, estes ativos **não podem entrar no backtest**:
+compará-los com Berkshire e IVV, que já têm total return, subestimaria seu retorno
+de forma sistemática — e Investor AB e as *sogo shosha* são pagadoras relevantes.
+
+### GBL: o que já foi descartado
+
+Euronext cifra o payload; Boursorama aposentou o endpoint de histórico (HTTP 410);
+De Tijd responde 403; ABC Bourse está atrás de desafio anti-bot; Beursduivel mudou
+de estrutura; a Avanza não lista o papel; a bolsa de Frankfurt responde 403 na API.
+O site institucional migrou de `gbl.be` para `gbl.com`.
+
+Resta procurar em holandês e francês belga com mais profundidade, e no RI em
+`gbl.com`, que como investment company tende a publicar total return sobre si
+mesma — o mesmo padrão observado na Investor AB.

@@ -81,9 +81,12 @@ tests/              testes do pipeline
 | Proventos Brasil (dinheiro) | ✅ 644 registros, dividendo × JCP separados | B3, proxy oficial |
 | Eventos em ações Brasil | ✅ ITSA4 completa; 2 desdobramentos de BRAP4 recuperados | B3 + detecção por salto |
 | **Total return Brasil** | ✅ **fechado e validado** | COTAHIST + eventos + proventos |
-| INVE-B, GBLB, 8058, 8031 | ❌ sem fonte gratuita no período completo | — |
+| 8058, 8031 (preço) | ✅ 240/240 meses | Kabutan 株探 (japonês) |
+| INVE-B (preço) | ✅ 240/240 meses | Avanza (sueco) |
+| Proventos JP e SE | ⬜ faltam — bloqueiam o total return | — |
+| GBLB | ❌ ainda sem fonte | — |
 
-**8 dos 12 ativos resolvidos.** Brasil e EUA completos, com total return validado.
+**11 dos 12 ativos com série de preço.** Brasil e EUA completos, com total return validado.
 O bloqueio restante são os quatro allocators de Europa e Japão.
 
 Barra a ser batida, já quantificada: o **CDI rendeu 4,46% a.a. reais** entre 2006
@@ -129,6 +132,7 @@ capallo fetch-equities  # total return dos ativos listados nos EUA
 capallo fetch-b3        # precos da B3 (baixa ~550MB de COTAHIST)
 capallo fetch-b3-events # proventos e eventos societarios, com reconciliacao
 capallo build-br        # monta e valida o total return brasileiro
+capallo fetch-intl      # precos de Japao (Kabutan) e Suecia (Avanza)
 capallo probe           # viabilidade das series ainda bloqueadas
 pytest tests/
 

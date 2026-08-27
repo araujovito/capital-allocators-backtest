@@ -28,6 +28,8 @@ def main(argv: list[str] | None = None) -> int:
     p_ds = sub.add_parser("export-dataset", help="prepara o dataset para o motor Rust")
     p_ds.add_argument("--curated", default="data/curated")
     p_ds.add_argument("--out", default="data/engine")
+    p_intl = sub.add_parser("fetch-intl", help="precos de Japao (Kabutan) e Suecia (Avanza)")
+    p_intl.add_argument("--out", default="data/curated")
 
     args = parser.parse_args(argv)
 
@@ -139,6 +141,23 @@ def main(argv: list[str] | None = None) -> int:
 
         for k, v in export(Path(args.curated), Path(args.out)).items():
             print(f"  {k:<10}{v:>7}")
+        return 0
+
+    if args.command == "fetch-intl":
+        from pathlib import Path
+
+        from capallo.ingest.international import build, validate
+
+        out = Path(args.out)
+        for name, n in build(out).items():
+            print(f"  {name:<8}{n:>5} meses")
+        problems = validate(out)
+        if problems:
+            print("\nPROBLEMAS:")
+            for p in problems:
+                print(f"  - {p}")
+            return 1
+        print("\nvalidacao ok  (ATENCAO: preco, ainda sem proventos)")
         return 0
 
     return 1
