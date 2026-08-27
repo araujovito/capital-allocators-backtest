@@ -620,3 +620,60 @@ O site institucional migrou de `gbl.be` para `gbl.com`.
 Resta procurar em holandês e francês belga com mais profundidade, e no RI em
 `gbl.com`, que como investment company tende a publicar total return sobre si
 mesma — o mesmo padrão observado na Investor AB.
+
+
+---
+
+## 10. Proventos de Japão e Suécia: parcialmente encontrados
+
+Com preço resolvido para 8058, 8031 e INVE-B, o total return depende só da série de
+proventos. Ela **não fechou**.
+
+### O que foi encontrado
+
+| Fonte | Ativo | Cobertura | Problema |
+|---|---|---|---|
+| **Avanza** (`/details`) | INVE-B | **2019-2026** | 15 eventos; faltam 13 anos da janela |
+| **IR Bank** (irbank.net) | 8058, 8031 | **2010-2027** | tabela com `rowspan`, colunas embaralham no parse; faltam 2006-2009 |
+| Kabutan `/finance` | 8058 | recente | mistura dividendo com revisão de resultado |
+
+O achado positivo: a Avanza expõe `exDate`, `paymentDate`, `amount` e tipo, e o IR
+Bank tem coluna **調整** (dividendo ajustado por desdobramento), que é exatamente o
+campo necessário. As duas fontes servem — só não alcançam o início da janela.
+
+### O que foi descartado
+
+| Fonte | Resultado |
+|---|---|
+| RI Mitsubishi (EN e JP) | HTTP 403 |
+| RI Mitsui (EN e JP) | HTTP 404 |
+| RI Investor AB | aplicação de página única, sem tabela estática |
+| Nordnet | exige sessão autenticada |
+| **Listagens alemãs na Twelve Data** | MBI, MBI1, MTS1, EAI e o ISIN sueco em FSX/XSTU: **todos exigem plano Grow** |
+
+A tentativa das bolsas alemãs merecia registro porque era a saída mais elegante: as
+quatro empresas negociam na Alemanha, e o `adjust=all` da Twelve Data já entrega
+total return. Mas o plano gratuito cobre **apenas listagens dos EUA** — nenhuma
+praça europeia ou asiática, nem por ISIN.
+
+### O que sobrou, e por que não é aceitável ainda
+
+Usar preço sem proventos para estes três **enviesaria o estudo contra os
+allocators**. Investor AB e as *sogo shosha* são pagadoras relevantes: as japonesas
+rendem 2% a 5% ao ano em dividendo pelos próprios dados do IR Bank, e a Investor AB
+paga duas vezes por ano. Vinte anos de dividendo ignorado é um buraco de dezenas de
+pontos percentuais, comparado contra Berkshire e IVV que **já têm** total return.
+
+Seria erro pior do que não ter o ativo: produziria um número, passaria em todas as
+validações, e responderia à pergunta central do estudo de forma invertida.
+
+### Caminho restante
+
+**Relatórios anuais.** Companhias japonesas publicam 有価証券報告書 com série
+histórica, e a Investor AB publica resumo de dez anos com dividendo por ação — são
+investment companies e *sogo shosha*, esse dado é institucional. É coleta em PDF,
+parcialmente manual, mas com 3 ativos e ~20 anos é finita.
+
+Combinada com o que já se tem, cobriria a janela: Avanza de 2019 em diante e IR Bank
+de 2010 em diante reduzem o trabalho manual a **2006-2009** para o Japão e
+**2006-2018** para a Suécia.
