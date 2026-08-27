@@ -85,9 +85,9 @@ tests/              testes do pipeline
 | INVE-B (preço) | ✅ 240/240 meses | Avanza (sueco) |
 | Proventos JP | ⬜ parcial: 2010+ | IR Bank (japonês) |
 | Proventos SE | ⬜ parcial: 2019+ | Avanza (sueco) |
-| GBLB | ❌ ainda sem fonte | — |
+| GBLB (preço) | ✅ 240/240 meses, Bruxelas em EUR | onvista (alemão) |
 
-**11 dos 12 ativos com série de preço.** Brasil e EUA completos, com total return validado.
+**Os 12 ativos têm série de preço.** Brasil e EUA completos, com total return validado.
 O bloqueio restante são os quatro allocators de Europa e Japão.
 
 Barra a ser batida, já quantificada: o **CDI rendeu 4,46% a.a. reais** entre 2006

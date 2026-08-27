@@ -182,3 +182,12 @@ def test_intl_validate_flagra_mes_faltando(tmp_path):
     pd.DataFrame({"date": meses, "ticker": "INVE-B", "close": 100.0}
                  ).to_parquet(tmp_path / "se_prices.parquet")
     assert any("239 meses" in p for p in intl_validate(tmp_path))
+
+
+def test_onvista_aponta_para_a_bolsa_de_origem():
+    """O GBL e coletado em Bruxelas, nao na listagem secundaria alema."""
+    from capallo.ingest.onvista import INSTRUMENTS
+
+    isin, _entity, notation = INSTRUMENTS["GBLB"]
+    assert isin == "BE0003797140"
+    assert notation == 29217  # BRU, conforme o snapshot da onvista

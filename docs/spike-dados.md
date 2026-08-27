@@ -677,3 +677,47 @@ parcialmente manual, mas com 3 ativos e ~20 anos é finita.
 Combinada com o que já se tem, cobriria a janela: Avanza de 2019 em diante e IR Bank
 de 2010 em diante reduzem o trabalho manual a **2006-2009** para o Japão e
 **2006-2018** para a Suécia.
+
+
+---
+
+## 11. GBL resolvido — pela porta alemã, com dado belga
+
+Último ativo sem fonte, e o que mais custou. Resolvido pelo portal alemão
+**onvista**.
+
+O detalhe que destravou: a onvista indexa o papel pelo **ISIN** e expõe todas as
+praças em que ele negocia. Para o GBL isso inclui **Bruxelas, `idNotation` 29217**,
+em EUR — a bolsa de origem, não a listagem secundária alemã.
+
+Ou seja: a fonte é alemã, mas o dado é belga, na moeda certa. Não houve troca de
+praça nem compromisso metodológico.
+
+| Ativo | Pregões | Período | Saltos > 25% |
+|---|---|---|---|
+| GBLB | 5.118 | 2006-01-02 → 2025-12-31 | nenhum |
+
+240 meses completos.
+
+### A armadilha do parâmetro
+
+`range=Y20` responde **HTTP 400**. `range=Y10` responde **200 com um mês de dados** —
+ignora o parâmetro em silêncio, que é o pior dos dois casos: quem não conferir o
+intervalo retornado conclui que o histórico não existe.
+
+O que funciona é `range=Y1` **combinado com `startDate`**. Vinte requisições, uma
+por ano, cobrem o estudo.
+
+### Por que a substituição do ativo não foi necessária
+
+Cogitou-se trocar o GBL por uma holding alemã ou francesa. A investigação mostrou
+que isso **não teria resolvido nada**: a barreira não era a Bélgica, era a
+**Euronext**, que cifra o histórico de qualquer papel listado nela. Wendel, Eurazeo
+e Sofina são todas Euronext e teriam exatamente o mesmo problema.
+
+E o custo metodológico teria sido real. Trocar um ativo do universo congelado por
+outro mais fácil de coletar é um critério de seleção aplicado **depois** de
+31/12/2005 — a regra anti-cherry-picking da seção 4 valendo contra o próprio autor.
+Vale registrar que a alternativa foi considerada e descartada por método, não por
+teimosia: se a coleta tivesse falhado, a saída correta seria declarar a ausência,
+não substituir.
