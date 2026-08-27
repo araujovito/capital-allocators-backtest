@@ -160,3 +160,36 @@ mexer na carteira: mede quanto do patrimônio final veio do ativo de maior peso.
 
 Maior peso 19,0% (Mitsui), HHI 0,144 contra 0,125 do equilíbrio perfeito entre
 oito ativos. O resultado não depende de uma empresa excepcional.
+
+## 2026-08-27 — Janelas de crise são datadas por terceiros
+
+Escolher o início e o fim de uma crise depois de ver o resultado é escolher o
+resultado. Nenhuma janela do módulo de crises foi datada pelo estudo: NBER para
+os Estados Unidos (2007-12 a 2009-06; 2020-02 a 2020-04), CEPR para a área do
+euro (3T2011 a 1T2013), CODACE/FGV para o Brasil (2T2014 a 4T2016). O aperto
+monetário de 2022 não tem árbitro oficial e usa o ano-calendário inteiro, com a
+ausência de árbitro declarada no campo `fonte`.
+
+Um teste exige que toda crise declare a fonte da datação.
+
+## 2026-08-27 — Duas escolhas que mudam o número da crise
+
+**Retorno real, não nominal.** No recorte da recessão brasileira a inflação
+acumulou 22%: uma carteira nominalmente positiva pode ter destruído poder de
+compra.
+
+**Nível de entrada no mês de véspera.** Tomar o primeiro mês de dentro da janela
+como base engoliria a queda desse mês, que é justamente a que se quer medir. Na
+crise financeira global a diferença é de vários pontos.
+
+O `queda_max` é limitado a zero: quem nunca ficou abaixo do nível de entrada não
+teve queda, e sem o limite o CDI reportava "+0,1% de queda".
+
+## 2026-08-27 — "As regras não mudam na crise" virou checagem, não texto
+
+A seção 6 da metodologia promete que as regras não mudam durante crises. A
+promessa não vale como afirmação: se um arquivo de estratégia tivesse outra
+janela ou outro aporte, o recorte compararia carteiras diferentes em condições
+diferentes e nada denunciaria. `regras_congeladas()` confere que todos os arquivos
+em `strategies/` compartilham `start`, `end`, `base_currency`, `dividends` e o
+bloco de aporte — diferindo só na composição.

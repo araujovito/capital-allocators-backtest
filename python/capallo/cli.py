@@ -42,6 +42,10 @@ def main(argv: list[str] | None = None) -> int:
     p_pr = sub.add_parser("premium", help="Allocator Premium por regiao, ao lado do risco")
     p_pr.add_argument("--results", default="data/results")
     p_pr.add_argument("--curated", default="data/curated")
+    p_cr = sub.add_parser("crises", help="comportamento das estrategias em recortes de crise")
+    p_cr.add_argument("--results", default="data/results")
+    p_cr.add_argument("--curated", default="data/curated")
+    p_cr.add_argument("--strategies", default="strategies")
     p_sb = sub.add_parser("scoreboard", help="placar comparativo entre estrategias")
     p_sb.add_argument("--results", default="data/results")
     p_sb.add_argument("--curated", default="data/curated")
@@ -276,6 +280,52 @@ def main(argv: list[str] | None = None) -> int:
         c = sem_o_melhor(results, curated, "capital_allocators")
         print(f"    maior peso {c['ativo_dominante']} com {c['peso_final']:.1%}; "
               f"HHI {c['concentracao_hhi']:.3f}")
+        return 0
+
+    if args.command == "crises":
+        from pathlib import Path
+
+        from capallo.analysis.crises import (
+            CRISES,
+            confronto,
+            placar_de_protecao,
+            tabela,
+            validate,
+        )
+
+        results, curated = Path(args.results), Path(args.curated)
+        strategies = Path(args.strategies)
+
+        print("  janelas datadas por terceiros, antes de olhar o resultado:")
+        for cr in CRISES:
+            print(f"    {cr.nome:<26}{cr.inicio} a {cr.fim}   {cr.fonte}")
+
+        t = tabela(results, curated, ("capital_allocators", "passive_etfs", "cdi"))
+        print(f"\n  retorno real dentro da janela, aporte expurgado:\n"
+              f"    {'crise':<26}{'estrategia':<20}{'retorno':>9}{'queda':>9}{'recup.':>8}")
+        for _, r in t.iterrows():
+            rec = "—" if r.recuperacao_meses is None else f"{r.recuperacao_meses}m"
+            print(f"    {r.crise:<26}{r.estrategia:<20}{r.retorno:>8.1%}"
+                  f"{r.queda_max:>9.1%}{rec:>8}")
+
+        print("\n  allocator contra o ETF da mesma regiao, crise a crise:")
+        for _, r in placar_de_protecao(results, curated).iterrows():
+            print(f"    {r.regiao:<8}{r.venceu}/{r.crises} crises   "
+                  f"media {r.media_pp:+.1f} p.p.")
+
+        piores = confronto(results, curated).nsmallest(3, "diferenca_pp")
+        print("\n  onde a gestao ativa mais atrapalhou:")
+        for _, r in piores.iterrows():
+            print(f"    {r.crise:<26}{r.regiao:<8}{r.diferenca_pp:+7.1f} p.p.")
+
+        problems = validate(results, curated, strategies)
+        if problems:
+            print("\nPROBLEMAS:")
+            for p in problems:
+                print(f"  - {p}")
+            return 1
+        print("\n  regras congeladas: todas as estrategias compartilham janela, "
+              "aporte e regra de dividendo")
         return 0
 
     if args.command == "scoreboard":

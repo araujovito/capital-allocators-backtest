@@ -189,8 +189,33 @@ como a regra anti-cherry-picking exige.
 76% delas. Quem olhasse só o mercado americano concluiria o oposto de quem
 olhasse só o japonês. **É essa a descoberta, não o placar global.**
 
-**Próximo passo:** recortes de crise (2008, dívida europeia, recessão brasileira,
-COVID) sobre as regras já congeladas.
+### Como cada estratégia atravessou as crises
+
+Janelas datadas por **terceiros** — NBER, CEPR, CODACE/FGV —, nunca pelo estudo.
+Retorno real, aporte expurgado, nível de entrada tomado no mês de véspera. As
+regras não mudam durante a crise, e `regras_congeladas()` confere que os onze
+arquivos de estratégia compartilham janela, aporte e regra de dividendo.
+
+| Crise | Allocators | ETFs | CDI | Recuperação |
+|---|---|---|---|---|
+| Crise financeira global (2007-12 → 2009-06) | −39,4% | −32,9% | +9,1% | 68 meses |
+| Crise da dívida do euro (2011-08 → 2013-02) | +13,0% | +17,5% | +4,4% | — |
+| Recessão brasileira (2014-04 → 2016-12) | +31,2% | +25,6% | +14,0% | — |
+| COVID-19 (2020-02 → 2020-04) | +1,9% | +5,4% | +0,9% | — |
+| Aperto monetário (2022) | −5,7% | −24,0% | +6,2% | 11 vs 19 meses |
+
+**A gestão ativa não protegeu de forma consistente.** Venceu o índice da mesma
+região em apenas 2 das 5 crises no agregado global, e caiu **mais** que o passivo
+em 2008 — a crise mais profunda da janela. Protegeu bem em 2022 (−5,7% contra
+−24,0%, recuperando em 11 meses contra 19) e na Europa (4 de 5 crises), e mal no
+Japão (1 de 5).
+
+É um contrapeso ao placar de vinte anos: o prêmio global de +2,72 p.p. ao ano veio
+mais de acumular vantagem na alta do que de perder menos na queda — e um investidor
+que abandona a estratégia no fundo do poço só vive a segunda metade.
+
+**Próximo passo:** os experimentos de sensibilidade da metodologia (PTAX compra vs
+venda, retenção na fonte, data do aporte).
 
 ## Setup
 
