@@ -684,3 +684,40 @@ holdings de 2005 ainda existiriam em 2025. É a limitação de fundo do estudo, 
 passa a estar escrita no README como o ataque que sobra: só um universo montado por
 critério mecânico sobre todas as holdings listadas em 2005, mortas inclusive,
 separaria o prêmio da gestão do prêmio de ter sobrevivido.
+
+## 2026-08-29 — O teste de sobrevivência não fecha, e a limitação fica específica
+
+O README declarava, como ataque restante, refazer a seleção dos allocators por
+critério mecânico sobre todas as empresas listadas em 2005 — mortas inclusive. A
+tentativa foi feita pelo Brasil, única das quatro regiões com fonte gratuita, e
+está documentada em `docs/spike-dados.md`. **Não fecha.**
+
+O que ficou de sólido: o universo investável brasileiro de jan/2006 tem **96
+empresas**, e o painel completo do COTAHIST — 2.514 tickers, sem viés por
+construção — fica versionado para uma tentativa futura.
+
+O que trava: **ligação de entidade**. Só 40 das 96 aparecem com o mesmo nome em
+dez/2025, mas contar o resto como morte é errado, e onze contraexemplos estão
+nomeados no código (AMBEV, VALE, DURATEX, Americanas, a fusão Itaú-Unibanco, a
+fusão Sadia-Perdigão, Telemar). E mesmo com o mapa a pergunta continua ambígua:
+Sadia e Perdigão sumiram como ticker e sobreviveram como negócio dentro da BRF.
+
+Decisões que ficam:
+
+1. **Não publicar taxa de mortalidade.** "33% mantiveram o ticker" é um número
+   verdadeiro que seria lido como "67% morreram", e isso é falso. O módulo chama a
+   medida de **permanência**, nunca de sobrevivência, e o teste
+   `test_permanencia_nao_e_sobrevivencia` existe para impedir que a distinção se
+   perca numa refatoração.
+2. **Registrar o critério de nome como refutado.** Procurar "PART"/"HOLDING" nos
+   nomes de 2006 devolve 8 empresas e não pega nem Itaúsa nem Bradespar. No
+   Brasil, holding não se identifica pelo nome — e esse era o único critério
+   mecânico observável em 2005 sem dado pago.
+3. **Reescrever a limitação no README em vez de removê-la.** Ela sai de "o próximo
+   passo é fazer X" para "X exige ligação de entidade curada, que só existe em base
+   paga, e ainda assim cobriria uma das quatro regiões". Limitação específica vale
+   mais que promessa vaga.
+
+É o segundo módulo do projeto cujo produto principal é um "não dá" — o primeiro
+foi `ingest.irbank`. Os dois ficam no repositório pelo mesmo motivo: o caminho
+descartado é informação, e refazê-lo custa mais que lê-lo.

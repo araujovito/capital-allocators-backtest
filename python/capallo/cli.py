@@ -72,6 +72,13 @@ def main(argv: list[str] | None = None) -> int:
     p_bs.add_argument("--results", default="data/results")
     p_bs.add_argument("--curated", default="data/curated")
     p_bs.add_argument("--sorteios", type=int, default=4000)
+    p_bu = sub.add_parser("fetch-b3-universo",
+                          help="painel de TODO papel negociado na B3, sem vies de sobrevivencia")
+    p_bu.add_argument("--raw", default="data/raw")
+    p_bu.add_argument("--out", default="data/curated")
+    p_sv = sub.add_parser("sobrevivencia",
+                          help="o teste de sobrevivencia: o que mede e o que nao fecha")
+    p_sv.add_argument("--curated", default="data/curated")
     p_dc = sub.add_parser("decompose", help="retorno de cada ativo entre ativo, cambio e inflacao")
     p_dc.add_argument("--curated", default="data/curated")
     p_dc.add_argument("--engine", default="data/engine")
@@ -614,6 +621,62 @@ def main(argv: list[str] | None = None) -> int:
                   f"{x.p5_pp:>9.2f}{x.p95_pp:>9.2f}{x.fracao_positiva:>10.1%}")
         print("    bloco curto e a escolha mais adversarial: destroi a memoria da serie")
         print("    e alarga a distribuicao. O veredito nao muda em nenhum deles.")
+        return 0
+
+    if args.command == "fetch-b3-universo":
+        from pathlib import Path
+
+        from capallo.ingest.b3_universo import build, universo_investavel, validate
+
+        out = Path(args.out)
+        df = build(Path(args.raw), out)
+        print(f"  {len(df):,} observacoes mensais · {df.ticker.nunique()} tickers ·"
+              f" {df.nome.nunique()} nomes, 2006 a 2025")
+        inv = universo_investavel(df)
+        print(f"  universo investavel de jan/2006: {len(inv)} empresas"
+              f" (volume mensal >= R$ 1 milhao)")
+        problems = validate(out)
+        if problems:
+            print("\nPROBLEMAS:")
+            for pb in problems:
+                print(f"  - {pb}")
+            return 1
+        print("\nvalidacao ok")
+        return 0
+
+    if args.command == "sobrevivencia":
+        from pathlib import Path
+
+        import pandas as pd
+
+        from capallo.analysis.sobrevivencia import (
+            permanencia,
+            por_que_nao_fecha,
+            sumiram,
+        )
+
+        painel = pd.read_parquet(Path(args.curated) / "b3_universo.parquet")
+        p = permanencia(painel)
+        print("  permanencia do universo investavel brasileiro de jan/2006:")
+        print(f"    empresas no inicio      {p['empresas_no_inicio']:>4}")
+        print(f"    mesmo nome em dez/2025  {p['mesmo_nome']:>4}"
+              f"  ({p['mesmo_nome'] / p['empresas_no_inicio']:.0%})")
+        print(f"    mesmo ticker            {p['mesmo_ticker']:>4}"
+              f"  ({p['mesmo_ticker'] / p['empresas_no_inicio']:.0%})")
+
+        fora = sumiram(painel)
+        vivas = fora[fora.nao_morreu.notna()]
+        print(f"\n  das {len(fora)} que somem do arquivo, {len(vivas)} comprovadamente"
+              f" NAO morreram:")
+        for _, r in vivas.iterrows():
+            print(f"    {r.nome:<14} {r.nao_morreu}")
+
+        print("\n  por que o teste nao fecha:")
+        for razao in por_que_nao_fecha(painel):
+            print(f"    - {razao}")
+        print("\n  EUA, Europa e Japao nao tem nem essa fonte: nao ha historico"
+              " gratuito com")
+        print("  empresas deslistadas em nenhuma das tres pracas.")
         return 0
 
     if args.command == "decompose":

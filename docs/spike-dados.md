@@ -928,3 +928,61 @@ coluna `fontes` do arquivo, e não escondido.
 
 Não há mais buraco de dado. O que falta é transformação: montar o total return de
 Europa e Japão sobre preço e provento já coletados.
+
+## 2026-08-29 — Quarta rodada: universo sem viés de sobrevivência
+
+Objetivo: refazer a seleção dos allocators por critério mecânico sobre **todas** as
+empresas listadas em 2005, mortas inclusive, para separar o prêmio da gestão do
+prêmio de ter sobrevivido.
+
+**Resultado: não fecha, e a razão é ligação de entidade, não falta de dado bruto.**
+
+### O que existe
+
+O COTAHIST já baixado publica todo papel negociado à vista em cada ano, sem
+qualquer filtro de sobrevivência — é a única fonte deste projeto imune ao viés por
+construção. Lido inteiro, dá 140.156 observações mensais, 2.514 tickers e 2.080
+nomes entre 2006 e 2025. Com corte de liquidez de R$ 1 milhão de volume mensal em
+jan/2006 e uma classe por empresa: **96 empresas investáveis**.
+
+Está versionado em `b3_universo.parquet` para que uma tentativa futura comece daí.
+
+### Onde trava
+
+**Primeiro: identidade.** Das 96, só **40 aparecem com o mesmo nome** em dez/2025 e
+**32 com o mesmo ticker**. Mas contar o resto como morte é grosseiramente errado, e
+dá para provar com nomes: AMBEV virou AMBEV S/A, VALE R DOCE virou VALE, DURATEX
+virou Dexco, LOJAS AMERIC virou Americanas, ITAUBANCO e UNIBANCO se fundiram,
+SADIA e PERDIGÃO viraram BRF, TELEMAR virou Oi. Onze contraexemplos identificados à
+mão, e a lista não é exaustiva.
+
+Reconstruir a cadeia exige um **mapa de entidades** — o equivalente do `PERMNO` do
+CRSP —, que é precisamente o produto que as bases pagas vendem e que a B3 não
+publica.
+
+**Segundo: a pergunta é ambígua mesmo com o mapa.** Sadia e Perdigão sumiram como
+ticker e continuaram como negócio dentro da BRF. Contá-las como mortas exagera o
+viés; como vivas, o subestima. Não há resposta única, e é por isso que a literatura
+de viés de sobrevivência usa bases com ligação curada à mão.
+
+**Terceiro: preço bruto.** O COTAHIST não ajusta desdobramento, então o relativo de
+vinte anos de cada papel não se sustenta. Este seria o obstáculo mais fácil dos
+três — a API de eventos da B3 cobre parte das mortas, e ACESITA, encerrada em 2009,
+devolve quatro eventos —, mas seria curadoria ativo a ativo sobre 96 empresas.
+
+### Hipótese refutada no caminho
+
+Tentou-se um critério **mecânico de nome** para identificar holdings: procurar
+"PART" (Participações) e "HOLDING" nos nomes de 2006. Devolve 8 nomes e **não pega
+nem Itaúsa nem Bradespar** — os dois allocators brasileiros do próprio estudo —,
+enquanto pega TIM PART e TELEMIG PART, que são operadoras de telecom. O critério
+está morto: no Brasil, holding não se identifica pelo nome.
+
+### O que isso significa para o estudo
+
+A limitação **permanece**, e passa a ser específica em vez de vaga: não é "faltou
+tempo", é "falta ligação de entidade, e a pergunta é ambígua mesmo com ela".
+
+E o alcance seria parcial de todo modo: **Estados Unidos, Europa e Japão não têm
+nem essa fonte.** Não há histórico gratuito com empresas deslistadas em nenhuma das
+três praças. Mesmo resolvido o Brasil, o teste cobriria uma das quatro regiões.

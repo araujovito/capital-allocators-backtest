@@ -691,12 +691,46 @@ venceria o produto de hoje (sim, +2,31, com menos risco).
 de experimento da §7, os testes de robustez da §9, as sensibilidades de método e o
 Tesouro IPCA+ que ficara para V2.
 
-**Próximo passo:** o estudo está completo no que se propôs. O que falta é ataque
-de fora — e o melhor candidato é o que este trabalho não pode responder sozinho: os
-oito allocators foram escolhidos com informação de 2005, mas por *alguém que já
-sabia quais deles existiriam em 2025*. Só um universo montado a partir de um
-critério mecânico aplicado a **todas** as holdings listadas em 2005 — sobreviventes
-e mortas — separaria o prêmio da gestão do prêmio de ter sobrevivido.
+### A limitação que sobra, e por que ela sobra
+
+Os oito allocators foram escolhidos com informação de 2005 — mas por *alguém que já
+sabia quais deles existiriam em 2025*. Separar o prêmio da gestão do prêmio de ter
+sobrevivido exigiria refazer a seleção por critério mecânico sobre **todas** as
+empresas listadas em 2005, mortas inclusive.
+
+**Isso foi tentado, pelo Brasil, e não fecha.** O COTAHIST já baixado publica todo
+papel negociado à vista, sem filtro de sobrevivência — 2.514 tickers entre 2006 e
+2025, e **96 empresas investáveis** em jan/2006 com pelo menos R$ 1 milhão de
+volume mensal. O painel fica versionado; `capallo sobrevivencia` mostra o que ele
+sustenta e o que não sustenta.
+
+Trava em três lugares, e o primeiro é fatal:
+
+1. **Ligação de entidade.** Das 96, só **40 aparecem com o mesmo nome** em dez/2025
+   e 32 com o mesmo ticker — mas contar o resto como morte é grosseiramente errado.
+   AMBEV virou AMBEV S/A, VALE R DOCE virou VALE, DURATEX virou Dexco, LOJAS AMERIC
+   virou Americanas, ITAUBANCO e UNIBANCO se fundiram, SADIA e PERDIGÃO viraram BRF,
+   TELEMAR virou Oi. Reconstruir a cadeia exige um mapa de entidades — o `PERMNO` do
+   CRSP — que é o produto que as bases pagas vendem e a B3 não publica.
+2. **A pergunta é ambígua mesmo com o mapa.** Sadia e Perdigão sumiram como ticker
+   e continuaram como negócio dentro da BRF. Contá-las como mortas exagera o viés;
+   como vivas, o subestima.
+3. **Preço bruto.** O COTAHIST não ajusta desdobramento, então o relativo de vinte
+   anos de cada papel não se sustenta sem curadoria ativo a ativo.
+
+Uma hipótese morreu no caminho: identificar holdings por **nome** — procurar "PART"
+e "HOLDING" nos nomes de 2006 — devolve 8 empresas e **não pega nem Itaúsa nem
+Bradespar**, enquanto pega duas operadoras de telecom. No Brasil, holding não se
+identifica pelo nome.
+
+⚠️ E o alcance seria parcial de todo modo: **EUA, Europa e Japão não têm nem essa
+fonte.** Não há histórico gratuito com empresas deslistadas em nenhuma das três
+praças. Mesmo resolvido o Brasil, o teste cobriria uma das quatro regiões.
+
+**A limitação, portanto, não é "faltou tempo" — é "falta ligação de entidade
+curada, que só existe em base paga".** É o que um leitor precisa saber para calibrar
+o quanto acreditar em +3,66 p.p.: o número sobreviveu a tudo o que se podia testar
+de graça, e o que resta em aberto tem preço de assinatura.
 
 ## Setup
 
@@ -711,6 +745,7 @@ capallo fetch-equities  # total return bruto e preco puro dos ativos dos EUA
 capallo build-us-net    # aplica os 30% de retencao a serie americana
 capallo fetch-b3        # precos da B3 (baixa ~550MB de COTAHIST)
 capallo fetch-b3-events # proventos e eventos societarios, com reconciliacao
+capallo fetch-b3-universo   # TODO papel negociado na B3, sem vies de sobrevivencia
 capallo build-br        # monta e valida o total return brasileiro
 capallo fetch-intl      # precos de Japao (Kabutan) e Suecia (Avanza)
 capallo check-jp-prices     # confere a serie japonesa contra o preco publicado pelas companhias
@@ -743,5 +778,6 @@ capallo index-benchmark # o indice no lugar do ETF (§7)
 capallo modern-alternative  # o produto que existe hoje (§7)
 capallo renda-fixa      # a regua real, e a licao sobre sequencia
 capallo bootstrap       # quanto do premio sobrevive a outra historia
+capallo sobrevivencia   # o teste de sobrevivencia: o que mede e o que nao fecha
 capallo charts          # as quatro figuras, nos dois temas  (pip install -e "./python[charts]")
 ```
