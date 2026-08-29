@@ -10,6 +10,7 @@ aportes mensais entre **jan/2006 e dez/2025** (240 meses), três caminhos:
 | Referência de mercado | **Índices** dos mesmos 4 mercados (experimento §7) |
 | Contrafactual moderno | **ACWI global**, o produto de hoje (experimento §7) |
 | Custo de oportunidade | **CDI** |
+| Retorno real contratado | **Tesouro IPCA+** longo (NTN-B Principal) |
 | Régua de poder de compra | **IPCA** (não é investimento) |
 
 > Entre 2006 e 2025, qual foi a recompensa obtida por um investidor brasileiro ao
@@ -351,7 +352,7 @@ conta no exterior. Em 2006 isso não existia para ele; hoje é a recomendação 
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/img/tres-experimentos-dark.png">
-  <img alt="A mesma poupança por cinco caminhos, 2006-2025: Capital Allocators termina em 3,75x, o ACWI global em 3,09x, os índices regionais em 2,61x, os ETFs de 2006 em 2,49x e o CDI em 1,52x." src="docs/img/tres-experimentos-light.png">
+  <img alt="A mesma poupança por seis caminhos, 2006-2025: Capital Allocators termina em 3,75x, o ACWI global em 3,09x, os índices regionais em 2,61x, os ETFs de 2006 em 2,49x, o CDI em 1,52x e o Tesouro IPCA+ longo em 1,41x — este último liderando com folga até 2013 e caindo para último no fim." src="docs/img/tres-experimentos-light.png">
 </picture>
 
 | Estratégia | Experimento | R$/R$ | Real a.a. | Vol. | Máx. DD | Sharpe |
@@ -405,6 +406,87 @@ não existia na data de congelamento do universo. É o que o torna um contrafact
 e não um resultado. Os três tipos de experimento aparecem juntos só na tabela e na
 figura acima, sempre com o tipo escrito ao lado — o que a §7 proíbe é tratar um
 número de um tipo como se fosse de outro.
+
+### Tesouro IPCA+: a régua mais dura, e a armadilha que ela revela
+
+O CDI pergunta se o risco da bolsa compensou contra o juro nominal. Falta a versão
+dura da mesma pergunta: compensou contra um **retorno real contratado**? Em 2006 o
+investidor podia travar IPCA + 8% ao ano por dezoito anos no Tesouro Direto.
+
+A perna estava declarada como pendente em `docs/decisions.md` desde **26/08/2026**
+— antes de existir motor e antes de qualquer número — com o motivo do adiamento
+escrito: *"introduz duration e marcação a mercado"*. Era exatamente o problema.
+
+| Estratégia | Real a.a. | R$/R$ | Vol. | Máx. DD | Posto por tempo | Posto por dinheiro |
+|---|---|---|---|---|---|---|
+| Capital Allocators | 8,87% | 3,75 | 13,2% | −18,7% | 1º | 1º |
+| **Tesouro IPCA+ longo** | **6,85%** | **1,41** | **21,8%** | **−35,4%** | **2º** | **5º** |
+| ACWI global | 6,56% | 3,09 | 15,4% | −26,9% | 3º | 2º |
+| ETFs de 2006 | 5,21% | 2,49 | 19,6% | −28,2% | 4º | 3º |
+| CDI | 4,43% | 1,52 | 0,9% | 0,0% | 5º | 4º |
+
+**O título rendeu 6,85% ao ano real e entregou menos poder de compra que o CDI.**
+Os dois números não se contradizem — medem coisas diferentes. O primeiro é
+ponderado por tempo; o segundo, por dinheiro. A distância entre eles é a
+**sequência**:
+
+| Período | Tesouro IPCA+ | CDI | Capital Allocators |
+|---|---|---|---|
+| 2006-2012 | **+20,1%** a.a. | +5,8% | −0,5% |
+| 2013-2018 | +1,6% | +4,2% | +13,8% |
+| 2019-2025 | **−0,6%** | +3,4% | +14,6% |
+
+O título longo teve seu melhor período quando o investidor ainda quase não tinha
+dinheiro aplicado, e o pior quando já tinha quase tudo. **Quem acumula não recebe
+o retorno médio do ativo — recebe o retorno dos anos em que o patrimônio dele era
+grande.**
+
+⚠️ **E isso corta para os dois lados.** Os Capital Allocators são a imagem
+espelhada do Tesouro IPCA+: fracos em 2006-2012, fortes depois. O placar de 3,75x
+se beneficiou de uma sequência favorável na mesma medida em que o do título sofreu
+de uma desfavorável. Não é acusação de sorte — é definição: com aporte mensal,
+*quando* o retorno chega importa tanto quanto quanto ele foi. O teste de janelas de
+início já apontava para isso; aqui aparece o mecanismo.
+
+E a volatilidade não é detalhe: **21,8% ao ano, com drawdown de −35,4%** — risco de
+ação, num título público, vindo da duration de 18 a 25 anos que a série carrega.
+
+#### As decisões que essa perna obrigou a tomar
+
+**Título:** `Tesouro IPCA+` **sem** juros semestrais (NTN-B Principal). É
+zero-cupom, então o total return é a variação do preço unitário e ponto — o primo
+com cupom exigiria uma convenção de reinvestimento nova a cada seis meses por vinte
+anos. Disponível desde 18/07/2005: comprável antes do início da janela.
+
+**Rolagem:** um título vence, e vencer obriga a decidir. Duas regras foram
+implementadas e as duas são reportadas, porque a escolha muda o resultado:
+
+| Regra | Rolagens | Acumulado | Nominal a.a. |
+|---|---|---|---|
+| **`mais_longo`** (principal) | 3 | 11,04x | 12,76% |
+| `ate_o_vencimento` | 1 | 13,37x | 13,85% |
+
+A principal é `mais_longo` porque descreve o mandato: vinte anos de aporte mensal
+com objetivo de longo prazo. Sob a outra regra, em 2023 o aporte do mês estaria
+comprando um título de um ano de prazo — caixa disfarçado de renda fixa longa. A
+escolha custa 1,09 p.p. ao ano, e o número fica declarado em vez de escondido.
+
+**Spread de rolagem entra; imposto de renda não.** Vender ao preço de venda e
+comprar ao de compra é **preço**, e o estudo modela preço em todas as pernas — além
+de ser intrínseco ao instrumento, já que uma ação nunca é obrigada a transacionar e
+um título que vence é. Já o IR não entra porque a §4 congelou apenas retenção sobre
+dividendo, o CDI também entra bruto, e as carteiras de ação rebalanceiam por aporte
+justamente para não realizar ganho. Mudar a regra tributária só para esta perna a
+tornaria incomparável. **Mas o que a regra ignora fica medido:** os 15% sobre o
+ganho nominal, cobrados nas quatro realizações, custariam **1,46 p.p. ao ano** —
+uma mordida grande, porque o ganho nominal de vinte anos de IPCA+ embute toda a
+inflação do período.
+
+**Uma coluna que mudou de significado.** A leitura inicial usou `PU Base` como
+preço de marcação, porque nas linhas recentes ele coincide com `PU Venda`. A
+validação reprovou: coincide em 30% da amostra e diverge em 70% — até 2021 fica
+~0,04% abaixo, e de 2022 em diante passa a ser o mesmo número. A marcação usa
+`PU Venda`, que tem definição estável nos vinte anos.
 
 ### As escolhas de método decidem alguma coisa?
 
@@ -528,9 +610,15 @@ perguntas que se propôs: a gestão ativa venceu o produto de 2006 (sim, +3,66 p
 venceu o mercado (sim, +3,08 — exceto nos EUA, onde o prêmio era o produto) e
 venceria o produto de hoje (sim, +2,31, com menos risco).
 
-**Próximo passo:** o Tesouro IPCA+ como quarta perna, adiado desde o começo por
-introduzir duration e marcação a mercado — está registrado em `docs/decisions.md`
-como item de V2.
+**Todos os itens declarados no começo do projeto estão fechados**: os três tipos
+de experimento da §7, os testes de robustez da §9, as sensibilidades de método e o
+Tesouro IPCA+ que ficara para V2.
+
+**Próximo passo:** nenhum item pendente herdado. O que o estudo pede agora é
+adversarial — atacar o resultado por onde ele é mais frágil. A ressalva de
+sequência acima é o melhor candidato: um teste de aporte com sequência embaralhada
+(*bootstrap* de blocos) diria quanto do prêmio de 3,66 p.p. sobrevive a uma ordem
+de retornos diferente da que a história sorteou.
 
 ## Setup
 
@@ -549,6 +637,8 @@ capallo build-br        # monta e valida o total return brasileiro
 capallo fetch-intl      # precos de Japao (Kabutan) e Suecia (Avanza)
 capallo check-jp-prices     # confere a serie japonesa contra o preco publicado pelas companhias
 capallo fetch-jp-dividends  # proventos de 8058 e 8031, dos relatorios anuais
+capallo fetch-tesouro       # precos historicos do Tesouro Direto
+capallo build-tesouro       # indice de retorno total do Tesouro IPCA+ longo
 capallo fetch-indices       # indices de MSCI e B3, para o Index Benchmark
 capallo build-indices       # aplica a retencao da §4 aos indices
 capallo fetch-se-dividends  # proventos de INVE-B e o teste de data-ex da serie sueca
@@ -573,5 +663,6 @@ capallo crises          # comportamento em recortes de crise datados por terceir
 capallo sensitivity     # ponta da PTAX e janelas de inicio movel
 capallo index-benchmark # o indice no lugar do ETF (§7)
 capallo modern-alternative  # o produto que existe hoje (§7)
+capallo renda-fixa      # a regua real, e a licao sobre sequencia
 capallo charts          # as quatro figuras, nos dois temas  (pip install -e "./python[charts]")
 ```

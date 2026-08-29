@@ -90,6 +90,18 @@ MODERN_ALTERNATIVE: tuple[Asset, ...] = (
     Asset("ACWI", "MSCI ACWI", Region.US, Currency.USD, Currency.USD, 0.30),
 )
 
+#: Referência de renda fixa com retorno real contratado. Fica ao lado do CDI, não
+#: dentro das carteiras: é régua, não ativo do universo.
+#:
+#: ⚠️ Declarado como pendente em `docs/decisions.md` desde 26/08/2026 — antes de
+#: existir motor e antes de qualquer resultado. Não é acréscimo pós-resultado, e o
+#: `Tesouro IPCA+` já era comprável em 31/12/2005, o que a regra anti-cherry-picking
+#: exigiria mesmo se fosse ativo.
+RENDA_FIXA: tuple[Asset, ...] = (
+    Asset("IPCAP", "Tesouro IPCA+ (NTN-B Principal)", Region.BR, Currency.BRL,
+          Currency.BRL, 0.00),
+)
+
 #: Índice → ETF da mesma região, para medir o custo do produto.
 INDICE_DO_ETF: dict[str, str] = {
     "PIBB11": "IBXL", "IVV": "MXUS", "IEV": "MXEU", "EWJ": "MXJP",
@@ -97,7 +109,8 @@ INDICE_DO_ETF: dict[str, str] = {
 
 BY_TICKER: dict[str, Asset] = {
     a.ticker: a
-    for a in (*CAPITAL_ALLOCATORS, *PASSIVE_ETFS, *INDICES, *MODERN_ALTERNATIVE)
+    for a in (*CAPITAL_ALLOCATORS, *PASSIVE_ETFS, *INDICES, *MODERN_ALTERNATIVE,
+              *RENDA_FIXA)
 }
 
 

@@ -58,6 +58,15 @@ def main(argv: list[str] | None = None) -> int:
     p_ma.add_argument("--strategies", default="strategies")
     p_ma.add_argument("--skip-ter", action="store_true",
                       help="pula a sensibilidade da taxa, que roda o motor 3x")
+    p_ft = sub.add_parser("fetch-tesouro", help="precos historicos do Tesouro Direto")
+    p_ft.add_argument("--out", default="data/curated")
+    p_bt = sub.add_parser("build-tesouro", help="indice de retorno total do Tesouro IPCA+")
+    p_bt.add_argument("--curated", default="data/curated")
+    p_bt.add_argument("--regra", choices=["mais_longo", "ate_o_vencimento"],
+                      default="mais_longo")
+    p_rf = sub.add_parser("renda-fixa", help="a regua real, e a licao sobre sequencia")
+    p_rf.add_argument("--results", default="data/results")
+    p_rf.add_argument("--curated", default="data/curated")
     p_dc = sub.add_parser("decompose", help="retorno de cada ativo entre ativo, cambio e inflacao")
     p_dc.add_argument("--curated", default="data/curated")
     p_dc.add_argument("--engine", default="data/engine")
@@ -458,6 +467,102 @@ def main(argv: list[str] | None = None) -> int:
             for _, r in d.iterrows():
                 print(f"    {r.ter:>6.2%}{r.moderna_aa * 100:>14.2f}%"
                       f"{r.reais_por_real:>7.2f}x{r.premio_da_ativa_pp:>15.2f} p.p.")
+        return 0
+
+    if args.command == "fetch-tesouro":
+        from pathlib import Path
+
+        from capallo.ingest.tesouro import build, validate
+
+        out = Path(args.out)
+        df = build(out)
+        print(f"  {len(df)} pregoes, {df.maturity.nunique()} vencimentos, "
+              f"{df.date.min().date()} a {df.date.max().date()}")
+        spread = (df.pu_compra / df.pu_venda - 1) * 100
+        print(f"  spread de compra e venda: media {spread.mean():.2f}%, "
+              f"mediana {spread.median():.2f}%")
+        problems = validate(out)
+        if problems:
+            print("\nPROBLEMAS:")
+            for pb in problems:
+                print(f"  - {pb}")
+            return 1
+        print("\nvalidacao ok")
+        return 0
+
+    if args.command == "build-tesouro":
+        from pathlib import Path
+
+        import pandas as pd
+
+        from capallo.transform.build_tesouro import (
+            build,
+            build_index,
+            comparar_regras,
+            custo_do_ir,
+            validate,
+        )
+
+        curated = Path(args.curated)
+        build(curated, regra=args.regra)
+        _, rolagens = build_index(
+            pd.read_parquet(curated / "tesouro_ipca.parquet"), args.regra)
+        print(f"  regra: {args.regra}   {len(rolagens)} rolagens em vinte anos")
+        for r in rolagens:
+            print(f"    {r.mes}  {r.de} -> {r.para}   custo {r.custo_pct:.2f}%"
+                  f"   ({r.motivo})")
+
+        print("\n  o que a regra de rolagem decide:")
+        for _, r in comparar_regras(curated).iterrows():
+            print(f"    {r.regra:<18}{r.rolagens} rolagens   {r.acumulado:6.2f}x"
+                  f"   {r.nominal_aa:6.2%} a.a. nominal")
+
+        ir = custo_do_ir(curated, args.regra)
+        print("\n  o IR nao entra no indice (a §4 so congelou retencao sobre"
+              " dividendo, e o CDI tambem")
+        print(f"  entra bruto). Se entrasse: {ir['bruto_aa']:.2%} viraria"
+              f" {ir['liquido_de_ir_aa']:.2%} a.a. nominal,")
+        print(f"  um custo de {ir['custo_pp_aa']:.2f} p.p. ao ano em"
+              f" {ir['realizacoes']} realizacoes.")
+
+        problems = validate(curated)
+        if problems:
+            print("\nPROBLEMAS:")
+            for pb in problems:
+                print(f"  - {pb}")
+            return 1
+        print("\nvalidacao ok")
+        return 0
+
+    if args.command == "renda-fixa":
+        from pathlib import Path
+
+        from capallo.analysis.renda_fixa import (
+            PERIODOS,
+            inversoes,
+            sequencia,
+            tempo_contra_dinheiro,
+        )
+
+        res, cur = Path(args.results), Path(args.curated)
+        t = tempo_contra_dinheiro(res, cur)
+        print(f"  {'estrategia':<22}{'real a.a.':>11}{'R$/R$':>9}{'vol':>8}{'maxDD':>9}"
+              f"{'posto tempo':>13}{'posto dinheiro':>16}")
+        for _, r in t.iterrows():
+            print(f"  {r.estrategia:<22}{r.real_aa * 100:10.2f}%{r.reais_por_real:8.2f}x"
+                  f"{r.volatilidade * 100:7.2f}%{r.max_drawdown * 100:8.1f}%"
+                  f"{r.posto_por_tempo:>13}{r.posto_por_dinheiro:>16}")
+
+        print("\n  retorno real por terco da janela — a sequencia e a explicacao:")
+        s = sequencia(res, cur)
+        cols = [f"{a[:4]}-{b[:4]}" for a, b in PERIODOS]
+        print(f"    {'estrategia':<22}" + "".join(f"{c:>13}" for c in cols))
+        for _, r in s.iterrows():
+            print(f"    {r.estrategia:<22}" + "".join(f"{r[c] * 100:12.2f}%" for c in cols))
+
+        print("\n  onde o ranking por tempo e o por dinheiro discordam:")
+        for frase in inversoes(t):
+            print(f"    - {frase}")
         return 0
 
     if args.command == "decompose":

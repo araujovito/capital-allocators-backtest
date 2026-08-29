@@ -33,7 +33,7 @@ def test_numero_sai_no_formato_brasileiro():
 
 def test_os_dois_temas_tem_a_mesma_quantidade_de_slots():
     """O tema escuro é a mesma paleta re-escalonada, não outra paleta."""
-    assert len(CLARO.series) == len(ESCURO.series) == 5
+    assert len(CLARO.series) == len(ESCURO.series) == 6
     assert len(set(CLARO.series)) == len(CLARO.series)
     assert len(set(ESCURO.series)) == len(ESCURO.series)
     assert CLARO.surface != ESCURO.surface

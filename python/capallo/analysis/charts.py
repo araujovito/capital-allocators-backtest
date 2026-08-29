@@ -55,7 +55,13 @@ from capallo.analysis.scoreboard import _deflator, _load_result
 
 @dataclass(frozen=True)
 class Tema:
-    """Tokens de um modo. Os dois modos são escolhidos, não um a inversão do outro."""
+    """Tokens de um modo. Os dois modos são escolhidos, não um a inversão do outro.
+
+    Seis slots categóricos, na ordem fixa da paleta de referência. A ordem é o
+    mecanismo de segurança para daltonismo, não estética: validada nos dois modos
+    com o script, pior par adjacente ΔE 9,1 claro / 8,4 escuro contra piso 8. Um
+    sétimo slot não se inventa — ou dobra em "Outros", ou vira painéis.
+    """
 
     nome: str
     surface: str
@@ -73,13 +79,13 @@ class Tema:
 CLARO = Tema(
     nome="light", surface="#fcfcfb", ink="#0b0b0b", ink2="#52514e", muted="#898781",
     grid="#e1e0d9", axis="#c3c2b7",
-    series=("#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4"),
+    series=("#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300"),
     div_pos="#2a78d6", div_neg="#e34948", div_mid="#f0efec",
 )
 ESCURO = Tema(
     nome="dark", surface="#1a1a19", ink="#ffffff", ink2="#c3c2b7", muted="#898781",
     grid="#2c2c2a", axis="#383835",
-    series=("#3987e5", "#d95926", "#199e70", "#c98500", "#d55181"),
+    series=("#3987e5", "#d95926", "#199e70", "#c98500", "#d55181", "#008300"),
     div_pos="#3987e5", div_neg="#e66767", div_mid="#383835",
 )
 TEMAS = (CLARO, ESCURO)
@@ -434,7 +440,7 @@ FIGURAS = {
     "decomposicao": "quanto do retorno veio da empresa e quanto da moeda",
     "janelas-moveis": "com que frequência os allocators venceram",
     "index-benchmark": "quanto do prêmio era o mercado e quanto era o produto",
-    "tres-experimentos": "a mesma poupança pelos cinco caminhos possíveis",
+    "tres-experimentos": "a mesma poupança pelos seis caminhos possíveis",
 }
 
 
@@ -540,11 +546,12 @@ CAMINHOS = (
     ("Índices regionais", "passive_indices"),
     ("ETFs de 2006", "passive_etfs"),
     ("CDI", "cdi"),
+    ("Tesouro IPCA+ longo", "tesouro_ipca"),
 )
 
 
 def tres_experimentos(resultados: Path, curated: Path, out_dir: Path) -> list[Path]:
-    """A mesma poupança por cinco caminhos, entre os três tipos de experimento.
+    """A mesma poupança por seis caminhos, entre os três tipos de experimento.
 
     É a única figura em que os três tipos aparecem juntos, e por isso cada linha
     carrega no rótulo de qual deles ela vem. A §7 proíbe **misturar resultados**
@@ -580,11 +587,12 @@ def tres_experimentos(resultados: Path, curated: Path, out_dir: Path) -> list[Pa
         ax.set_ylabel("reais de poder de compra por real aportado",
                       color=t.muted, fontsize=9.5)
 
-        fig.suptitle("A mesma poupança, cinco caminhos",
+        fig.suptitle("A mesma poupança, seis caminhos",
                      color=t.ink, fontsize=13, x=0.02, ha="left", y=1.03)
         fig.text(0.02, 0.965,
                  "aportes mensais corrigidos pelo IPCA, 2006-2025 · a linha fina marca "
-                 "1,00x, onde o poder de compra apenas se preserva",
+                 "1,00x, onde o poder de compra apenas se preserva · repare no Tesouro "
+                 "IPCA+, à frente até 2013 e último no fim",
                  color=t.muted, fontsize=9.5, ha="left")
         fig.tight_layout()
         saidas.append(_salvar(fig, out_dir, "tres-experimentos", t))

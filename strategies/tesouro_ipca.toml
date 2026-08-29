@@ -1,0 +1,32 @@
+# Referencia de renda fixa: Tesouro IPCA+ sem juros semestrais (NTN-B Principal),
+# carregando sempre o vencimento mais longo disponivel — a regra que descreve o
+# mandato do investidor do estudo, que acumula por vinte anos.
+#
+# Fica ao lado do CDI: e regua, nao ativo das carteiras. O CDI responde "o risco
+# da bolsa compensou contra o juro nominal?"; esta perna responde a versao mais
+# dura da mesma pergunta, contra um retorno REAL contratado.
+#
+# A serie ja embute marcacao a mercado e o spread das tres rolagens. NAO embute
+# imposto de renda — a §4 so congelou retencao sobre dividendo, e o CDI tambem
+# entra bruto. `capallo tesouro` mede o que o IR custaria.
+[strategy]
+name = "Tesouro IPCA+"
+start = "2006-01-01"
+end = "2025-12-31"
+base_currency = "BRL"
+dividends = "reinvest"
+
+[strategy.contribution]
+amount = 1000.0
+frequency = "monthly"
+mode = "real"
+inflation_index = "IPCA"
+adjustment = "annual"
+
+[strategy.rebalance]
+method = "none"
+allow_selling = false
+
+[[strategy.weights]]
+ticker = "IPCAP"
+weight = 1.0

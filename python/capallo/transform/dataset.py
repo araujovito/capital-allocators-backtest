@@ -36,6 +36,8 @@ CURRENCY = {
     "IBXL": "BRL", "MXUS": "USD", "MXEU": "USD", "MXJP": "USD",
     # Modern Alternative: o mundo num ticker só, liquidado em dólar.
     "ACWI": "USD",
+    # Renda fixa com retorno real contratado, em reais.
+    "IPCAP": "BRL",
 }
 
 
@@ -75,6 +77,11 @@ def build(curated: Path, fx_side: str = "ask") -> pd.DataFrame:
     # Índices do Index Benchmark, quando já coletados. Opcional porque o
     # experimento principal — Historical Reality — não depende deles, e o painel
     # tem de continuar montando para quem só rodou o pipeline até aqui.
+    caminho_tesouro = curated / "tesouro_total_return.parquet"
+    if caminho_tesouro.exists():
+        tes = pd.read_parquet(caminho_tesouro)
+        frames.append(_monthly_last(tes, "tr_index"))
+
     caminho_indices = curated / "indices.parquet"
     if caminho_indices.exists():
         idx = pd.read_parquet(caminho_indices)

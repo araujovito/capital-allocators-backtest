@@ -542,3 +542,80 @@ cada camada.
 Os três números caem nessa ordem, e a ordem é informativa: cada experimento
 sucessivo remove uma vantagem do lado ativo, e o que sobra depois dos três é o que
 o estudo pode chamar de gestão de capital.
+
+## 2026-08-29 — Tesouro IPCA+: retorno alto, resultado ruim, e a razão é sequência
+
+Último item herdado do começo do projeto. Ficou para "V2" com o motivo escrito em
+26/08/2026: *"introduz duration e marcação a mercado"*. Era exatamente o problema —
+e o problema virou o achado.
+
+Entra como **régua ao lado do CDI**, não como ativo das carteiras: o CDI pergunta
+se o risco da bolsa compensou contra o juro nominal, e esta perna pergunta a versão
+dura, contra um retorno real contratado. Estava declarada como pendente antes de
+existir motor e antes de qualquer número, então não é acréscimo pós-resultado ao
+universo congelado — e o título já era comprável em 31/12/2005 de todo modo.
+
+### O resultado
+
+**6,85% ao ano real, e 1,41 real de poder de compra por real aportado — menos que
+o CDI**, que rendeu 4,43%. Os dois números não se contradizem: o primeiro é
+ponderado por tempo, o segundo por dinheiro, e a distância entre eles é a
+sequência.
+
+| período | Tesouro IPCA+ | CDI | Capital Allocators |
+|---|---|---|---|
+| 2006-2012 | **+20,1%** a.a. | +5,8% | −0,5% |
+| 2013-2018 | +1,6% | +4,2% | +13,8% |
+| 2019-2025 | **−0,6%** | +3,4% | +14,6% |
+
+O título longo brilhou quando o investidor quase não tinha dinheiro aplicado e
+afundou quando já tinha quase tudo. Quem acumula não recebe o retorno médio do
+ativo; recebe o retorno dos anos em que o patrimônio dele era grande.
+
+### A ressalva que isso cria contra o número principal do estudo
+
+Os Capital Allocators são a **imagem espelhada**: fracos em 2006-2012, fortes
+depois. O placar de 3,75x se beneficiou de uma sequência favorável na mesma medida
+em que o do título sofreu de uma desfavorável. Não é acusação de sorte — é
+definição de carteira com aporte mensal. O teste de janelas de início já apontava
+para o mesmo lugar (prêmio cresce com entradas tardias); aqui aparece o mecanismo,
+e ele passa a constar do README como ressalva ao lado do placar.
+
+Vale registrar como pauta: um *bootstrap* de blocos, embaralhando a ordem dos
+retornos e mantendo a distribuição, diria quanto do prêmio sobrevive a uma sequência
+diferente da que a história sorteou. É o teste adversarial natural daqui em diante.
+
+### As decisões que a perna obrigou
+
+**Zero-cupom, não o primo com juros semestrais.** O total return vira variação de
+preço unitário e ponto; o outro exigiria uma convenção de reinvestimento nova a
+cada seis meses por vinte anos — a mesma família de problema que a data-ex criou no
+lado internacional, e desta vez evitável.
+
+**Duas regras de rolagem, as duas reportadas.** `mais_longo` (principal, 3
+rolagens, 12,76% a.a. nominal) contra `ate_o_vencimento` (1 rolagem, 13,85%). A
+principal descreve o mandato: quem acumula por vinte anos não deixa a carteira
+encurtar sozinha — sob a outra regra, em 2023 o aporte compraria um título de um
+ano, caixa disfarçado de renda fixa longa. A escolha custa 1,09 p.p. ao ano, e o
+número fica declarado.
+
+**Spread de rolagem entra, IR não, e a linha entre os dois é principiada.** Spread
+é preço, e o estudo modela preço em todas as pernas; além disso é intrínseco — uma
+ação nunca é obrigada a transacionar, um título que vence é. IR não entra porque a
+§4 congelou só retenção sobre dividendo, o CDI entra bruto e as carteiras de ação
+rebalanceiam por aporte para não realizar ganho. Mas o que a regra ignora é
+medido: 1,46 p.p. ao ano, grande porque o ganho nominal de vinte anos de IPCA+
+embute toda a inflação do período.
+
+### Mais uma coluna que muda de significado no meio da série
+
+A leitura inicial tomou `PU Base` como preço de marcação, porque nas linhas
+recentes ele é idêntico ao `PU Venda`. A guarda de coerência reprovou: coincide em
+30% da amostra e diverge em 70%, ficando ~0,04% abaixo até 2021 e igual de 2022 em
+diante. É a terceira vez no projeto que uma classificação feita pelas últimas
+linhas da série se revela errada — depois da Avanza e do Kabutan. A regra que fica:
+**classificar coluna olhando a amostra inteira, nunca a cauda dela.**
+
+E um pregão único (01/07/2010, vencimento 2015) traz spread negativo, que não
+existe. É descartado na coleta com o motivo escrito, sob uma guarda que falha se
+deixar de ser caso isolado.
