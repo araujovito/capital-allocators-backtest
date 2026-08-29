@@ -2,7 +2,7 @@
 
 import pandas as pd
 import pytest
-from capallo.transform.build_intl import accumulate, payouts_gbl, payouts_jp
+from capallo.transform.build_intl import accumulate, payouts_gbl, payouts_jp, payouts_se
 
 
 def _px(dates, close, ticker="X"):
@@ -71,3 +71,31 @@ def test_proventos_na_mesma_data_somam():
 def test_ticker_sem_preco_falha_em_vez_de_devolver_vazio():
     with pytest.raises(ValueError, match="sem preços"):
         accumulate("Y", _px(["2020-01-31"], [100.0]), _pay("Y", [], []), 0.0)
+
+
+def test_provento_sueco_usa_a_data_ex_publicada_sem_convencao():
+    """INVE-B é o único ativo em que a data-ex é dado, não calendário inferido."""
+    d = pd.DataFrame({
+        "ticker": ["INVE-B", "INVE-B"],
+        "ex_date": pd.to_datetime(["2019-05-08", "2019-11-07"]),
+        "dps_sek": [2.25, 1.0],
+    })
+    out = payouts_se(d).sort_values("ex_date").reset_index(drop=True)
+    assert list(out.ex_date) == [pd.Timestamp("2019-05-08"), pd.Timestamp("2019-11-07")]
+    assert list(out.value) == [2.25, 1.0]
+
+
+def test_retencao_sueca_de_30_por_cento_incide_sobre_o_provento_de_inve_b():
+    """A regressão que este teste tranca: INVE-B entrando sem provento nenhum.
+
+    Durante dois dias o ativo foi ao motor com `units` fixo em 1,0 — a série da
+    Avanza fora lida como total return por um teste de data-ex desalinhado em um
+    dia. Aqui o dividendo tem de aparecer, e tem de aparecer líquido dos 30%.
+    """
+    px = _px(["2019-04-30", "2019-05-31"], [100.0, 100.0], ticker="INVE-B")
+    pay = payouts_se(pd.DataFrame({
+        "ticker": ["INVE-B"], "ex_date": pd.to_datetime(["2019-05-08"]), "dps_sek": [10.0],
+    }))
+    out = accumulate("INVE-B", px, pay, withholding=0.30)
+    assert out.units.iloc[-1] == pytest.approx(1.07)
+    assert out.units.iloc[-1] > 1.0, "provento sueco sumiu — a regressão voltou"

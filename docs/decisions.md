@@ -231,3 +231,63 @@ Pelo rendimento observado de 2020 a 2024 (1,8% a 2,6% ao ano), os 30% suecos
 valem de 0,5 a 0,8 p.p. ao ano no ativo — cerca de 0,3 p.p. no prêmio europeu e
 0,1 p.p. no global. Não inverte veredito nenhum, e **favorece os allocators**.
 Fica declarado no README como item aberto, não corrigido por estimativa.
+
+## 2026-08-29 — O item sueco não era retenção: era o dividendo inteiro
+
+A entrada anterior está errada no diagnóstico, e o erro é instrutivo o bastante
+para ficar registrado em vez de reescrito.
+
+Ela dizia que a série da Avanza para INVE-B era total return **bruto** e que
+faltava aplicar os 30% suecos. A primeira metade da frase vinha de um teste feito
+em `avanza.py`: em cinco datas-ex conhecidas o retorno médio do papel era +0,146%,
+contra +0,087% de um dia qualquer, enquanto uma série de preço cairia ~1,6%.
+Parecia demonstração, e foi tratada como tal por dois dias.
+
+Era **erro de alinhamento de um dia**. As datas usadas vinham do calendário de
+assembleia; o teste comparava o fechamento do dia-ex com o do pregão *seguinte* e
+mediu, portanto, o dia depois da queda.
+
+### A refutação
+
+A página de dividendos do site da Investor AB é um iframe do provedor de IR
+(`vp053.alertir.com`), que lê um endpoint público de dados de mercado alimentado
+pela Millistream. Ele devolve todos os eventos societários desde 1976, com
+data-ex, valor nominal e valor ajustado por desdobramento — o 4:1 de 2021
+inclusive, como dado da fonte e não premissa nossa. Foi o que faltava: não a
+retenção, a **data-ex**.
+
+Com a data verdadeira e 27 eventos em vez de 5:
+
+| medida | valor |
+|---|---|
+| retorno médio no dia-ex | **−2,085%** |
+| dividendo esperado, sobre o preço cum | −2,051% |
+| resíduo | −0,034 p.p. |
+| um dia qualquer | +0,066% (dp 1,51%) |
+| t contra zero | **−5,63** |
+
+O papel cai exatamente o dividendo. A série da Avanza é **preço puro**. Confere
+também o nível: o fechamento de 2005-01-02 é 21,44 SEK pós-desdobramento, que é o
+preço que a Investor B tinha — uma série com vinte anos de dividendo reinvestido
+começaria bem abaixo disso.
+
+### O que estava em jogo
+
+INVE-B ia ao motor **sem provento nenhum** por vinte anos. O erro não valia 0,5 a
+0,8 p.p. ao ano, e não corria a favor dos allocators: corria **contra**. Corrigido,
+o ativo sai de 12,23% para 14,43% ao ano em SEK, o prêmio europeu de +3,40 para
++4,94 p.p. e o global de +3,26 para +3,66 p.p. Nenhum veredito regional inverte —
+a dispersão entre regiões, que é a descoberta do estudo, fica mais forte, não mais
+fraca.
+
+### As duas lições, que valem mais que o número
+
+1. **Um teste que confirma a hipótese barata merece a mesma desconfiança que um
+   que a contraria.** Concluir "já é total return" dispensava coletar proventos de
+   um ativo estrangeiro. O teste que autorizava essa economia foi aceito com cinco
+   observações e sem checar de onde vinha a data.
+2. **Classificação de série é medida, não comentário.** O veredito agora é
+   recalculado toda vez que `capallo fetch-se-dividends` roda, com t-stat impresso,
+   e o teste que trancava a exceção do INVE-B em `build_intl.validate()` — a única
+   linha do código que sabia que aquele ativo não tinha provento — foi removido em
+   favor de uma guarda que vale para os quatro ativos.

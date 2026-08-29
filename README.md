@@ -82,9 +82,9 @@ tests/              testes do pipeline
 | Eventos em ações Brasil | ✅ ITSA4 completa; 2 desdobramentos de BRAP4 recuperados | B3 + detecção por salto |
 | **Total return Brasil** | ✅ **fechado e validado** | COTAHIST + eventos + proventos |
 | 8058, 8031 (preço) | ✅ 240/240 meses | Kabutan 株探 (japonês) |
-| **INVE-B (total return)** | ✅ 240/240 meses — série já ajustada | Avanza (sueco) |
+| INVE-B (preço) | ✅ 240/240 meses | Avanza (sueco) |
+| **Proventos SE** | ✅ 27 parcelas com data-ex, 2006-2025 | central de dados do IR da Investor AB |
 | **Proventos JP** | ✅ 20/20 exercícios, 8058 e 8031 | relatórios anuais das companhias (PDF) |
-| Proventos SE | ✅ desnecessários — já no preço | — |
 | GBLB (preço) | ✅ 240/240 meses, Bruxelas em EUR | onvista (alemão) |
 | **Proventos BE** | ✅ 20/20 exercícios | relatórios anuais do GBL (PDF) |
 | **Total return EU e JP** | ✅ **fechado e validado** | preço + provento, convenção de data-ex declarada |
@@ -114,7 +114,7 @@ brasileiro, dividendos reinvestidos líquidos de retenção na fonte.
 | JP Allocators (8058 + 8031) | **4,90** | 8,79% | 21,97% | −33,8% | 0,29 |
 | US ETF (IVV) | 4,54 | 8,93% | 22,10% | −32,1% | 0,30 |
 | US Allocators (BRK-B + MKL) | 4,06 | 9,42% | 22,14% | −23,6% | 0,32 |
-| EU Allocators (INVE-B + GBLB) | 3,19 | 6,63% | 17,86% | −40,5% | 0,20 |
+| EU Allocators (INVE-B + GBLB) | 3,86 | 8,17% | 18,17% | −40,1% | 0,28 |
 | EU ETF (IEV) | 2,06 | 3,23% | 24,12% | −32,7% | 0,07 |
 | BR Allocators (ITSA4 + BRAP4) | 2,05 | 5,03% | 27,93% | −41,7% | 0,16 |
 | JP ETF (EWJ) | 1,98 | 1,82% | 21,97% | −31,7% | −0,01 |
@@ -127,7 +127,7 @@ Vitórias dos allocators sobre o ETF da mesma região, em janelas móveis:
 |---|---|---|---|---|
 | Brasil | 49% | 57% | 62% | 62% |
 | EUA | 52% | 51% | 49% | **38%** |
-| Europa | 63% | 82% | 94% | **100%** |
+| Europa | 67% | 87% | 99% | **100%** |
 | Japão | 61% | 72% | 72% | 71% |
 
 O resultado **não é uniforme entre regiões**, e é essa a descoberta: nos EUA o
@@ -149,7 +149,7 @@ resultado de EWJ e IEV.
 
 | Ativo | Moeda | Ativo a.a. | Câmbio a.a. | Real em BRL a.a. |
 |---|---|---|---|---|
-| INVE-B | SEK | 12,23% | 3,69% | **10,33%** |
+| INVE-B | SEK | 14,43% | 3,69% | **12,50%** |
 | BRK-B | USD | 10,88% | 4,65% | 10,02% |
 | 8031 | JPY | 12,08% | 3,14% | 9,60% |
 | IVV | USD | 9,74% | 4,65% | 8,89% |
@@ -172,18 +172,18 @@ perna ativa em euro e iene, carregando as duas a mesma economia.
 |---|---|---|---|---|---|---|
 | Brasil | 5,03% | 2,77% | +2,26 p.p. | +6,62 p.p. | +0,12 | prêmio com risco extra |
 | EUA | 9,42% | 8,93% | +0,49 p.p. | +0,03 p.p. | +0,02 | mesmo risco, com prêmio |
-| Europa | 6,63% | 3,23% | +3,40 p.p. | −6,26 p.p. | +0,14 | **dominância** |
+| Europa | 8,17% | 3,23% | +4,94 p.p. | −5,95 p.p. | +0,21 | **dominância** |
 | Japão | 8,79% | 1,82% | +6,97 p.p. | −0,00 p.p. | +0,30 | mesmo risco, com prêmio |
-| **Global** | **8,47%** | **5,21%** | **+3,26 p.p.** | −6,25 p.p. | +0,22 | **dominância** |
+| **Global** | **8,87%** | **5,21%** | **+3,66 p.p.** | −6,35 p.p. | +0,25 | **dominância** |
 
-A carteira ativa entregou 3,58x o poder de compra aportado contra 2,49x da
-passiva, com **menos** volatilidade (13,3% contra 19,7%) — oito empresas em quatro
+A carteira ativa entregou 3,75x o poder de compra aportado contra 2,49x da
+passiva, com **menos** volatilidade (13,2% contra 19,6%) — oito empresas em quatro
 regiões diversificam mais que quatro índices regionais.
 
 E o resultado **não depende de uma empresa excepcional**: o maior peso final é
-19,0% (Mitsui), o HHI da carteira é 0,144 contra 0,125 do equilíbrio perfeito, e
-o pior ativo do universo — GBL, com 0,59% real ao ano — permaneceu na carteira,
-como a regra anti-cherry-picking exige.
+21,0% (Investor AB), o HHI da carteira é 0,148 contra 0,125 do equilíbrio
+perfeito, e o pior ativo do universo — GBL, com 0,59% real ao ano — permaneceu na
+carteira, como a regra anti-cherry-picking exige.
 
 ⚠️ Nos EUA a vantagem é de 0,49 p.p. ao ano — dentro do que qualquer premissa de
 custo ou tributação move —, e em janelas de 10 anos o índice ainda venceu em 62%
@@ -191,13 +191,38 @@ delas. Quem olhasse só o mercado americano concluiria bem menos do que quem
 olhasse o Japão. **A dispersão entre regiões é a descoberta, não o placar
 global.**
 
-⚠️ **Assimetria residual conhecida.** A retenção na fonte incide sobre Brasil,
-Estados Unidos, Bélgica e Japão, mas **não sobre INVE-B**: a série da Avanza já
-vem como total return bruto e a companhia não publica série de dividendo
-acessível para os vinte anos. Pelo rendimento observado de 2020 a 2024 (1,8% a
-2,6% ao ano), os 30% suecos valeriam de 0,5 a 0,8 p.p. ao ano no ativo — cerca de
-0,3 p.p. no prêmio europeu e 0,1 p.p. no global. Não inverte nenhum veredito, e
-**favorece os allocators**: é o próximo item a fechar.
+### O erro que estes números corrigem
+
+A versão anterior deste README declarava, como assimetria residual conhecida, que
+faltava aplicar a retenção sueca de 30% ao INVE-B, e estimava o efeito em 0,5 a
+0,8 p.p. ao ano **a favor** dos allocators. Ao fechar o item, o diagnóstico se
+inverteu duas vezes.
+
+O que faltava não era a retenção: era **o dividendo inteiro**. A série da Avanza
+tinha sido classificada como total return por um teste de cinco datas-ex — e o
+teste estava desalinhado em um dia, comparando o fechamento do dia-ex com o do
+pregão *seguinte*. Mediu o dia depois da queda, não a queda. Com a data-ex
+verdadeira, publicada pela central de dados do IR da Investor AB, e com 27
+eventos em vez de 5, o sinal é inequívoco:
+
+| medida | valor |
+|---|---|
+| retorno médio no dia-ex | **−2,085%** |
+| dividendo esperado, sobre o preço cum | −2,051% |
+| resíduo | −0,034 p.p. |
+| um dia qualquer | +0,066% (dp 1,51%) |
+| t contra zero | **−5,63** |
+
+O papel cai exatamente o dividendo. A série é preço puro, e INVE-B passou vinte
+anos no estudo sem provento nenhum — o que empurrava o resultado **contra** os
+allocators europeus, não a favor. Corrigido, o ativo sai de 12,23% para 14,43% ao
+ano em SEK, e o prêmio europeu de +3,40 para +4,94 p.p.
+
+A medição roda agora dentro do coletor (`capallo fetch-se-dividends`), com
+veredito impresso a cada execução: a classificação da série deixou de ser uma
+afirmação em comentário e virou um número que o pipeline recalcula. A lição fica
+registrada em `docs/decisions.md` — **um teste que confirma a hipótese barata
+merece a mesma desconfiança que um que a contraria**.
 
 ### Como cada estratégia atravessou as crises
 
@@ -208,23 +233,24 @@ arquivos de estratégia compartilham janela, aporte e regra de dividendo.
 
 | Crise | Allocators | ETFs | CDI | Recuperação |
 |---|---|---|---|---|
-| Crise financeira global (2007-12 → 2009-06) | −39,4% | −33,6% | +9,1% | 68 meses |
-| Crise da dívida do euro (2011-08 → 2013-02) | +13,0% | +16,4% | +4,4% | — |
-| Recessão brasileira (2014-04 → 2016-12) | +31,2% | +23,6% | +14,0% | — |
-| COVID-19 (2020-02 → 2020-04) | +1,9% | +5,0% | +0,9% | — |
-| Aperto monetário (2022) | −5,7% | −24,2% | +6,2% | 11 vs 19 meses |
+| Crise financeira global (2007-12 → 2009-06) | −39,0% | −33,6% | +9,1% | 68 meses |
+| Crise da dívida do euro (2011-08 → 2013-02) | +13,9% | +16,4% | +4,4% | — |
+| Recessão brasileira (2014-04 → 2016-12) | +32,5% | +23,6% | +14,0% | — |
+| COVID-19 (2020-02 → 2020-04) | +2,7% | +5,0% | +0,9% | — |
+| Aperto monetário (2022) | −6,1% | −24,2% | +6,2% | 11 vs 19 meses |
 
 **A gestão ativa não protegeu de forma consistente.** Venceu o índice da mesma
 região em apenas 2 das 5 crises no agregado global, e caiu **mais** que o passivo
-em 2008 — a crise mais profunda da janela. Protegeu bem em 2022 e na Europa (4 de
+em 2008 — a crise mais profunda da janela. Protegeu bem em 2022 e na Europa (5 de
 5 crises), e mal no Brasil e no Japão (2 de 5 cada).
 
-É um contrapeso ao placar de vinte anos: o prêmio global de +3,26 p.p. ao ano veio
+É um contrapeso ao placar de vinte anos: o prêmio global de +3,66 p.p. ao ano veio
 mais de acumular vantagem na alta do que de perder menos na queda — e um investidor
 que abandona a estratégia no fundo do poço só vive a segunda metade.
 
-**Próximo passo:** fechar a retenção sueca do INVE-B e rodar os experimentos de
-sensibilidade que restam (PTAX compra vs venda, data do aporte).
+**Próximo passo:** rodar os experimentos de sensibilidade que restam — PTAX
+compra vs venda, data do aporte dentro do mês — e revisitar as demais séries com
+o mesmo teste de data-ex que pegou o INVE-B, já que ele agora é código.
 
 ## Setup
 
@@ -242,6 +268,7 @@ capallo fetch-b3-events # proventos e eventos societarios, com reconciliacao
 capallo build-br        # monta e valida o total return brasileiro
 capallo fetch-intl      # precos de Japao (Kabutan) e Suecia (Avanza)
 capallo fetch-jp-dividends  # proventos de 8058 e 8031, dos relatorios anuais
+capallo fetch-se-dividends  # proventos de INVE-B e o teste de data-ex da serie sueca
 capallo build-intl      # monta e valida o total return de Europa e Japao
 capallo export-dataset  # painel mensal em BRL para o motor Rust
 pytest tests/

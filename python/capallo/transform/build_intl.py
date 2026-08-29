@@ -32,8 +32,11 @@ Na falta da data, entra calendário declarado, não chute:
   só o total do exercício, então ele entra **metade em cada data**. A série de
   preço japonesa é mensal, de forma que o que a convenção decide é o mês, não o
   dia.
-- **INVE-B** — a série da Avanza já é total return; entra com uma unidade e sem
-  provento, para o arquivo ficar uniforme.
+- **INVE-B** — aqui não há convenção a inventar: o IR da Investor AB publica a
+  **data-ex de cada parcela**, e é ela que o coletor usa. É o único dos quatro
+  ativos em que a data é dado, não calendário — a série de preço sueca é mensal,
+  então o reinvestimento cai no fim do mês da data-ex, como nos demais, mas o
+  *mês* não foi escolhido por nós.
 
 A convenção move a data de reinvestimento, não o valor. `sensibilidade()` mede o
 que isso custa: refaz a série com todo o provento japonês na data final e compara
@@ -59,7 +62,7 @@ favorecer. Nenhuma é corrigida por estimativa: o número que falta é o número
 falta.
 
 ⚠️ Proventos entram **líquidos de retenção na fonte**, com as alíquotas
-congeladas em `docs/methodology.md`: Bélgica 30%, Japão 15%.
+congeladas em `docs/methodology.md`: Bélgica 30%, Japão 15%, Suécia 30%.
 """
 
 from __future__ import annotations
@@ -100,6 +103,16 @@ def payouts_jp(dividends: pd.DataFrame) -> pd.DataFrame:
                 "value": float(r.dps_jpy) * peso,
             })
     return pd.DataFrame(linhas)
+
+
+def payouts_se(dividends: pd.DataFrame) -> pd.DataFrame:
+    """Provento de INVE-B na data-ex publicada pelo IR, sem convenção no meio."""
+    d = dividends[dividends.ticker == "INVE-B"]
+    return pd.DataFrame({
+        "ticker": "INVE-B",
+        "ex_date": d.ex_date.to_numpy(),
+        "value": d.dps_sek.astype(float).to_numpy(),
+    })
 
 
 def accumulate(
@@ -150,13 +163,16 @@ def build(out_dir: Path) -> pd.DataFrame:
     payouts = pd.concat([
         payouts_gbl(pd.read_parquet(out_dir / "be_dividends.parquet")),
         payouts_jp(pd.read_parquet(out_dir / "jp_dividends.parquet")),
+        payouts_se(pd.read_parquet(out_dir / "se_dividends.parquet")),
     ], ignore_index=True)
 
     frames = []
     for ticker, px in (("GBLB", be_px), ("8058", jp_px), ("8031", jp_px), ("INVE-B", se_px)):
         wt = BY_TICKER[ticker].withholding_tax
-        # A série sueca já é total return: aplicar provento de novo contaria duas vezes.
-        p = payouts if ticker != "INVE-B" else payouts.head(0)
+        # A série sueca é preço puro, como as demais: o provento entra aqui. Até
+        # 2026-08-29 INVE-B era a exceção que entrava sem provento nenhum, por
+        # uma verificação errada — ver `capallo.ingest.investor_ir`.
+        p = payouts
         # A janela é recortada **antes** de acumular. Kabutan começa em 2001 e
         # Avanza em 2005: acumular fora da janela faria o índice de 2006 já embutir
         # reinvestimento que o investidor do estudo não fez, e tornaria a guarda de
@@ -221,7 +237,9 @@ def validate(out_dir: Path, threshold: float = 0.35) -> list[str]:
             problemas.append(f"{ticker}: série termina em {g.date.iloc[-1].date()}")
         if (g.units.diff().dropna() < -1e-12).any():
             problemas.append(f"{ticker}: unidades diminuíram — só evento de grupamento faria isso")
-        # O provento reinvestido tem de aparecer: sem ele, units fica em 1 o tempo todo.
-        if ticker != "INVE-B" and g.units.iloc[-1] <= 1.0:
+        # O provento reinvestido tem de aparecer: sem ele, units fica em 1 o tempo
+        # todo. Os quatro ativos pagam dividendo, INVE-B inclusive — a exceção que
+        # existia aqui era o sintoma visível do erro, e nenhum teste a questionava.
+        if g.units.iloc[-1] <= 1.0:
             problemas.append(f"{ticker}: nenhum provento reinvestido")
     return problemas

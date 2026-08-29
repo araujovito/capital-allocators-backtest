@@ -37,6 +37,8 @@ def main(argv: list[str] | None = None) -> int:
     p_jp = sub.add_parser("fetch-jp-dividends", help="proventos de 8058 e 8031, dos relatorios anuais")
     p_jp.add_argument("--out", default="data/curated")
     p_jp.add_argument("--raw", default="data/raw/reports")
+    p_se = sub.add_parser("fetch-se-dividends", help="proventos de INVE-B, pelo IR da Investor AB")
+    p_se.add_argument("--out", default="data/curated")
     p_dc = sub.add_parser("decompose", help="retorno de cada ativo entre ativo, cambio e inflacao")
     p_dc.add_argument("--curated", default="data/curated")
     p_dc.add_argument("--engine", default="data/engine")
@@ -247,6 +249,44 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"  - {p}")
             return 1
         print("\nvalidacao ok — 2006-2025 completo, em acoes pos-desdobramento")
+        return 0
+
+    if args.command == "fetch-se-dividends":
+        from pathlib import Path
+
+        from capallo.ingest.investor_ir import build, conferir_avanza, evidencia_data_ex, validate
+
+        out = Path(args.out)
+        df = build(out)
+        print(f"  INVE-B  {len(df):>3} proventos entre {df.ex_date.min().date()} "
+              f"e {df.ex_date.max().date()}")
+
+        # A pergunta que este coletor existe para responder: a serie de preco da
+        # Avanza ja embute o dividendo? Se embutisse, o papel nao cairia na data-ex.
+        ev = evidencia_data_ex(out)
+        print(f"\ncomportamento do preco na data-ex, em {len(ev)} eventos:")
+        print(f"  retorno medio no dia-ex   {ev.retorno_pct.mean():+7.3f}%")
+        print(f"  dividendo esperado        {ev.dividendo_pct.mean():+7.3f}%")
+        print(f"  residuo                   {ev.attrs['residuo_pp']:+7.3f} p.p.")
+        print(f"  um dia qualquer           {ev.attrs['dia_qualquer_pct']:+7.3f}%"
+              f"  (dp {ev.attrs['dp_diario_pct']:.2f}%)")
+        print(f"  t contra zero             {ev.attrs['t_stat']:>7.2f}")
+        veredito = ("preco puro — o provento PRECISA ser somado"
+                    if ev.attrs["t_stat"] < -2 else "total return — nao somar provento")
+        print(f"  veredito: {veredito}")
+
+        divergencias = conferir_avanza(out)
+        print("\nconferencia contra a Avanza, onde as duas fontes se sobrepoem:")
+        for d in divergencias or ["  sem divergencia"]:
+            print(f"  {d}" if divergencias else d)
+
+        problems = validate(out)
+        if problems:
+            print("\nPROBLEMAS:")
+            for pb in problems:
+                print(f"  - {pb}")
+            return 1
+        print("\nvalidacao ok")
         return 0
 
     if args.command == "decompose":
