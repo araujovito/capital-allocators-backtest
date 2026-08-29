@@ -291,3 +291,55 @@ fraca.
    e o teste que trancava a exceção do INVE-B em `build_intl.validate()` — a única
    linha do código que sabia que aquele ativo não tinha provento — foi removido em
    favor de uma guarda que vale para os quatro ativos.
+
+## 2026-08-29 — O Kabutan é preço puro, agora medido e não suposto
+
+Fechado o caso sueco, sobrava a premissa simétrica e não verificada. O commit
+`e07d0a4` tinha testado as três séries estrangeiras pela queda na data-ex e
+registrado o resultado com honestidade: onvista **verificado** como preço puro
+(quedas de 2,71% e 3,92% nas datas-ex), Avanza "verificado" como total return — o
+erro corrigido hoje mais cedo — e **Kabutan inconclusivo**, com t de −0,74 e −1,11,
+adotado como preço puro "registrada como premissa, não como fato".
+
+Essa premissa passou a ser risco material. Se o Kabutan fosse total return, o
+provento japonês estaria sendo **contado duas vezes** — e o Japão é a região de
+maior prêmio do estudo (+6,97 p.p.). O erro seria a imagem espelhada do sueco, no
+ativo onde mais custa.
+
+### Por que o teste de data-ex não fecha, e o que fecha
+
+O Kabutan guarda cerca de 14 meses de série diária, então o teste precisa rodar na
+série mensal, onde o ruído de um mês inteiro engole um provento semestral de ~1,5%.
+Aumentar a amostra não resolve: a granularidade é que está errada para a pergunta.
+
+A saída foi trocar de pergunta. Ajuste por dividendo **se acumula para trás**: a
+~3,5% ao ano, em vinte anos, o começo de uma série ajustada cai perto da metade do
+preço que a ação realmente teve. Isso não é sinal a extrair de ruído — é um fator
+de 2. Basta uma referência de **nível** vinda de fora, e ela estava no disco: os
+relatórios anuais já coletados publicam o preço da própria ação.
+
+| ativo | referência publicada pela companhia | pontos | razão média |
+|---|---|---|---|
+| 8058 | média do preço no exercício (`mc_ar2015.pdf`) | 5 | 1,009 |
+| 8031 | fechamento de 31 de março na TSE (`en_ar2015_all.pdf`) | 7 | **1,000** |
+
+O 8031 bate **ao iene**: fechamento do Kabutan em 31/03/2006 é 851, e o relatório
+publica 1.702 antes do desdobramento 1:2. O resíduo do 8058 é maior porque a média
+do relatório corre sobre todos os pregões e a nossa sobre doze fechamentos mensais
+— diferença de método, de ordem 2%, contra os ~50% que o cenário alternativo
+produziria.
+
+O fator de desdobramento também deixa de ser premissa nossa: o mesmo relatório do
+8031 traz 24 JPY de provento no exercício de 2006, e `jp_dividends` traz 12.
+
+### O que fica
+
+`capallo check-jp-prices` roda a conferência e emite veredito; a referência está em
+`data/manual/jp_reported_prices.csv`, transcrita dos PDFs com fonte por linha, no
+mesmo padrão dos outros arquivos de `data/manual`. Nenhum número do estudo muda —
+a premissa estava certa. O que mudou é que ela deixou de ser premissa.
+
+Vale registrar o padrão, porque foi ele que resolveu os dois casos do dia: quando o
+teste natural não tem poder, **procurar a evidência de nível em vez de a de evento**.
+A data-ex é um sinal de um dia competindo com ruído de um dia; o nível acumula vinte
+anos de diferença contra ruído nenhum.

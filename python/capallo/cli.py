@@ -34,6 +34,10 @@ def main(argv: list[str] | None = None) -> int:
     p_ds.add_argument("--out", default="data/engine")
     p_intl = sub.add_parser("fetch-intl", help="precos de Japao (Kabutan) e Suecia (Avanza)")
     p_intl.add_argument("--out", default="data/curated")
+    p_jc = sub.add_parser("check-jp-prices",
+                          help="confere a serie do Kabutan contra o preco publicado pelas companhias")
+    p_jc.add_argument("--curated", default="data/curated")
+    p_jc.add_argument("--manual", default="data/manual")
     p_jp = sub.add_parser("fetch-jp-dividends", help="proventos de 8058 e 8031, dos relatorios anuais")
     p_jp.add_argument("--out", default="data/curated")
     p_jp.add_argument("--raw", default="data/raw/reports")
@@ -226,6 +230,30 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"  - {p}")
             return 1
         print("\nvalidacao ok  (ATENCAO: preco, ainda sem proventos)")
+        return 0
+
+    if args.command == "check-jp-prices":
+        from capallo.ingest.kabutan import conferir_contra_relatorio, veredito_da_serie
+
+        conf = conferir_contra_relatorio(args.curated, args.manual)
+        print(f"  {'ativo':<7}{'exerc.':>7}{'tipo':>16}{'publicado':>11}"
+              f"{'coletado':>10}{'razao':>8}   fonte")
+        for _, r in conf.iterrows():
+            print(f"  {r.ticker:<7}{r.exercicio:>7}{r.tipo:>16}{r.publicado:>11,.1f}"
+                  f"{r.coletado:>10,.1f}{r.razao:>8.3f}   {r.fonte}")
+        print("\n  razao media por ativo:")
+        for ticker, g in conf.groupby("ticker"):
+            print(f"    {ticker}  {g.razao.mean():.4f}  ({len(g)} pontos)")
+        print("\n  uma serie ajustada por dividendo apareceria perto de 0,50 nesta"
+              " ponta da janela")
+
+        problems = veredito_da_serie(conf)
+        if problems:
+            print("\nPROBLEMAS:")
+            for pb in problems:
+                print(f"  - {pb}")
+            return 1
+        print("\nvalidacao ok — serie e preco puro; o provento japones entra por fora")
         return 0
 
     if args.command == "fetch-jp-dividends":

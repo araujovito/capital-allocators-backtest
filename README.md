@@ -81,7 +81,7 @@ tests/              testes do pipeline
 | Proventos Brasil (dinheiro) | ✅ 644 registros, dividendo × JCP separados | B3, proxy oficial |
 | Eventos em ações Brasil | ✅ ITSA4 completa; 2 desdobramentos de BRAP4 recuperados | B3 + detecção por salto |
 | **Total return Brasil** | ✅ **fechado e validado** | COTAHIST + eventos + proventos |
-| 8058, 8031 (preço) | ✅ 240/240 meses | Kabutan 株探 (japonês) |
+| 8058, 8031 (preço) | ✅ 240/240 meses, preço puro conferido contra o relatório das companhias | Kabutan 株探 (japonês) |
 | INVE-B (preço) | ✅ 240/240 meses | Avanza (sueco) |
 | **Proventos SE** | ✅ 27 parcelas com data-ex, 2006-2025 | central de dados do IR da Investor AB |
 | **Proventos JP** | ✅ 20/20 exercícios, 8058 e 8031 | relatórios anuais das companhias (PDF) |
@@ -248,9 +248,41 @@ em 2008 — a crise mais profunda da janela. Protegeu bem em 2022 e na Europa (5
 mais de acumular vantagem na alta do que de perder menos na queda — e um investidor
 que abandona a estratégia no fundo do poço só vive a segunda metade.
 
-**Próximo passo:** rodar os experimentos de sensibilidade que restam — PTAX
-compra vs venda, data do aporte dentro do mês — e revisitar as demais séries com
-o mesmo teste de data-ex que pegou o INVE-B, já que ele agora é código.
+### E a premissa simétrica, no Japão
+
+O erro sueco tinha um gêmeo possível na direção oposta. A série do Kabutan era
+tratada como preço puro — com o provento japonês somado por fora — e essa leitura
+estava registrada desde a coleta como **premissa, não fato**: o teste de data-ex
+original ficou inconclusivo (t de −0,74 e −1,11), porque o Kabutan só guarda ~14
+meses de série diária e o ruído de um mês engole um provento semestral de 1,5%. Se
+a premissa estivesse errada, o dividendo japonês estaria sendo contado **duas
+vezes**, na região de maior prêmio do estudo.
+
+Aumentar a amostra não resolveria — a granularidade é que estava errada para a
+pergunta. A saída foi trocar de pergunta: ajuste por dividendo se acumula para
+trás, e em vinte anos a ~3,5% ao ano derruba o começo da série para perto da
+metade do preço real. Isso pede uma referência de **nível**, não de evento — e ela
+estava nos relatórios anuais já baixados, onde as companhias publicam o preço da
+própria ação:
+
+| ativo | referência publicada pela companhia | pontos | razão média |
+|---|---|---|---|
+| 8058 | média do preço no exercício | 5 | 1,009 |
+| 8031 | fechamento de 31 de março na TSE | 7 | **1,000** |
+
+O 8031 bate ao iene: o fechamento do Kabutan em 31/03/2006 é 851, e o relatório
+publica 1.702 antes do desdobramento 1:2. A premissa estava certa — **nenhum
+número do estudo muda** — e deixou de ser premissa: `capallo check-jp-prices`
+refaz a conferência e emite veredito.
+
+O padrão que resolveu os dois casos do dia fica registrado em `docs/decisions.md`:
+quando o teste natural não tem poder, procurar a evidência de **nível** em vez da
+de evento. A data-ex é um sinal de um dia competindo com ruído de um dia; o nível
+acumula vinte anos de diferença contra ruído nenhum.
+
+**Próximo passo:** rodar os experimentos de sensibilidade que restam — PTAX compra
+vs venda, data do aporte dentro do mês — e as janelas de início móvel (2006→2025,
+2007→2025, … 2015→2025) previstas na §9 da metodologia.
 
 ## Setup
 
@@ -267,6 +299,7 @@ capallo fetch-b3        # precos da B3 (baixa ~550MB de COTAHIST)
 capallo fetch-b3-events # proventos e eventos societarios, com reconciliacao
 capallo build-br        # monta e valida o total return brasileiro
 capallo fetch-intl      # precos de Japao (Kabutan) e Suecia (Avanza)
+capallo check-jp-prices     # confere a serie japonesa contra o preco publicado pelas companhias
 capallo fetch-jp-dividends  # proventos de 8058 e 8031, dos relatorios anuais
 capallo fetch-se-dividends  # proventos de INVE-B e o teste de data-ex da serie sueca
 capallo build-intl      # monta e valida o total return de Europa e Japao
