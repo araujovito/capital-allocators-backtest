@@ -1,0 +1,42 @@
+# Index Benchmark (metodologia §7) — carteira passiva com os **índices** no lugar
+# dos ETFs, em pesos iguais. Mesma exposição regional, sem taxa de administração e
+# sem tracking error: mede o que o allocator teria enfrentado se o investidor
+# pudesse comprar o mercado em vez do produto.
+#
+# ⚠️ Resultados dos tipos de experimento nunca se misturam (§7). Esta carteira NÃO
+# entra no placar principal — ela existe para ser comparada com `passive_etfs`.
+
+[strategy]
+name = "Passive Indices"
+start = "2006-01-01"
+end = "2025-12-31"
+base_currency = "BRL"
+dividends = "reinvest"
+
+[strategy.contribution]
+amount = 1000.0
+frequency = "monthly"
+mode = "real"
+inflation_index = "IPCA"
+adjustment = "annual"
+
+[strategy.rebalance]
+method = "via_contribution"
+frequency = "annual"
+allow_selling = false
+
+[[strategy.weights]]
+ticker = "IBXL"
+weight = 0.25
+
+[[strategy.weights]]
+ticker = "MXUS"
+weight = 0.25
+
+[[strategy.weights]]
+ticker = "MXEU"
+weight = 0.25
+
+[[strategy.weights]]
+ticker = "MXJP"
+weight = 0.25

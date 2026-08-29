@@ -53,7 +53,7 @@ def test_as_regioes_das_figuras_sao_as_mesmas_em_toda_parte():
 
 def test_toda_figura_declarada_tem_um_proposito_escrito():
     """`FIGURAS` é o que o README consome; entrada muda sem legenda seria silêncio."""
-    assert len(FIGURAS) == 4
+    assert len(FIGURAS) == 5
     assert all(v and not v.endswith(".") for v in FIGURAS.values())
 
 

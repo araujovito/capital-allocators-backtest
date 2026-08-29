@@ -30,6 +30,10 @@ CURRENCY = {
     "ITSA4": "BRL", "BRAP4": "BRL", "PIBB11": "BRL",
     "BRK-B": "USD", "MKL": "USD", "IVV": "USD", "IEV": "USD", "EWJ": "USD",
     "GBLB": "EUR", "INVE-B": "SEK", "8058": "JPY", "8031": "JPY",
+    # Índices do experimento Index Benchmark. A MSCI só publica em dólar, que é
+    # também a moeda em que os três ETFs estrangeiros liquidam: as duas pernas
+    # atravessam o mesmo câmbio, e a comparação entre elas não vira aposta cambial.
+    "IBXL": "BRL", "MXUS": "USD", "MXEU": "USD", "MXJP": "USD",
 }
 
 
@@ -65,6 +69,18 @@ def build(curated: Path, fx_side: str = "ask") -> pd.DataFrame:
 
     intl = pd.read_parquet(curated / "intl_total_return.parquet")
     frames.append(_monthly_last(intl, "tr_index"))
+
+    # Índices do Index Benchmark, quando já coletados. Opcional porque o
+    # experimento principal — Historical Reality — não depende deles, e o painel
+    # tem de continuar montando para quem só rodou o pipeline até aqui.
+    caminho_indices = curated / "indices.parquet"
+    if caminho_indices.exists():
+        idx = pd.read_parquet(caminho_indices)
+        if "close_net" not in idx.columns:
+            raise ValueError(
+                "indices.parquet sem close_net — rode `capallo build-indices`"
+            )
+        frames.append(_monthly_last(idx, "close_net"))
 
     panel = pd.concat(frames, ignore_index=True)
     panel["currency"] = panel.ticker.map(CURRENCY)

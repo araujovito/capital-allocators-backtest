@@ -43,6 +43,13 @@ def main(argv: list[str] | None = None) -> int:
     p_jp.add_argument("--raw", default="data/raw/reports")
     p_se = sub.add_parser("fetch-se-dividends", help="proventos de INVE-B, pelo IR da Investor AB")
     p_se.add_argument("--out", default="data/curated")
+    p_fi = sub.add_parser("fetch-indices", help="indices de MSCI e B3, para o Index Benchmark")
+    p_fi.add_argument("--out", default="data/curated")
+    p_bi = sub.add_parser("build-indices", help="aplica a retencao na fonte aos indices")
+    p_bi.add_argument("--curated", default="data/curated")
+    p_ib = sub.add_parser("index-benchmark", help="o allocator venceu o mercado ou o produto?")
+    p_ib.add_argument("--results", default="data/results")
+    p_ib.add_argument("--curated", default="data/curated")
     p_dc = sub.add_parser("decompose", help="retorno de cada ativo entre ativo, cambio e inflacao")
     p_dc.add_argument("--curated", default="data/curated")
     p_dc.add_argument("--engine", default="data/engine")
@@ -331,6 +338,81 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"  - {pb}")
             return 1
         print("\nvalidacao ok")
+        return 0
+
+    if args.command == "fetch-indices":
+        from pathlib import Path
+
+        from capallo.ingest.indices import (
+            build,
+            risco_da_substituicao,
+            teste_de_retorno_total,
+            validate,
+        )
+
+        out = Path(args.out)
+        df = build(out)
+        for ticker, g in df.groupby("ticker"):
+            print(f"  {ticker:<6}{len(g):>4} meses   {g.date.min().date()} a {g.date.max().date()}")
+
+        print("\nordenacao que classifica a serie brasileira:")
+        for _, r in teste_de_retorno_total(out).iterrows():
+            print(f"  {r.serie:<38}{r.cagr_aa * 100:6.2f}% a.a.")
+        print("  indice so de preco ficaria pontos ABAIXO do ETF; provento perdido do")
+        print("  ETF o deixaria pontos abaixo do indice. Colados = as duas coisas certas.")
+
+        print("\nrisco da substituicao — indice contra o total return bruto do ETF:")
+        for _, r in risco_da_substituicao(out).iterrows():
+            marca = "indice do proprio ETF" if r.e_o_indice_do_etf else "SUBSTITUTO declarado"
+            print(f"  {r.etf:<7}{r.indice:<6}{r.indice_bruto_aa * 100:6.2f}%"
+                  f"{r.etf_bruto_aa * 100:8.2f}%{r.diferenca_pp:>8.2f} p.p.   {marca}")
+
+        problems = validate(out)
+        if problems:
+            print("\nPROBLEMAS:")
+            for pb in problems:
+                print(f"  - {pb}")
+            return 1
+        print("\nvalidacao ok")
+        return 0
+
+    if args.command == "build-indices":
+        from pathlib import Path
+
+        from capallo.transform.build_indices import build, custo_da_retencao, validate
+
+        curated = Path(args.curated)
+        build(curated)
+        print(f"  {'indice':<8}{'aliquota':>10}{'bruto a.a.':>13}{'liquido a.a.':>14}{'custo':>10}")
+        for _, r in custo_da_retencao(curated).iterrows():
+            print(f"  {r.indice:<8}{r.aliquota:>9.0%}{r.bruto_aa * 100:>12.2f}%"
+                  f"{r.liquido_aa * 100:>13.2f}%{r.custo_pp_aa:>7.2f} p.p.")
+        problems = validate(curated)
+        if problems:
+            print("\nPROBLEMAS:")
+            for pb in problems:
+                print(f"  - {pb}")
+            return 1
+        print("\nvalidacao ok")
+        return 0
+
+    if args.command == "index-benchmark":
+        from pathlib import Path
+
+        from capallo.analysis.index_benchmark import comparar, veredito
+
+        tabela = comparar(Path(args.results), Path(args.curated))
+        print("  Index Benchmark (§7) — o indice no lugar do ETF."
+              " NAO se mistura com o placar principal.\n")
+        print(f"  {'regiao':<8}{'alloc':>8}{'ETF':>8}{'indice':>9}"
+              f"{'premio vs ETF':>15}{'vs indice':>12}{'custo do produto':>19}")
+        for _, r in tabela.iterrows():
+            print(f"  {r.regiao:<8}{r.alloc_aa * 100:7.2f}%{r.etf_aa * 100:7.2f}%"
+                  f"{r.indice_aa * 100:8.2f}%{r.premio_vs_etf_pp:>13.2f}p"
+                  f"{r.premio_vs_indice_pp:>11.2f}p{r.custo_do_produto_pp:>17.2f}p")
+        print("\n  o que muda ao trocar o produto pelo mercado:")
+        for frase in veredito(tabela) or ["  nenhum veredito inverte"]:
+            print(f"  - {frase}" if veredito(tabela) else frase)
         return 0
 
     if args.command == "decompose":

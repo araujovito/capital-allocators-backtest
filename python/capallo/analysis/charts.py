@@ -433,6 +433,7 @@ FIGURAS = {
     "janelas-de-inicio": "o resultado depende de ter começado em 2006",
     "decomposicao": "quanto do retorno veio da empresa e quanto da moeda",
     "janelas-moveis": "com que frequência os allocators venceram",
+    "index-benchmark": "quanto do prêmio era o mercado e quanto era o produto",
 }
 
 
@@ -450,6 +451,79 @@ def build_all(
     saidas = list(crescimento(resultados, curated, out_dir))
     saidas += decomposicao(by_asset(curated, engine), out_dir)
     saidas += janelas_moveis(resultados, out_dir)
+    # A figura do Index Benchmark só existe se o experimento tiver rodado; quem
+    # parou no Historical Reality não tem os CSVs de índice.
+    if (resultados / "passive_indices.csv").exists():
+        from capallo.analysis.index_benchmark import comparar
+
+        saidas += index_benchmark(comparar(resultados, curated), out_dir)
     if premios is not None:
         saidas += janelas_de_inicio(premios, out_dir)
+    return saidas
+
+
+def index_benchmark(tabela: pd.DataFrame, out_dir: Path) -> list[Path]:
+    """Halteres do prêmio contra o ETF até o prêmio contra o índice.
+
+    Forma de "antes → depois por item": cada região tem o mesmo prêmio medido
+    contra duas referências, e o que interessa é a **distância** entre elas — o
+    quanto do prêmio era custo de produto e não gestão de capital.
+
+    Duas cores, porque aqui há polaridade e não identidade: encolher e crescer
+    são coisas opostas, e o Brasil é o único que cresce.
+    """
+    d = tabela.set_index("regiao").loc[list(ORDEM_REGIOES)].reset_index()
+    saidas = []
+    for t in TEMAS:
+        fig, ax = plt.subplots(figsize=(9.6, 5.0))
+        _base(t, fig, [ax])
+        ax.grid(False, axis="y")
+        ax.grid(True, axis="x", color=t.grid, linewidth=1.0)
+
+        for i, r in d.iterrows():
+            a, b = r.premio_vs_etf_pp, r.premio_vs_indice_pp
+            cor = t.div_neg if b < a else t.div_pos
+            ax.plot([a, b], [i, i], color=cor, linewidth=2.0, alpha=0.45,
+                    solid_capstyle="round", zorder=2)
+            ax.plot([a], [i], marker="o", markersize=7, markerfacecolor=t.surface,
+                    markeredgecolor=t.muted, markeredgewidth=2.0, zorder=3)
+            ax.plot([b], [i], marker="o", markersize=8, color=cor,
+                    markeredgecolor=t.surface, markeredgewidth=2.0, zorder=4)
+            lado, desloc = ("right", -11) if b < a else ("left", 11)
+            ax.annotate(_num(b, 2), xy=(b, i), xytext=(desloc, -3),
+                        textcoords="offset points", ha=lado, fontsize=9,
+                        color=t.ink2, fontweight="bold")
+
+        ax.axvline(0, color=t.ink2, linewidth=1.4, zorder=1)
+        ax.set_yticks(range(len(d)), d.regiao, fontsize=10, color=t.ink2)
+        ax.invert_yaxis()
+        ax.set_xlabel("Allocator Premium, p.p. ao ano", color=t.muted,
+                      fontsize=9.5, labelpad=8)
+        ax.set_xlim(-1.4, float(d[["premio_vs_etf_pp", "premio_vs_indice_pp"]].to_numpy().max()) + 1.1)
+
+        handles = [
+            plt.Line2D([], [], color=t.muted, marker="o", linewidth=0, markersize=7,
+                       markerfacecolor=t.surface, markeredgecolor=t.muted,
+                       markeredgewidth=2.0),
+            plt.Line2D([], [], color=t.div_neg, marker="o", linewidth=0, markersize=8,
+                       markeredgecolor=t.surface, markeredgewidth=2.0),
+            plt.Line2D([], [], color=t.div_pos, marker="o", linewidth=0, markersize=8,
+                       markeredgecolor=t.surface, markeredgewidth=2.0),
+        ]
+        leg = fig.legend(handles,
+                         ["contra o ETF de 2006", "contra o índice: prêmio encolhe",
+                          "contra o índice: prêmio cresce"],
+                         loc="lower center", ncol=3, frameon=False, fontsize=9.5,
+                         bbox_to_anchor=(0.5, -0.07))
+        for texto in leg.get_texts():
+            texto.set_color(t.ink2)
+
+        fig.suptitle("O allocator venceu o mercado, ou venceu o produto?",
+                     color=t.ink, fontsize=13, x=0.02, ha="left", y=1.04)
+        fig.text(0.02, 0.955,
+                 "a distância é o que a taxa e o tracking error do ETF valiam · "
+                 "nos EUA o prêmio inteiro era o produto",
+                 color=t.muted, fontsize=9.5, ha="left")
+        fig.tight_layout()
+        saidas.append(_salvar(fig, out_dir, "index-benchmark", t))
     return saidas

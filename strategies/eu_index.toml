@@ -1,0 +1,26 @@
+# Index Benchmark (metodologia §7) — Europa. MSCI Europe, líquido dos 30%.
+# ⚠️ Substituto declarado, e o mais frouxo dos quatro: o índice do IEV é o
+# S&P Europe 350. A diferença de +0,87 p.p. ao ano contra o IEV bruto mistura
+# o custo do produto com a distância entre dois índices, e esta fonte não
+# separa as duas parcelas.
+[strategy]
+name = "EU Index"
+start = "2006-01-01"
+end = "2025-12-31"
+base_currency = "BRL"
+dividends = "reinvest"
+
+[strategy.contribution]
+amount = 1000.0
+frequency = "monthly"
+mode = "real"
+inflation_index = "IPCA"
+adjustment = "annual"
+
+[strategy.rebalance]
+method = "none"
+allow_selling = false
+
+[[strategy.weights]]
+ticker = "MXEU"
+weight = 1.0

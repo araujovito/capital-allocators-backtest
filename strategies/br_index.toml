@@ -1,0 +1,24 @@
+# Index Benchmark (metodologia §7) — Brasil. O IBrX-50 publicado pela B3,
+# que é o índice que o PIBB11 replica. Sem taxa de administração e sem
+# tracking error: é o mercado, não o produto.
+[strategy]
+name = "BR Index"
+start = "2006-01-01"
+end = "2025-12-31"
+base_currency = "BRL"
+dividends = "reinvest"
+
+[strategy.contribution]
+amount = 1000.0
+frequency = "monthly"
+mode = "real"
+inflation_index = "IPCA"
+adjustment = "annual"
+
+[strategy.rebalance]
+method = "none"
+allow_selling = false
+
+[[strategy.weights]]
+ticker = "IBXL"
+weight = 1.0

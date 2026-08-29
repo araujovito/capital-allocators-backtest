@@ -7,6 +7,7 @@ aportes mensais entre **jan/2006 e dez/2025** (240 meses), três caminhos:
 |---|---|
 | Gestão ativa | **Capital Allocators** — 8 empresas, 2 por região |
 | Gestão passiva | **ETFs** amplos dos mesmos 4 mercados |
+| Referência de mercado | **Índices** dos mesmos 4 mercados (experimento §7) |
 | Custo de oportunidade | **CDI** |
 | Régua de poder de compra | **IPCA** (não é investimento) |
 
@@ -36,6 +37,10 @@ inclusive se contradisserem a hipótese inicial.
 | 🇺🇸 EUA | IVV | S&P 500 | mai/2000 |
 | 🇪🇺 Europa | IEV | S&P Europe 350 | jul/2000 |
 | 🇯🇵 Japão | EWJ | MSCI Japan | mar/1996 |
+
+Os **índices** da coluna do meio entram como um segundo tipo de experimento
+(*Index Benchmark*, §7), com o mercado no lugar do produto — resultados nunca
+misturados com os do placar principal.
 
 **Regra anti-cherry-picking:** todo ativo precisa ser justificável com informação
 que já existia aproximadamente em 31/12/2005. Depois de fechado o universo,
@@ -256,6 +261,85 @@ janela positiva das dez**; começando em qualquer outro ano de 2007 a 2015, o
 descoberta central — **reforça**: a dispersão entre regiões é maior do que o placar
 de 2006 sugeria, não menor.
 
+### Index Benchmark: o allocator venceu o mercado ou venceu o produto?
+
+O placar principal compara gestão ativa com **o ETF que dava para comprar em
+2006** — a pergunta certa para um investidor, mas não a pergunta "gestão ativa
+bate o mercado". A §7 prevê um segundo tipo de experimento para separar as duas:
+o **índice** no lugar do produto, sem taxa de administração e sem tracking error.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/index-benchmark-dark.png">
+  <img alt="Halteres do Allocator Premium por região, do prêmio medido contra o ETF até o prêmio medido contra o índice. Brasil cresce de 2,26 para 2,57 p.p.; EUA cai de 0,49 para -0,01; Europa de 4,94 para 3,83; Japão de 6,97 para 6,01; global de 3,66 para 3,08." src="docs/img/index-benchmark-light.png">
+</picture>
+
+| Região | Allocators | ETF | Índice | Prêmio vs ETF | vs índice | Custo do produto |
+|---|---|---|---|---|---|---|
+| Brasil | 5,03% | 2,77% | 2,46% | +2,26 p.p. | **+2,57** | **−0,31** |
+| EUA | 9,42% | 8,93% | 9,43% | +0,49 p.p. | **−0,01** | +0,50 |
+| Europa | 8,17% | 3,23% | 4,34% | +4,94 p.p. | +3,83 | +1,11 |
+| Japão | 8,79% | 1,82% | 2,78% | +6,97 p.p. | +6,01 | +0,96 |
+| **Global** | **8,87%** | 5,21% | 5,79% | **+3,66 p.p.** | **+3,08** | **+0,58** |
+
+**O prêmio global sobrevive: cai de +3,66 para +3,08 p.p. ao ano.** Cerca de 0,58
+p.p. — um sexto dele — era o custo de embrulhar o mercado num fundo, não gestão de
+capital. O resto continua de pé.
+
+**Nos EUA, o prêmio inteiro era o produto.** Contra o índice ele é −0,01 p.p.:
+zero. Somado ao teste de janelas de início, em que os EUA são positivos em 1 de 10
+entradas, o veredito americano de "mesmo risco, com prêmio" não sobrevive a nenhum
+dos dois testes. Berkshire e Markel não venceram o mercado americano — venceram um
+ETF, por uma margem que é a taxa do ETF.
+
+**No Brasil o experimento anda para o outro lado**, e isso é sinal de que ele não
+está viciado: o PIBB11 **superou** o IBrX-50 em 0,31 p.p. ao ano, então trocar o
+produto pelo índice *aumenta* o prêmio. O estudo não tem dado para decompor por
+quê — receita de aluguel de ações e convenção de reinvestimento do índice são as
+hipóteses óbvias, e nenhuma foi testada aqui.
+
+#### De onde vêm os índices, e o que é substituto
+
+| Índice | Fonte | É o índice do ETF? |
+|---|---|---|
+| IBrX-50 | B3, estatísticas históricas | ✅ é o índice do PIBB11 |
+| MSCI Japan | MSCI, dados de fim de dia | ✅ é o índice do EWJ |
+| MSCI USA | MSCI | ⚠️ o do IVV é o S&P 500 |
+| MSCI Europe | MSCI | ⚠️ o do IEV é o S&P Europe 350 |
+
+A S&P Dow Jones responde **403** a qualquer requisição de nível de índice. A MSCI
+publica de graça, mensal, nas três variantes. Então metade do experimento usa o
+índice exato e metade usa o índice da mesma região com outra regra de construção —
+e o tamanho dessa troca é **medido**, comparando cada índice com o total return
+bruto do próprio ETF: +0,05 p.p. ao ano no IVV (imaterial), +0,87 no IEV (mistura
+custo de produto e diferença de índice, e esta fonte não separa as duas parcelas).
+Onde o índice é o do próprio ETF, a diferença é só produto: +0,68 p.p. no EWJ,
+contra taxa declarada de 0,50%.
+
+A retenção de 30% da §4 é aplicada **por fora**, pelo mesmo método de
+`transform.us_net`, em vez de usar a variante `NETR` da MSCI — que já vem líquida,
+mas com as alíquotas que a MSCI assume. Usar `NETR` faria a perna do índice ser
+tributada diferente da perna do ETF, e a comparação mediria regime fiscal em vez
+de custo de produto.
+
+#### A série é total return? Verificado, com um susto pelo caminho
+
+`b3_cash_dividends` não tem **nenhum** provento do PIBB11 em vinte anos, e as
+unidades dele nunca crescem — a assinatura exata do erro do INVE-B. O teste de
+ordenação responde às duas dúvidas de uma vez:
+
+| série, mesma janela e mesma grade mensal | retorno a.a. |
+|---|---|
+| PIBB11 — só preço (COTAHIST) | 8,42% |
+| PIBB11 — total return do pipeline | 8,42% |
+| IBrX-50 — publicado pela B3 | 8,09% |
+
+Se o índice fosse só preço, ficaria vários pontos ao ano **abaixo** do total return
+do ETF. Se o PIBB11 distribuísse e a coleta tivesse perdido, o preço puro dele
+ficaria muito abaixo do índice. Nenhum dos dois acontece: os três andam colados,
+que é o único arranjo compatível com **índice de retorno total** e **fundo que
+reinveste internamente** — característica declarada do PIBB11. As duas premissas
+estavam certas, e agora estão medidas.
+
 ### As escolhas de método decidem alguma coisa?
 
 **Ponta da PTAX.** A §5 converte tudo pela PTAX de venda. O spread parece
@@ -373,9 +457,8 @@ quando o teste natural não tem poder, procurar a evidência de **nível** em ve
 de evento. A data-ex é um sinal de um dia competindo com ruído de um dia; o nível
 acumula vinte anos de diferença contra ruído nenhum.
 
-**Próximo passo:** os dois tipos de experimento que a §7 prevê e ainda não
-rodaram — *Index Benchmark* (índices no lugar dos ETFs, sem taxa nem tracking
-error) e *Modern Alternative* —, e a camada de gráficos que a arquitetura promete.
+**Próximo passo:** o *Modern Alternative*, último dos três tipos de experimento
+da §7 — o contrafactual com os produtos que existem hoje e não existiam em 2006.
 
 ## Setup
 
@@ -394,6 +477,8 @@ capallo build-br        # monta e valida o total return brasileiro
 capallo fetch-intl      # precos de Japao (Kabutan) e Suecia (Avanza)
 capallo check-jp-prices     # confere a serie japonesa contra o preco publicado pelas companhias
 capallo fetch-jp-dividends  # proventos de 8058 e 8031, dos relatorios anuais
+capallo fetch-indices       # indices de MSCI e B3, para o Index Benchmark
+capallo build-indices       # aplica a retencao da §4 aos indices
 capallo fetch-se-dividends  # proventos de INVE-B e o teste de data-ex da serie sueca
 capallo build-intl      # monta e valida o total return de Europa e Japao
 capallo export-dataset  # painel mensal em BRL para o motor Rust
@@ -414,5 +499,6 @@ capallo decompose       # retorno entre ativo, cambio e inflacao
 capallo premium         # Allocator Premium por regiao, ao lado do risco
 capallo crises          # comportamento em recortes de crise datados por terceiros
 capallo sensitivity     # ponta da PTAX e janelas de inicio movel
+capallo index-benchmark # o indice no lugar do ETF (§7)
 capallo charts          # as quatro figuras, nos dois temas  (pip install -e "./python[charts]")
 ```

@@ -56,7 +56,31 @@ PASSIVE_ETFS: tuple[Asset, ...] = (
     Asset("EWJ", "iShares MSCI Japan", Region.JP, Currency.USD, Currency.JPY, 0.30),
 )
 
-BY_TICKER: dict[str, Asset] = {a.ticker: a for a in (*CAPITAL_ALLOCATORS, *PASSIVE_ETFS)}
+#: Experimento Index Benchmark (§7): o **índice** no lugar do produto, para separar
+#: "o allocator venceu o mercado" de "o allocator venceu o ETF que existia em 2006".
+#: Não é um universo alternativo — é a mesma exposição regional sem taxa de
+#: administração, sem tracking error e sem o custo de embrulhar tudo num fundo.
+#:
+#: ⚠️ Duas das quatro linhas são **substitutas declaradas**. O índice do PIBB11
+#: (IBrX-50) e o do EWJ (MSCI Japan) são publicados de graça pelos próprios
+#: provedores. Os da S&P — S&P 500 e S&P Europe 350 — não são: o site responde 403.
+#: MSCI USA e MSCI Europe entram no lugar, cobrindo o mesmo mercado com outra regra
+#: de construção. O custo dessa troca é medido, não suposto — ver `ingest.indices`.
+INDICES: tuple[Asset, ...] = (
+    Asset("IBXL", "IBrX-50 (B3)", Region.BR, Currency.BRL, Currency.BRL, 0.00),
+    Asset("MXUS", "MSCI USA", Region.US, Currency.USD, Currency.USD, 0.30),
+    Asset("MXEU", "MSCI Europe", Region.EU, Currency.USD, Currency.EUR, 0.30),
+    Asset("MXJP", "MSCI Japan", Region.JP, Currency.USD, Currency.JPY, 0.30),
+)
+
+#: Índice → ETF da mesma região, para medir o custo do produto.
+INDICE_DO_ETF: dict[str, str] = {
+    "PIBB11": "IBXL", "IVV": "MXUS", "IEV": "MXEU", "EWJ": "MXJP",
+}
+
+BY_TICKER: dict[str, Asset] = {
+    a.ticker: a for a in (*CAPITAL_ALLOCATORS, *PASSIVE_ETFS, *INDICES)
+}
 
 
 def by_region(assets: tuple[Asset, ...], region: Region) -> tuple[Asset, ...]:

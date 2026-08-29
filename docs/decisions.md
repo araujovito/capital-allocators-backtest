@@ -408,3 +408,74 @@ existe para impedir.
 Fica declarado como limitação de dado, não como experimento omitido. A diferença
 importa: a primeira é honesta sobre o alcance do estudo, a segunda seria silêncio
 sobre um resultado que não se quis ver.
+
+## 2026-08-29 — Index Benchmark: o prêmio global sobrevive, o americano era o produto
+
+Segundo dos três tipos de experimento da §7, rodado com o **índice** no lugar do
+ETF. Ele existe porque o placar principal responde "a gestão ativa venceu o
+produto que dava para comprar em 2006", que é a pergunta certa para um investidor
+e **não** é a pergunta "a gestão ativa venceu o mercado". Esta é.
+
+| Região | Prêmio vs ETF | vs índice | Custo do produto |
+|---|---|---|---|
+| Brasil | +2,26 | **+2,57** | **−0,31** |
+| EUA | +0,49 | **−0,01** | +0,50 |
+| Europa | +4,94 | +3,83 | +1,11 |
+| Japão | +6,97 | +6,01 | +0,96 |
+| **Global** | **+3,66** | **+3,08** | **+0,58** |
+
+O prêmio global cai de +3,66 para +3,08 p.p. ao ano: cerca de um sexto dele era
+custo de embrulhar o mercado num fundo. **Nos EUA o prêmio inteiro era o produto**
+— contra o índice ele é zero. Junto com as janelas de início, em que os EUA são
+positivos em 1 de 10, o veredito americano cai por dois testes independentes.
+
+No Brasil o experimento anda para o **outro lado**: o PIBB11 superou o IBrX-50 em
+0,31 p.p. ao ano, então trocar produto por índice aumenta o prêmio. Vale registrar
+porque é a evidência de que o experimento não está viciado a favor da tese — e
+também que o estudo **não tem dado para explicar por quê**: aluguel de ações e
+convenção de reinvestimento do índice são hipóteses não testadas.
+
+### Metade dos índices é substituta, e a troca é medida
+
+A S&P Dow Jones responde 403 a qualquer requisição de nível de índice, com
+navegador ou sem. A MSCI publica de graça, mensal, desde os anos 1970, nas três
+variantes. Então IBrX-50 (do PIBB11) e MSCI Japan (do EWJ) são os índices exatos,
+e MSCI USA e MSCI Europe entram no lugar de S&P 500 e S&P Europe 350.
+
+O tamanho da troca não fica no texto, fica em número: comparando cada índice com o
+total return bruto do próprio ETF, +0,05 p.p. ao ano no IVV — imaterial —, +0,87
+no IEV, que mistura custo de produto com diferença de índice sem que esta fonte
+separe as parcelas. Onde o índice é o do próprio ETF a diferença é só produto:
++0,68 p.p. no EWJ, contra taxa declarada de 0,50%. Os números batem com as taxas
+reais, o que é a melhor confirmação disponível de que a comparação está medindo o
+que diz medir.
+
+### `NETR` existia pronta e foi recusada
+
+A MSCI publica a variante líquida. Ela já vem com retenção — mas com **as
+alíquotas que a MSCI assume**, não os 30% que a §4 congelou para o investidor
+brasileiro antes de qualquer resultado. Usar `NETR` faria a perna do índice ser
+tributada diferente da perna do ETF, e a comparação passaria a medir regime fiscal
+em vez de custo de produto. Entra `GRTR` com a retenção aplicada por fora, pelo
+mesmo método de `transform.us_net` — o provento do mês é o que sobra entre o bruto
+e o preço puro.
+
+### O susto do PIBB11
+
+Ao classificar a série brasileira apareceu que `b3_cash_dividends` não tem
+**nenhum** provento do PIBB11 em vinte anos e que as unidades dele nunca crescem —
+a assinatura exata do erro do INVE-B, encontrada no mesmo dia.
+
+Um teste de ordenação respondeu às duas dúvidas de uma vez: PIBB11 só preço 8,42%,
+PIBB11 total return do pipeline 8,42%, IBrX-50 publicado 8,09%. Índice só de preço
+ficaria pontos **abaixo** do total return do ETF; provento perdido do ETF o
+deixaria pontos abaixo do índice. Os três colados só são compatíveis com índice de
+retorno total e fundo que reinveste internamente, que é característica declarada
+do PIBB11. As duas premissas estavam certas — e o susto valeu por transformá-las
+em medida.
+
+Uma armadilha de alinhamento apareceu aqui e vale registro: a primeira rodada
+comparou o índice a partir de 31/12/2005 com o ETF a partir de 02/01/2006 e
+produziu diferenças que embutiam **um mês inteiro de bolsa** — maior que o custo
+anual de qualquer ETF. Toda comparação do módulo passa agora por uma grade mensal
+comum, e a base é a mesma para as duas séries.

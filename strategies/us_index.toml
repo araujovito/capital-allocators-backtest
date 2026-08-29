@@ -1,0 +1,26 @@
+# Index Benchmark (metodologia §7) — Estados Unidos. MSCI USA, líquido dos 30%
+# de retenção da §4, como a perna do ETF.
+# ⚠️ Substituto declarado: o índice do IVV é o S&P 500, que a S&P Dow Jones
+# não publica de graça. A distância entre os dois foi medida em +0,05 p.p.
+# ao ano contra o próprio IVV bruto — ver `ingest.indices`.
+[strategy]
+name = "US Index"
+start = "2006-01-01"
+end = "2025-12-31"
+base_currency = "BRL"
+dividends = "reinvest"
+
+[strategy.contribution]
+amount = 1000.0
+frequency = "monthly"
+mode = "real"
+inflation_index = "IPCA"
+adjustment = "annual"
+
+[strategy.rebalance]
+method = "none"
+allow_selling = false
+
+[[strategy.weights]]
+ticker = "MXUS"
+weight = 1.0
