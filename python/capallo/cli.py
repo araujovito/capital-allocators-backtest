@@ -67,6 +67,11 @@ def main(argv: list[str] | None = None) -> int:
     p_rf = sub.add_parser("renda-fixa", help="a regua real, e a licao sobre sequencia")
     p_rf.add_argument("--results", default="data/results")
     p_rf.add_argument("--curated", default="data/curated")
+    p_bs = sub.add_parser("bootstrap",
+                          help="quanto do premio sobrevive a outra historia")
+    p_bs.add_argument("--results", default="data/results")
+    p_bs.add_argument("--curated", default="data/curated")
+    p_bs.add_argument("--sorteios", type=int, default=4000)
     p_dc = sub.add_parser("decompose", help="retorno de cada ativo entre ativo, cambio e inflacao")
     p_dc.add_argument("--curated", default="data/curated")
     p_dc.add_argument("--engine", default="data/engine")
@@ -563,6 +568,52 @@ def main(argv: list[str] | None = None) -> int:
         print("\n  onde o ranking por tempo e o por dinheiro discordam:")
         for frase in inversoes(t):
             print(f"    - {frase}")
+        return 0
+
+    if args.command == "bootstrap":
+        from pathlib import Path
+
+        import capallo.analysis.bootstrap as bs
+
+        r = bs.retornos_reais(Path(args.results), Path(args.curated))
+        obs = bs.observado(r)
+        print(f"  {len(r)} meses · o que aconteceu: premio {obs['premio_pp']:.2f} p.p.,"
+              f" allocators {obs['alloc_multiplo']:.2f}x contra"
+              f" {obs['etf_multiplo']:.2f}x do ETF\n")
+
+        desvio = bs.conferir_invariancia(r)
+        print("  media geometrica nao depende da ordem, entao reordenar nao pode mover")
+        print(f"  o premio. Conferido no codigo: desvio maximo {desvio:.1e} p.p.\n")
+
+        print("  TESTE 1 — embaralhar a ordem dos mesmos meses:")
+        d1 = bs.rodar(r, com_reposicao=False, sorteios=args.sorteios)
+        m = d1["capital_allocators__multiplo"]
+        pct = float((m < obs["alloc_multiplo"]).mean()) * 100
+        print(f"    multiplo dos allocators   p5 {m.quantile(0.05):.2f}x"
+              f"   mediana {m.median():.2f}x   p95 {m.quantile(0.95):.2f}x")
+        print(f"    o que aconteceu ({obs['alloc_multiplo']:.2f}x) esta no percentil"
+              f" {pct:.0f} — a sequencia AJUDOU")
+        rz = d1.razao_multiplo
+        print(f"    razao entre os multiplos  mediana {rz.median():.3f}"
+              f"   o que aconteceu {obs['razao_multiplo']:.3f}"
+              f"   -> a sequencia ajudou as DUAS pernas igual")
+
+        print("\n  TESTE 2 — reamostrar com reposicao, blocos de 12 meses:")
+        d2 = bs.rodar(r, com_reposicao=True, sorteios=args.sorteios)
+        s = bs.resumo(d2, obs, "premio_pp")
+        print(f"    premio   media {s['media']:.2f}   dp {s['desvio']:.2f}"
+              f"   p5 {s['p5']:.2f}   p95 {s['p95']:.2f} p.p.")
+        print(f"    premio positivo em {s['fracao_positiva']:.1%} das"
+              f" {args.sorteios} historias")
+
+        print("\n  o tamanho do bloco decide?")
+        sens = bs.sensibilidade_do_bloco(r)
+        print(f"    {'bloco':>7}{'premio medio':>15}{'p5':>9}{'p95':>9}{'positivo':>11}")
+        for _, x in sens.iterrows():
+            print(f"    {int(x.bloco_meses):>4}m{x.premio_medio_pp:>14.2f}"
+                  f"{x.p5_pp:>9.2f}{x.p95_pp:>9.2f}{x.fracao_positiva:>10.1%}")
+        print("    bloco curto e a escolha mais adversarial: destroi a memoria da serie")
+        print("    e alarga a distribuicao. O veredito nao muda em nenhum deles.")
         return 0
 
     if args.command == "decompose":

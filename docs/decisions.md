@@ -619,3 +619,68 @@ linhas da série se revela errada — depois da Avanza e do Kabutan. A regra que
 E um pregão único (01/07/2010, vencimento 2015) traz spread negativo, que não
 existe. É descartado na coleta com o motivo escrito, sob uma guarda que falha se
 deixar de ser caso isolado.
+
+## 2026-08-29 — Bootstrap: a sequência move o placar, mas não pode mover o prêmio
+
+Primeiro teste puramente adversarial do projeto, e ele obrigou a separar duas
+perguntas que a ressalva do Tesouro IPCA+ deixou embaralhadas.
+
+### O que é aritmética e o que é empírico
+
+O retorno anualizado é a média geométrica dos retornos mensais, e média geométrica
+**não depende da ordem**. Logo, reordenar os meses não pode mover o prêmio em
+pontos ao ano — não aproximadamente, e sim identicamente. Isso não é resultado do
+bootstrap; é aritmética, e o bootstrap serve para conferir que o código a respeita.
+Confere: desvio máximo de 2·10⁻¹⁴ p.p. em 4.000 reordenações.
+
+O múltiplo por real aportado, esse sim, é ponderado por dinheiro, e é onde a
+sequência aparece.
+
+### O placar teve sorte; a comparação, não
+
+O múltiplo dos allocators sob reordenação tem mediana 2,67x, p5 2,04x e p95 3,67x.
+O que aconteceu — 3,76x — está no **percentil 96**. A sequência ajudou muito, e a
+ressalva levantada pelo Tesouro IPCA+ está confirmada e quantificada.
+
+**Mas a razão entre os múltiplos não se move**: mediana 1,509 contra 1,506
+observado. A sequência favorável levantou as duas pernas igualmente — o ETF também
+foi comprado barato cedo e valorizado tarde. A sorte está no número absoluto, não
+na comparação, e o estudo passa a dizer as duas coisas em vez de uma.
+
+### O prêmio contra a incerteza de amostra
+
+Reamostragem com reposição, blocos de 12 meses, 4.000 histórias: prêmio médio
++3,62 p.p., desvio 1,66, p5 +0,92, p95 +6,36, **positivo em 98,8%**. O tamanho do
+bloco não decide — de 3 a 24 meses a fração positiva vai de 95,3% a 99,3%, e bloco
+curto é a escolha mais adversarial porque destrói a memória da série.
+
+Positivo não é grande: no percentil 5 vale +0,92 p.p. ao ano. Suficiente para o
+veredito sobreviver, insuficiente para ele ser confortável — e é assim que fica
+escrito.
+
+### A guarda que faz o teste valer
+
+**Todas as pernas reamostradas com os mesmos índices.** Se cada estratégia
+sorteasse os próprios meses, a correlação entre elas iria embora, os allocators de
+um mês bom encontrariam o ETF de um mês ruim, e a distribuição do prêmio ficaria
+larga por artefato — dando aparência de rigor a ruído. O bootstrap é do
+**calendário**, não das séries.
+
+### Um bug pego pela própria checagem
+
+A primeira versão do embaralhamento usava blocos circulares de tamanho fixo. Como
+239 não é múltiplo de 12, o corte final duplicava meses e descartava outros: não
+era permutação. O prêmio, que tem de ser idêntico sob reordenação, saía 0,38 p.p.
+diferente — e foi `conferir_invariancia()` que acusou. Vale o registro de método:
+**quando existe uma invariante analítica, ela é o melhor teste disponível**, porque
+falha por bug e nunca por ruído. A versão correta particiona a janela em blocos
+contíguos e sorteia só a ordem deles.
+
+### O que este teste não alcança
+
+Ele reamostra a história dos oito ativos **que foram escolhidos**. Não diz nada
+sobre a escolha em si — e a escolha foi feita por alguém que já sabia quais
+holdings de 2005 ainda existiriam em 2025. É a limitação de fundo do estudo, e
+passa a estar escrita no README como o ataque que sobra: só um universo montado por
+critério mecânico sobre todas as holdings listadas em 2005, mortas inclusive,
+separaria o prêmio da gestão do prêmio de ter sobrevivido.

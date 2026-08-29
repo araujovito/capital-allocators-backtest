@@ -488,6 +488,83 @@ validação reprovou: coincide em 30% da amostra e diverge em 70% — até 2021 
 ~0,04% abaixo, e de 2022 em diante passa a ser o mesmo número. A marcação usa
 `PU Venda`, que tem definição estável nos vinte anos.
 
+### Quanto disso é sinal, e quanto foi a mão que a história deu
+
+O estudo tem um resultado e **uma** amostra: os 240 meses que existiram. O teste
+adversarial é perguntar quanto do prêmio sobreviveria a outra história — e a
+resposta exige separar duas perguntas que costumam ser confundidas.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/bootstrap-dark.png">
+  <img alt="Dois histogramas. À esquerda, a distribuição do prêmio em 4.000 amostras reamostradas em blocos: média 3,62 p.p., positivo em 98,8% delas, com o valor observado de 3,66 no centro. À direita, a distribuição do múltiplo dos allocators em 4.000 reordenações dos mesmos meses: mediana 2,67x, e o valor observado de 3,76x na cauda alta." src="docs/img/bootstrap-light.png">
+</picture>
+
+#### A sequência move o placar, mas não pode mover o prêmio
+
+O retorno anualizado é a média geométrica dos retornos mensais, e média geométrica
+**não depende da ordem**. Então reordenar os meses deixa o prêmio de +3,66 p.p.
+*exatamente* onde estava — não aproximadamente: o desvio máximo em 4.000
+reordenações é de **2·10⁻¹⁴ p.p.**, que é precisão de máquina. Isso é aritmética,
+não achado; o teste existe para provar que o código a respeita.
+
+O **múltiplo por real aportado** é outra história, porque pondera por dinheiro — e
+dinheiro é justamente o que a sequência move:
+
+| Múltiplo dos allocators sob 4.000 reordenações | |
+|---|---|
+| p5 | 2,04x |
+| mediana | 2,67x |
+| p95 | 3,67x |
+| **o que aconteceu** | **3,76x — percentil 96** |
+
+**A sequência ajudou, e muito.** O placar de 3,75x está na cauda alta: os
+allocators foram fracos em 2006-2012, quando havia pouco dinheiro, e fortes depois,
+quando havia quase tudo. É exatamente a ressalva que o Tesouro IPCA+ expôs, agora
+quantificada.
+
+**Mas a razão entre os múltiplos não se move**: mediana de 1,509 nas reordenações
+contra 1,506 observado. A sequência favorável levantou as **duas** pernas na mesma
+medida — o ETF também foi comprado barato cedo e valorizado tarde. A sorte está no
+número absoluto, não na comparação.
+
+#### E se a amostra fosse outra
+
+O teste mais duro é reamostrar **com reposição**, em blocos de 12 meses, formando
+histórias que poderiam ter saído dos mesmos regimes. Blocos, e não meses soltos,
+porque retorno tem memória: sortear mês a mês fabricaria uma série sem 2008 e sem
+2020 como *eventos*.
+
+| Prêmio em 4.000 histórias reamostradas | |
+|---|---|
+| média | +3,62 p.p. |
+| desvio-padrão | 1,66 p.p. |
+| p5 | +0,92 p.p. |
+| p95 | +6,36 p.p. |
+| **positivo em** | **98,8% delas** |
+
+E o tamanho do bloco não decide:
+
+| Bloco | Prêmio médio | p5 | p95 | Positivo |
+|---|---|---|---|---|
+| 3 meses | +3,64 | +0,11 | +7,24 | 95,3% |
+| 6 meses | +3,62 | +0,74 | +6,59 | 97,8% |
+| **12 meses** | **+3,61** | **+0,93** | **+6,33** | **98,6%** |
+| 24 meses | +3,64 | +1,15 | +6,30 | 99,3% |
+
+Bloco curto é a escolha **mais adversarial** — destrói a memória da série e alarga
+a distribuição — e mesmo com três meses o prêmio é positivo em 95% das histórias.
+
+⚠️ Positivo não é grande: no percentil 5 ele vale +0,92 p.p. ao ano, o suficiente
+para o veredito sobreviver e não o suficiente para ele ser confortável.
+
+#### A guarda que faz o teste valer alguma coisa
+
+**Todas as pernas são reamostradas com os mesmos índices.** Se cada estratégia
+sorteasse seus próprios meses, a correlação entre elas seria destruída, os
+allocators de um mês bom encontrariam o ETF de um mês ruim, e a distribuição do
+prêmio ficaria larga por puro artefato. O bootstrap é do **calendário**, não das
+séries.
+
 ### As escolhas de método decidem alguma coisa?
 
 **Ponta da PTAX.** A §5 converte tudo pela PTAX de venda. O spread parece
@@ -614,11 +691,12 @@ venceria o produto de hoje (sim, +2,31, com menos risco).
 de experimento da §7, os testes de robustez da §9, as sensibilidades de método e o
 Tesouro IPCA+ que ficara para V2.
 
-**Próximo passo:** nenhum item pendente herdado. O que o estudo pede agora é
-adversarial — atacar o resultado por onde ele é mais frágil. A ressalva de
-sequência acima é o melhor candidato: um teste de aporte com sequência embaralhada
-(*bootstrap* de blocos) diria quanto do prêmio de 3,66 p.p. sobrevive a uma ordem
-de retornos diferente da que a história sorteou.
+**Próximo passo:** o estudo está completo no que se propôs. O que falta é ataque
+de fora — e o melhor candidato é o que este trabalho não pode responder sozinho: os
+oito allocators foram escolhidos com informação de 2005, mas por *alguém que já
+sabia quais deles existiriam em 2025*. Só um universo montado a partir de um
+critério mecânico aplicado a **todas** as holdings listadas em 2005 — sobreviventes
+e mortas — separaria o prêmio da gestão do prêmio de ter sobrevivido.
 
 ## Setup
 
@@ -664,5 +742,6 @@ capallo sensitivity     # ponta da PTAX e janelas de inicio movel
 capallo index-benchmark # o indice no lugar do ETF (§7)
 capallo modern-alternative  # o produto que existe hoje (§7)
 capallo renda-fixa      # a regua real, e a licao sobre sequencia
+capallo bootstrap       # quanto do premio sobrevive a outra historia
 capallo charts          # as quatro figuras, nos dois temas  (pip install -e "./python[charts]")
 ```

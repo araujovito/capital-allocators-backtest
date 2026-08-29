@@ -441,6 +441,7 @@ FIGURAS = {
     "janelas-moveis": "com que frequência os allocators venceram",
     "index-benchmark": "quanto do prêmio era o mercado e quanto era o produto",
     "tres-experimentos": "a mesma poupança pelos seis caminhos possíveis",
+    "bootstrap": "quanto do resultado é sinal e quanto foi a mão que a história deu",
 }
 
 
@@ -466,6 +467,19 @@ def build_all(
         saidas += index_benchmark(comparar(resultados, curated), out_dir)
     if (resultados / "modern_alternative.csv").exists():
         saidas += tres_experimentos(resultados, curated, out_dir)
+
+    # O bootstrap roda 8.000 simulações; é a figura mais cara do conjunto, e a
+    # única que depende de sorteio — daí a semente fixa em `analysis.bootstrap`.
+    import capallo.analysis.bootstrap as bs
+
+    r = bs.retornos_reais(resultados, curated)
+    obs = bs.observado(r)
+    saidas += bootstrap({
+        "premio": bs.rodar(r, com_reposicao=True).premio_pp.to_numpy(),
+        "premio_obs": obs["premio_pp"],
+        "multiplo": bs.rodar(r, com_reposicao=False)["capital_allocators__multiplo"].to_numpy(),
+        "multiplo_obs": obs["alloc_multiplo"],
+    }, out_dir)
     if premios is not None:
         saidas += janelas_de_inicio(premios, out_dir)
     return saidas
@@ -596,4 +610,61 @@ def tres_experimentos(resultados: Path, curated: Path, out_dir: Path) -> list[Pa
                  color=t.muted, fontsize=9.5, ha="left")
         fig.tight_layout()
         saidas.append(_salvar(fig, out_dir, "tres-experimentos", t))
+    return saidas
+
+
+def bootstrap(distribuicoes: dict, out_dir: Path) -> list[Path]:
+    """Dois histogramas: o que a sequência move e o que a amostra move.
+
+    Distribuição de uma grandeza é magnitude, não identidade: uma cor só, e o
+    valor observado marcado por uma linha. Dois painéis porque são **duas
+    perguntas**, e um eixo compartilhado sugeriria que a incerteza é a mesma.
+
+    `distribuicoes` traz, de `analysis.bootstrap`: `premio` (reamostragem com
+    reposição), `multiplo` (reordenação) e os valores observados.
+    """
+    saidas = []
+    for t in TEMAS:
+        fig, (esq, dir_) = plt.subplots(1, 2, figsize=(10.4, 4.6))
+        _base(t, fig, [esq, dir_])
+
+        painéis = (
+            (esq, distribuicoes["premio"], distribuicoes["premio_obs"],
+             "Prêmio se a amostra fosse outra",
+             "reamostragem em blocos de 12 meses, com reposição",
+             "prêmio, p.p. ao ano", lambda v: _num(v, 2), 0.0),
+            (dir_, distribuicoes["multiplo"], distribuicoes["multiplo_obs"],
+             "Múltiplo se a ordem fosse outra",
+             "mesmos 240 meses, blocos reordenados",
+             "reais por real aportado", lambda v: _num(v, 2, "x"), None),
+        )
+
+        for ax, v, obs, titulo, sub, rotulo, fmt, marco in painéis:
+            ax.hist(v, bins=44, color=t.series[ALLOC], alpha=0.85, edgecolor=t.surface,
+                    linewidth=0.6)
+            if marco is not None:
+                # A fronteira que decide o veredito ganha traço próprio.
+                ax.axvline(marco, color=t.ink2, linewidth=1.4, zorder=3)
+            ax.axvline(obs, color=t.series[ETF], linewidth=2.0, zorder=4)
+            # Folga no topo para o rótulo não pousar em cima das barras mais altas.
+            topo = ax.get_ylim()[1] * 1.2
+            ax.set_ylim(0, topo)
+            ax.annotate(f"o que aconteceu\n{fmt(obs)}", xy=(obs, topo),
+                        xytext=(8, -6), textcoords="offset points", ha="left",
+                        va="top", fontsize=9, color=t.ink2, fontweight="bold")
+            ax.set_title(titulo, color=t.ink, fontsize=11, loc="left", pad=8)
+            ax.set_xlabel(rotulo, color=t.muted, fontsize=9.5, labelpad=6)
+            ax.set_yticks([])
+            ax.grid(False)
+            ax.text(0.0, -0.235, sub, transform=ax.transAxes, color=t.muted,
+                    fontsize=9, ha="left")
+
+        fig.suptitle("Quanto do resultado é sinal, e quanto foi a mão que a história deu",
+                     color=t.ink, fontsize=13, x=0.02, ha="left", y=1.04)
+        fig.text(0.02, 0.955,
+                 "à esquerda, 4.000 histórias reamostradas da mesma janela · à direita, "
+                 "4.000 reordenações dos mesmos meses",
+                 color=t.muted, fontsize=9.5, ha="left")
+        fig.tight_layout()
+        saidas.append(_salvar(fig, out_dir, "bootstrap", t))
     return saidas
