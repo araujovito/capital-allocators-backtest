@@ -55,6 +55,10 @@ O motor Rust é **genérico**: nenhum ticker, índice ou país é hard-coded. As
 estratégias são declaradas em TOML (ver `strategies/`). O experimento financeiro
 é uma *aplicação* do motor, não o motor.
 
+As figuras são geradas por `capallo charts` e versionadas em `docs/img`, em dois
+temas — a paleta foi passada por validador de daltonismo nos dois modos, e cada
+figura tem a tabela correspondente logo abaixo, para quem lê sem enxergar cor.
+
 ## Layout
 
 ```
@@ -66,6 +70,7 @@ engine/             backtest engine em Rust
 strategies/         definições .toml das estratégias
 data/               raw → interim → curated (fora do git)
 docs/               metodologia e decisões
+  img/              figuras do estudo, nos temas claro e escuro
 tests/              testes do pipeline
 ```
 
@@ -109,6 +114,11 @@ Motor Rust rodando sobre dado real, **os doze ativos**. Aportes mensais de
 R$1.000 corrigidos pelo IPCA, jan/2006 a dez/2025, ótica do investidor
 brasileiro, dividendos reinvestidos líquidos de retenção na fonte.
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/crescimento-dark.png">
+  <img alt="Reais de poder de compra por real aportado, 2006-2025, em quatro painéis regionais: Capital Allocators, ETF da região e CDI. Brasil termina em 2,05x contra 1,45x do ETF; Estados Unidos 4,06x contra 4,54x; Europa 3,86x contra 2,06x; Japão 4,90x contra 1,98x." src="docs/img/crescimento-light.png">
+</picture>
+
 | Estratégia | R$ por R$1 aportado | Retorno real a.a. | Vol. | Máx. drawdown | Sharpe |
 |---|---|---|---|---|---|
 | JP Allocators (8058 + 8031) | **4,90** | 8,79% | 21,97% | −33,8% | 0,29 |
@@ -122,6 +132,12 @@ brasileiro, dividendos reinvestidos líquidos de retenção na fonte.
 | BR ETF (PIBB11) | 1,45 | 2,77% | 21,31% | −40,5% | 0,03 |
 
 Vitórias dos allocators sobre o ETF da mesma região, em janelas móveis:
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/janelas-moveis-dark.png">
+  <img alt="Matriz de quatro regiões por quatro horizontes com a fração de janelas móveis em que os allocators venceram o ETF. Europa vai de 67% em 1 ano a 100% em 10 anos; Estados Unidos cai de 52% a 38%." src="docs/img/janelas-moveis-light.png">
+</picture>
+
 
 | Região | 1 ano | 3 anos | 5 anos | 10 anos |
 |---|---|---|---|---|
@@ -146,6 +162,11 @@ que fecha em março de 2026). Ver `build_intl.py`.
 três fatores se multiplicam, e separá-los muda a leitura: o câmbio contribuiu com
 3% a 4,7% ao ano para todo ativo estrangeiro, e sozinho responde por metade do
 resultado de EWJ e IEV.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/decomposicao-dark.png">
+  <img alt="Gráfico de halteres dos doze ativos, do retorno em moeda local ao retorno real em reais. INVE-B lidera com 12,5% real ao ano e GBL fecha com 0,6%." src="docs/img/decomposicao-light.png">
+</picture>
 
 | Ativo | Moeda | Ativo a.a. | Câmbio a.a. | Real em BRL a.a. |
 |---|---|---|---|---|
@@ -200,6 +221,12 @@ uma conclusão que só sobrevive numa data de início é uma conclusão sobre a 
 início.
 
 Prêmio em p.p. ao ano, por ano de entrada:
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/janelas-de-inicio-dark.png">
+  <img alt="Allocator Premium por ano de entrada, de 2006 a 2015, sempre até dezembro de 2025. Japão, Brasil, Global e Europa ficam acima de zero em todas as dez janelas; Estados Unidos fica abaixo de zero em nove das dez." src="docs/img/janelas-de-inicio-light.png">
+</picture>
+
 
 | Início | Brasil | EUA | Europa | Japão | Global |
 |---|---|---|---|---|---|
@@ -387,4 +414,5 @@ capallo decompose       # retorno entre ativo, cambio e inflacao
 capallo premium         # Allocator Premium por regiao, ao lado do risco
 capallo crises          # comportamento em recortes de crise datados por terceiros
 capallo sensitivity     # ponta da PTAX e janelas de inicio movel
+capallo charts          # as quatro figuras, nos dois temas  (pip install -e "./python[charts]")
 ```

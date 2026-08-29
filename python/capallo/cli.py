@@ -61,6 +61,15 @@ def main(argv: list[str] | None = None) -> int:
     p_sn.add_argument("--engine-dir", default="engine")
     p_sn.add_argument("--engine-data", default="data/engine")
     p_sn.add_argument("--strategies", default="strategies")
+    p_ch = sub.add_parser("charts", help="gera as figuras do estudo, nos temas claro e escuro")
+    p_ch.add_argument("--results", default="data/results")
+    p_ch.add_argument("--curated", default="data/curated")
+    p_ch.add_argument("--engine", default="data/engine")
+    p_ch.add_argument("--engine-dir", default="engine")
+    p_ch.add_argument("--strategies", default="strategies")
+    p_ch.add_argument("--out", default="docs/img")
+    p_ch.add_argument("--skip-janelas", action="store_true",
+                      help="pula a figura de janelas de inicio, que roda o motor 10x")
     p_sb = sub.add_parser("scoreboard", help="placar comparativo entre estrategias")
     p_sb.add_argument("--results", default="data/results")
     p_sb.add_argument("--curated", default="data/curated")
@@ -463,6 +472,31 @@ def main(argv: list[str] | None = None) -> int:
                 marca = "  <-- o placar de 2006 e a unica janela positiva" if pos == 1 else ""
                 print(f"    {regiao:<8}{pos:>3}/{n}{marca}")
 
+        return 0
+
+    if args.command == "charts":
+        from pathlib import Path
+
+        from capallo.analysis.charts import FIGURAS, build_all
+
+        premios = None
+        if not args.skip_janelas:
+            from capallo.analysis.sensitivity import janelas_de_inicio
+
+            print("  rodando o motor para as dez janelas de inicio...")
+            premios = janelas_de_inicio(
+                Path(args.curated), Path(args.engine_dir),
+                Path(args.strategies), Path(args.engine),
+            )
+
+        saidas = build_all(Path(args.results), Path(args.curated), Path(args.engine),
+                           Path(args.out), premios)
+        for caminho in saidas:
+            print(f"  {caminho}")
+        print(f"\n{len(saidas)} arquivos — {len(saidas) // 2} figuras x 2 temas")
+        faltando = [n for n in FIGURAS if not any(p.name.startswith(n) for p in saidas)]
+        if faltando:
+            print(f"  nao geradas: {', '.join(faltando)}")
         return 0
 
     if args.command == "scoreboard":

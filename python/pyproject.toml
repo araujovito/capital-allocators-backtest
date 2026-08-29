@@ -12,6 +12,9 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "ruff>=0.5", "mypy>=1.10"]
+# Camada de graficos. Opcional de proposito: o pipeline e o motor nao dependem
+# dela, e quem so quer os numeros nao precisa instalar backend de renderizacao.
+charts = ["matplotlib>=3.8"]
 # Coleta de fontes que renderizam o dado no cliente. Nao e dependencia do
 # backtest: instale so quando for coletar.
 browser = ["playwright>=1.45"]
