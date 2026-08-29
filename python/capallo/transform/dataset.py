@@ -9,7 +9,9 @@ Decisões materializadas aqui:
   último pregão com negociação naquele mês, por ativo.
 - **Tudo em BRL.** A unidade econômica do estudo é o real. Ativos em moeda
   estrangeira são convertidos pela PTAX de venda da mesma data — venda porque é a
-  ponta que o investidor brasileiro paga ao comprar moeda.
+  ponta que o investidor brasileiro paga ao comprar moeda. A escolha é
+  parametrizada (`fx_side`) para que o custo dela possa ser medido em vez de
+  afirmado; ver `capallo.analysis.sensitivity`.
 - **Calendários diferentes não são alinhados à força.** Cada ativo usa o próprio
   último pregão do mês. Forçar uma data comum introduziria preço de um dia em que
   o ativo não negociou.
@@ -40,7 +42,14 @@ def _monthly_last(df: pd.DataFrame, value_col: str) -> pd.DataFrame:
     return out.rename(columns={value_col: "tr_local"}).reset_index(drop=True)
 
 
-def build(curated: Path) -> pd.DataFrame:
+#: Pontas da PTAX aceitas na conversão. `mid` não é cotação publicada: é a média
+#: das duas, útil só como referência de sensibilidade.
+FX_SIDES = ("ask", "bid", "mid")
+
+
+def build(curated: Path, fx_side: str = "ask") -> pd.DataFrame:
+    if fx_side not in FX_SIDES:
+        raise ValueError(f"fx_side deve ser um de {FX_SIDES}, veio {fx_side!r}")
     frames = []
 
     br = pd.read_parquet(curated / "br_total_return.parquet")
@@ -70,11 +79,13 @@ def build(curated: Path) -> pd.DataFrame:
         if moeda == "BRL":
             partes.append(g.assign(fx=1.0))
             continue
-        cot = ptax[ptax.currency == moeda][["date", "ask"]].sort_values("date")
+        cot = ptax[ptax.currency == moeda].sort_values("date").copy()
         if cot.empty:
             raise ValueError(f"PTAX não cobre {moeda}")
+        cot["mid"] = (cot.bid + cot.ask) / 2
+        cot = cot[["date", fx_side]]
         m = pd.merge_asof(g.sort_values("date"), cot, on="date", direction="backward")
-        partes.append(m.rename(columns={"ask": "fx"}))
+        partes.append(m.rename(columns={fx_side: "fx"}))
     panel = pd.concat(partes, ignore_index=True).sort_values(["ticker", "month"])
 
     panel["tr_brl"] = panel.tr_local * panel.fx
@@ -101,9 +112,9 @@ def build_macro(curated: Path) -> pd.DataFrame:
     return macro.reset_index()
 
 
-def export(curated: Path, out_dir: Path) -> dict[str, int]:
+def export(curated: Path, out_dir: Path, fx_side: str = "ask") -> dict[str, int]:
     out_dir.mkdir(parents=True, exist_ok=True)
-    panel = build(curated)
+    panel = build(curated, fx_side=fx_side)
     macro = build_macro(curated)
 
     # O motor lê CSV: formato estável, inspecionável e sem dependência de schema

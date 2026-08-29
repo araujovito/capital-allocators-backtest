@@ -189,7 +189,73 @@ carteira, como a regra anti-cherry-picking exige.
 custo ou tributação move —, e em janelas de 10 anos o índice ainda venceu em 62%
 delas. Quem olhasse só o mercado americano concluiria bem menos do que quem
 olhasse o Japão. **A dispersão entre regiões é a descoberta, não o placar
-global.**
+global.** E o teste de janelas de início abaixo mostra que essa vantagem
+americana é frágil de um jeito que o placar de 2006 escondia.
+
+### O resultado depende de ter começado em 2006?
+
+A §9 da metodologia prevê refazer o estudo começando em cada janeiro de 2006 a
+2015, sempre até dez/2025. É o teste anti-cherry-picking mais direto que existe:
+uma conclusão que só sobrevive numa data de início é uma conclusão sobre a data de
+início.
+
+Prêmio em p.p. ao ano, por ano de entrada:
+
+| Início | Brasil | EUA | Europa | Japão | Global |
+|---|---|---|---|---|---|
+| 2006 | +2,26 | **+0,49** | +4,94 | +6,97 | +3,66 |
+| 2007 | +1,13 | −0,46 | +5,20 | +7,29 | +3,27 |
+| 2008 | +2,55 | −1,27 | +5,76 | +5,61 | +3,28 |
+| 2009 | +2,38 | −1,42 | +4,89 | +7,50 | +3,54 |
+| 2010 | +2,31 | −1,12 | +4,59 | +5,29 | +3,08 |
+| 2011 | +1,60 | −0,79 | +5,13 | +5,82 | +3,34 |
+| 2012 | +2,52 | −0,38 | +5,85 | +6,55 | +4,16 |
+| 2013 | +3,72 | −0,78 | +4,91 | +7,68 | +4,59 |
+| 2014 | +5,21 | −0,28 | +4,30 | +9,88 | +5,82 |
+| 2015 | +8,32 | −1,53 | +4,13 | +11,82 | +7,46 |
+| **positivas** | **10/10** | **1/10** | **10/10** | **10/10** | **10/10** |
+
+Duas leituras, em direções opostas.
+
+**O prêmio global sobrevive a todas as dez janelas**, entre +3,08 e +7,46 p.p. — e
+2006, o início que o estudo escolheu, é a **terceira pior** delas. A escolha de
+janela não está inflando o resultado; está deflacionando. A Europa é a região mais
+estável de todas, entre +4,13 e +5,85 sem uma única janela negativa.
+
+**E a vantagem americana some.** O +0,49 p.p. do placar principal é a **única
+janela positiva das dez**; começando em qualquer outro ano de 2007 a 2015, o
+índice americano vence os allocators. O veredito "mesmo risco, com prêmio" dos EUA
+é um artefato do ponto de partida, e passa a ser lido assim. Isso não enfraquece a
+descoberta central — **reforça**: a dispersão entre regiões é maior do que o placar
+de 2006 sugeria, não menor.
+
+### As escolhas de método decidem alguma coisa?
+
+**Ponta da PTAX.** A §5 converte tudo pela PTAX de venda. O spread parece
+cancelar no retorno — e cancelaria, se fosse constante. Não é: o spread médio do
+dólar era 0,46% em 2006 e é 0,011% desde 2020. Refazendo o estudo inteiro com a
+outra ponta:
+
+| Região | venda | compra | média | venda − compra |
+|---|---|---|---|---|
+| Brasil | +2,259 | +2,259 | +2,259 | 0,000 |
+| EUA | +0,489 | +0,489 | +0,489 | 0,000 |
+| Europa | +4,937 | +4,965 | +4,951 | −0,028 |
+| Japão | +6,968 | +6,991 | +6,980 | −0,023 |
+| **Global** | **+3,656** | +3,667 | +3,662 | **−0,011** |
+
+Efeito máximo: **0,028 p.p. ao ano**. A escolha não decide veredito nenhum. O que
+vale mais que a magnitude é *onde* o resíduo aparece — e ele confirma o mecanismo
+em vez de só reportar um número: zero no Brasil, que não tem câmbio; zero nos EUA,
+onde as duas pernas são USD e o spread cancela exatamente; e diferente de zero só
+na Europa e no Japão, onde o ETF liquida em dólar e o allocator não.
+
+**Data do aporte dentro do mês: não roda, e o motivo é dado.** A §2 congela o
+aporte no 1º dia útil ao fechamento. Mover esse dia exigiria preço diário dos doze
+ativos, e a série do Kabutan é mensal — o site publica ~14 meses de pregão a
+pregão e nada além. Mover o aporte só para os outros dez compararia estratégias
+com regras diferentes, que é exatamente o que `regras_congeladas()` existe para
+impedir. Fica declarado como limitação de dado, não como experimento omitido.
 
 ### O erro que estes números corrigem
 
@@ -280,9 +346,9 @@ quando o teste natural não tem poder, procurar a evidência de **nível** em ve
 de evento. A data-ex é um sinal de um dia competindo com ruído de um dia; o nível
 acumula vinte anos de diferença contra ruído nenhum.
 
-**Próximo passo:** rodar os experimentos de sensibilidade que restam — PTAX compra
-vs venda, data do aporte dentro do mês — e as janelas de início móvel (2006→2025,
-2007→2025, … 2015→2025) previstas na §9 da metodologia.
+**Próximo passo:** os dois tipos de experimento que a §7 prevê e ainda não
+rodaram — *Index Benchmark* (índices no lugar dos ETFs, sem taxa nem tracking
+error) e *Modern Alternative* —, e a camada de gráficos que a arquitetura promete.
 
 ## Setup
 
@@ -319,4 +385,6 @@ done
 capallo scoreboard      # placar multi-metrica das nove estrategias
 capallo decompose       # retorno entre ativo, cambio e inflacao
 capallo premium         # Allocator Premium por regiao, ao lado do risco
+capallo crises          # comportamento em recortes de crise datados por terceiros
+capallo sensitivity     # ponta da PTAX e janelas de inicio movel
 ```

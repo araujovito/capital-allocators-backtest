@@ -343,3 +343,68 @@ Vale registrar o padrão, porque foi ele que resolveu os dois casos do dia: quan
 teste natural não tem poder, **procurar a evidência de nível em vez de a de evento**.
 A data-ex é um sinal de um dia competindo com ruído de um dia; o nível acumula vinte
 anos de diferença contra ruído nenhum.
+
+## 2026-08-29 — Janelas de início: o prêmio global sobrevive, o americano não
+
+A §9 previa "múltiplas datas de início — 2006→2025, 2007→2025, … 2015→2025" desde
+antes de existir motor. Rodado agora, com o fim sempre em dez/2025: o que varia é
+quanto de história entra, não quanto sai.
+
+O resultado tem duas metades, em direções opostas, e as duas importam.
+
+**O prêmio global sobrevive às dez janelas**, entre +3,08 e +7,46 p.p. ao ano.
+Mais que isso: 2006, o início que o estudo escolheu antes de ver qualquer número,
+é a **terceira pior** das dez. A escolha de janela não infla o resultado do estudo
+— deflaciona. Europa é a região mais estável, entre +4,13 e +5,85, sem uma janela
+negativa. Brasil e Japão sobem forte com entradas tardias (+8,32 e +11,82 em 2015),
+o que é informação sobre 2015-2025 e não sobre gestão ativa.
+
+**A vantagem americana some.** O +0,49 p.p. do placar principal é a **única janela
+positiva das dez**; de 2007 a 2015, todo início entrega prêmio negativo nos EUA.
+O veredito "mesmo risco, com prêmio" era artefato do ponto de partida.
+
+Isso obriga a corrigir o README, e a correção **não** enfraquece a conclusão
+central: a dispersão entre regiões é maior do que o placar de 2006 sugeria. Vale
+registrar que a regra anti-cherry-picking funciona nos dois sentidos — ela impediu
+remover um ativo ruim, e aqui impede manter um veredito bom que só existe numa
+data de entrada.
+
+## 2026-08-29 — A ponta da PTAX não decide nada, e o resíduo prova por quê
+
+A §5 converte tudo pela PTAX de **venda**. O spread pareceria cancelar no retorno,
+já que todos os níveis usam a mesma ponta — mas só cancelaria se fosse constante,
+e não é: o spread médio do dólar era **0,46% em 2006** e é **0,011% desde 2020**.
+Um spread que encolhe deixa resíduo, com sinal conhecido: converter pela venda
+infla o nível inicial mais que o final, subestimando o retorno de todo ativo
+estrangeiro.
+
+Refeito o estudo inteiro com cada ponta, o efeito máximo no prêmio é de **0,028
+p.p. ao ano** (Europa), 0,011 no global. Não move veredito nenhum.
+
+O que vale mais que a magnitude é **onde** o resíduo aparece, porque isso testa o
+mecanismo em vez de só reportar um número:
+
+- **Brasil: exatamente zero.** Não há câmbio.
+- **EUA: exatamente zero.** As duas pernas liquidam em USD, e o spread cancela
+  entre allocator e ETF, não dentro de cada um.
+- **Europa e Japão: diferente de zero.** É onde o ETF liquida em dólar e o
+  allocator não — as duas pernas usam moedas diferentes, e aí o spread sobra.
+
+Um número pequeno pelo motivo errado seria robustez aparente. Este é pequeno pelo
+motivo certo.
+
+## 2026-08-29 — A data do aporte não roda, e a limitação é de dado
+
+A §2 congela o aporte no **1º dia útil do mês, no fechamento**, e o experimento
+natural é mover esse dia. Ele **não pode ser executado** com o dado que existe.
+
+O bloqueio é o Japão: a série do Kabutan é mensal. O site publica cerca de catorze
+meses de pregão a pregão e nada além, e as três rodadas de busca de
+`docs/spike-dados.md` não acharam fonte diária japonesa gratuita com vinte anos.
+Sem preço diário de 8058 e 8031, mover o aporte para os outros dez ativos
+compararia estratégias com regras diferentes — exatamente o que `regras_congeladas()`
+existe para impedir.
+
+Fica declarado como limitação de dado, não como experimento omitido. A diferença
+importa: a primeira é honesta sobre o alcance do estudo, a segunda seria silêncio
+sobre um resultado que não se quis ver.

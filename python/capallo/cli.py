@@ -54,6 +54,13 @@ def main(argv: list[str] | None = None) -> int:
     p_cr.add_argument("--results", default="data/results")
     p_cr.add_argument("--curated", default="data/curated")
     p_cr.add_argument("--strategies", default="strategies")
+    p_sn = sub.add_parser("sensitivity",
+                          help="quanto as escolhas de metodo decidem o resultado")
+    p_sn.add_argument("experimento", choices=["ptax", "janelas", "all"], nargs="?", default="all")
+    p_sn.add_argument("--curated", default="data/curated")
+    p_sn.add_argument("--engine-dir", default="engine")
+    p_sn.add_argument("--engine-data", default="data/engine")
+    p_sn.add_argument("--strategies", default="strategies")
     p_sb = sub.add_parser("scoreboard", help="placar comparativo entre estrategias")
     p_sb.add_argument("--results", default="data/results")
     p_sb.add_argument("--curated", default="data/curated")
@@ -416,6 +423,46 @@ def main(argv: list[str] | None = None) -> int:
             return 1
         print("\n  regras congeladas: todas as estrategias compartilham janela, "
               "aporte e regra de dividendo")
+        return 0
+
+    if args.command == "sensitivity":
+        from pathlib import Path
+
+        from capallo.analysis.sensitivity import janelas_de_inicio, ponta_da_ptax
+
+        curated, eng = Path(args.curated), Path(args.engine_dir)
+        strat, edata = Path(args.strategies), Path(args.engine_data)
+        ordem = ["Brasil", "EUA", "Europa", "Japão", "Global"]
+
+        if args.experimento in ("ptax", "all"):
+            print("PONTA DA PTAX — premio em p.p. a.a. por ponta de conversao\n")
+            df = ponta_da_ptax(curated, eng, strat)
+            piv = df.pivot(index="regiao", columns="ponta", values="premio_pp").reindex(ordem)
+            print(f"  {'regiao':<8}{'venda':>9}{'compra':>9}{'media':>9}{'venda-compra':>14}")
+            for regiao, r in piv.iterrows():
+                print(f"  {regiao:<8}{r['ask']:>9.3f}{r['bid']:>9.3f}{r['mid']:>9.3f}"
+                      f"{r['ask'] - r['bid']:>14.3f}")
+            print("\n  o residuo aparece so onde as duas pernas usam moedas diferentes:")
+            print("  Brasil nao tem cambio; nos EUA as duas pernas sao USD e o spread cancela")
+            print("  exatamente; na Europa e no Japao o ETF liquida em USD e o allocator nao.")
+            maior = piv.apply(lambda r: abs(r["ask"] - r["bid"]), axis=1).max()
+            print(f"  maior efeito: {maior:.3f} p.p. a.a. — a escolha nao decide"
+                  " veredito nenhum.")
+
+        if args.experimento in ("janelas", "all"):
+            print("\n\nJANELAS DE INICIO — premio em p.p. a.a., sempre ate dez/2025\n")
+            df = janelas_de_inicio(curated, eng, strat, edata)
+            piv = df.pivot(index="inicio", columns="regiao", values="premio_pp")[ordem]
+            print("  inicio " + "".join(f"{c:>9}" for c in ordem))
+            for ano, r in piv.iterrows():
+                print(f"  {ano:<7}" + "".join(f"{v:>9.2f}" for v in r))
+            n = len(piv)
+            print(f"\n  janelas com premio positivo, de {n}:")
+            for regiao in ordem:
+                pos = int((piv[regiao] > 0).sum())
+                marca = "  <-- o placar de 2006 e a unica janela positiva" if pos == 1 else ""
+                print(f"    {regiao:<8}{pos:>3}/{n}{marca}")
+
         return 0
 
     if args.command == "scoreboard":
