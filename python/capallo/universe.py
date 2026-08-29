@@ -73,13 +73,31 @@ INDICES: tuple[Asset, ...] = (
     Asset("MXJP", "MSCI Japan", Region.JP, Currency.USD, Currency.JPY, 0.30),
 )
 
+#: Experimento Modern Alternative (§7): o contrafactual com o produto que existe
+#: **hoje** e não existia em 2006 — um fundo global de índice, um ticker só,
+#: comprável em reais sem conta no exterior.
+#:
+#: A escolha do MSCI ACWI não é hindsight sobre qual mercado ganhou: o índice usa
+#: os pesos **contemporâneos** de cada data, então em 2006 ele carregava a
+#: participação americana de 2006, não a de hoje. O anacronismo está no **acesso
+#: ao produto**, não na regra do índice — e é exatamente esse o contrafactual. A
+#: ideia de comprar o mundo ponderado por capitalização já era recomendação de
+#: manual em 2006; o que faltava ao investidor brasileiro era o veículo.
+#:
+#: ⚠️ Viola a regra anti-cherry-picking **de propósito**, e por isso os resultados
+#: nunca se misturam com os do placar principal (§7).
+MODERN_ALTERNATIVE: tuple[Asset, ...] = (
+    Asset("ACWI", "MSCI ACWI", Region.US, Currency.USD, Currency.USD, 0.30),
+)
+
 #: Índice → ETF da mesma região, para medir o custo do produto.
 INDICE_DO_ETF: dict[str, str] = {
     "PIBB11": "IBXL", "IVV": "MXUS", "IEV": "MXEU", "EWJ": "MXJP",
 }
 
 BY_TICKER: dict[str, Asset] = {
-    a.ticker: a for a in (*CAPITAL_ALLOCATORS, *PASSIVE_ETFS, *INDICES)
+    a.ticker: a
+    for a in (*CAPITAL_ALLOCATORS, *PASSIVE_ETFS, *INDICES, *MODERN_ALTERNATIVE)
 }
 
 

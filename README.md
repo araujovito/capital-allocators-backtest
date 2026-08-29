@@ -8,6 +8,7 @@ aportes mensais entre **jan/2006 e dez/2025** (240 meses), três caminhos:
 | Gestão ativa | **Capital Allocators** — 8 empresas, 2 por região |
 | Gestão passiva | **ETFs** amplos dos mesmos 4 mercados |
 | Referência de mercado | **Índices** dos mesmos 4 mercados (experimento §7) |
+| Contrafactual moderno | **ACWI global**, o produto de hoje (experimento §7) |
 | Custo de oportunidade | **CDI** |
 | Régua de poder de compra | **IPCA** (não é investimento) |
 
@@ -340,6 +341,71 @@ que é o único arranjo compatível com **índice de retorno total** e **fundo q
 reinveste internamente** — característica declarada do PIBB11. As duas premissas
 estavam certas, e agora estão medidas.
 
+### Modern Alternative: e se ele pudesse comprar o produto de hoje?
+
+Os dois experimentos anteriores comparam a gestão ativa com o que existia em 2006
+— o ETF e o índice que ele replica. O terceiro pergunta outra coisa: **o allocator
+vence o que um brasileiro compraria hoje?** O contrafactual é um fundo global de
+índice: o mundo inteiro ponderado por capitalização, num ticker só, em reais, sem
+conta no exterior. Em 2006 isso não existia para ele; hoje é a recomendação padrão.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/tres-experimentos-dark.png">
+  <img alt="A mesma poupança por cinco caminhos, 2006-2025: Capital Allocators termina em 3,75x, o ACWI global em 3,09x, os índices regionais em 2,61x, os ETFs de 2006 em 2,49x e o CDI em 1,52x." src="docs/img/tres-experimentos-light.png">
+</picture>
+
+| Estratégia | Experimento | R$/R$ | Real a.a. | Vol. | Máx. DD | Sharpe |
+|---|---|---|---|---|---|---|
+| **Capital Allocators** | carteira ativa | **3,75** | **8,87%** | 13,2% | −18,7% | **0,38** |
+| ACWI global, produto de hoje | Modern Alternative | 3,09 | 6,56% | 15,4% | −26,9% | 0,21 |
+| Índices regionais, pesos iguais | Index Benchmark | 2,61 | 5,79% | 13,5% | −22,9% | 0,16 |
+| ETFs de 2006, pesos iguais | Historical Reality | 2,49 | 5,21% | 19,6% | −28,2% | 0,13 |
+| CDI | custo de oportunidade | 1,52 | 4,43% | 0,9% | 0,0% | 0,00 |
+
+**É o benchmark mais duro que o estudo consegue montar contra a própria tese**, e
+por um motivo estrutural. A perna passiva do placar principal tem quatro ETFs em
+pesos iguais, espelhando a construção da perna ativa — o que **subponderou os
+Estados Unidos exatamente no período em que os Estados Unidos ganharam de todo
+mundo**. O ACWI não faz isso: carrega o peso de mercado de cada região a cada
+data. É por isso que ele rende 6,56% contra 5,21% dos ETFs de 2006 e 5,79% dos
+índices regionais.
+
+E mesmo assim: **+2,31 p.p. ao ano para a carteira ativa, com 2,13 p.p. de
+volatilidade a menos e um drawdown máximo 8,3 p.p. mais raso.** Venceu em 55% das
+janelas de 1 ano, 61% de 3, 67% de 5 e 62% de 10.
+
+⚠️ Não é dominância confortável. Entre as 180 janelas de 5 anos, a pior para a
+carteira ativa começa em **set/2015** e custa **−7,6 p.p. ao ano** contra o ACWI —
+cinco anos de arrependimento para quem tivesse entrado ali. A melhor começa em
+mar/2011 e rende +8,1 p.p.
+
+#### O que é anacrônico aqui, e o que não é
+
+**Não há lookahead na regra do índice.** O MSCI ACWI usa os pesos contemporâneos
+de cada data: em 2006 ele carregava a participação americana de 2006, não a de
+hoje. O anacronismo está no **acesso ao veículo** — e é isso que o contrafactual
+existe para medir. Comprar o mundo ponderado por capitalização já era recomendação
+de manual em 2006; ao investidor brasileiro faltava o produto, não a ideia.
+
+O que **é** escolha nossa é a taxa de administração: 0,30% ao ano, a ponta cara da
+faixa dos fundos globais acessíveis hoje, porque escolher a ponta barata
+favoreceria o lado contra o qual a tese está sendo testada. E escolha conservadora
+não dispensa medir:
+
+| Taxa do produto | Moderna a.a. | R$/R$ | Prêmio da ativa |
+|---|---|---|---|
+| 0,06% | 6,82% | 3,19 | +2,05 p.p. |
+| **0,30%** (base) | **6,56%** | **3,09** | **+2,31 p.p.** |
+| 0,50% | 6,35% | 3,02 | +2,52 p.p. |
+
+A taxa move o prêmio entre +2,05 e +2,52 p.p. — não decide veredito nenhum.
+
+⚠️ Este experimento **viola a regra anti-cherry-picking de propósito**: o produto
+não existia na data de congelamento do universo. É o que o torna um contrafactual
+e não um resultado. Os três tipos de experimento aparecem juntos só na tabela e na
+figura acima, sempre com o tipo escrito ao lado — o que a §7 proíbe é tratar um
+número de um tipo como se fosse de outro.
+
 ### As escolhas de método decidem alguma coisa?
 
 **Ponta da PTAX.** A §5 converte tudo pela PTAX de venda. O spread parece
@@ -457,8 +523,14 @@ quando o teste natural não tem poder, procurar a evidência de **nível** em ve
 de evento. A data-ex é um sinal de um dia competindo com ruído de um dia; o nível
 acumula vinte anos de diferença contra ruído nenhum.
 
-**Próximo passo:** o *Modern Alternative*, último dos três tipos de experimento
-da §7 — o contrafactual com os produtos que existem hoje e não existiam em 2006.
+**Os três tipos de experimento da §7 estão rodados.** O estudo responde às três
+perguntas que se propôs: a gestão ativa venceu o produto de 2006 (sim, +3,66 p.p.),
+venceu o mercado (sim, +3,08 — exceto nos EUA, onde o prêmio era o produto) e
+venceria o produto de hoje (sim, +2,31, com menos risco).
+
+**Próximo passo:** o Tesouro IPCA+ como quarta perna, adiado desde o começo por
+introduzir duration e marcação a mercado — está registrado em `docs/decisions.md`
+como item de V2.
 
 ## Setup
 
@@ -500,5 +572,6 @@ capallo premium         # Allocator Premium por regiao, ao lado do risco
 capallo crises          # comportamento em recortes de crise datados por terceiros
 capallo sensitivity     # ponta da PTAX e janelas de inicio movel
 capallo index-benchmark # o indice no lugar do ETF (§7)
+capallo modern-alternative  # o produto que existe hoje (§7)
 capallo charts          # as quatro figuras, nos dois temas  (pip install -e "./python[charts]")
 ```

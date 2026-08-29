@@ -75,6 +75,12 @@ MSCI_URL = "https://app2.msci.com/products/service/index/indexmaster/getLevelDat
 #: Ticker do estudo → código MSCI. Os códigos foram lidos do próprio serviço.
 MSCI_CODES = {"MXUS": "984000", "MXEU": "990500", "MXJP": "939200"}
 
+#: Índice do experimento Modern Alternative (§7): o mundo inteiro, ponderado por
+#: capitalização, num ticker só. Fica separado de `MSCI_CODES` porque não é
+#: benchmark de ETF nenhum do estudo — é outro experimento, e §7 manda não
+#: misturar. A coluna `grupo` do parquet carrega essa separação adiante.
+MSCI_MODERN = {"ACWI": "892400"}
+
 #: Estatísticas históricas de índice da B3. O parâmetro é um JSON em base64.
 B3_URL = ("https://sistemaswebb3-listados.b3.com.br/indexStatisticsProxy/"
           "IndexCall/GetPortfolioDay/")
@@ -138,13 +144,15 @@ def build(out_dir: Path) -> pd.DataFrame:
     pessoa física, e a §4 congelou Brasil em zero.
     """
     frames = []
-    for ticker, code in MSCI_CODES.items():
-        bruto = fetch_msci(code, "GRTR")
-        preco = fetch_msci(code, "STRD")
-        frames.append(pd.DataFrame({
-            "date": bruto.index, "ticker": ticker,
-            "close_adj": bruto.to_numpy(), "close_px": preco.reindex(bruto.index).to_numpy(),
-        }))
+    for grupo, codigos in (("index", MSCI_CODES), ("modern", MSCI_MODERN)):
+        for ticker, code in codigos.items():
+            bruto = fetch_msci(code, "GRTR")
+            preco = fetch_msci(code, "STRD")
+            frames.append(pd.DataFrame({
+                "date": bruto.index, "ticker": ticker, "grupo": grupo,
+                "close_adj": bruto.to_numpy(),
+                "close_px": preco.reindex(bruto.index).to_numpy(),
+            }))
 
     ibxl = fetch_b3_index("IBXL", range(START.year, END.year + 1))
     mensal = ibxl.resample("ME").last().dropna()
@@ -152,7 +160,7 @@ def build(out_dir: Path) -> pd.DataFrame:
     # Índice brasileiro de retorno total: bruto e "preço puro" coincidem porque
     # não há retenção a aplicar. Repetir a coluna mantém o esquema uniforme.
     frames.append(pd.DataFrame({
-        "date": mensal.index, "ticker": "IBXL",
+        "date": mensal.index, "ticker": "IBXL", "grupo": "index",
         "close_adj": mensal.to_numpy(), "close_px": mensal.to_numpy(),
     }))
 
@@ -260,7 +268,7 @@ def validate(curated: Path) -> list[str]:
     df = pd.read_parquet(path)
 
     problemas = []
-    esperados = set(MSCI_CODES) | {"IBXL"}
+    esperados = set(MSCI_CODES) | set(MSCI_MODERN) | {"IBXL"}
     if set(df.ticker) != esperados:
         problemas.append(f"tickers {sorted(set(df.ticker))}, esperados {sorted(esperados)}")
 

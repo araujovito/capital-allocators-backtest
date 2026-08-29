@@ -50,6 +50,14 @@ def main(argv: list[str] | None = None) -> int:
     p_ib = sub.add_parser("index-benchmark", help="o allocator venceu o mercado ou o produto?")
     p_ib.add_argument("--results", default="data/results")
     p_ib.add_argument("--curated", default="data/curated")
+    p_ma = sub.add_parser("modern-alternative",
+                          help="contrafactual com o produto que existe hoje (§7)")
+    p_ma.add_argument("--results", default="data/results")
+    p_ma.add_argument("--curated", default="data/curated")
+    p_ma.add_argument("--engine-dir", default="engine")
+    p_ma.add_argument("--strategies", default="strategies")
+    p_ma.add_argument("--skip-ter", action="store_true",
+                      help="pula a sensibilidade da taxa, que roda o motor 3x")
     p_dc = sub.add_parser("decompose", help="retorno de cada ativo entre ativo, cambio e inflacao")
     p_dc.add_argument("--curated", default="data/curated")
     p_dc.add_argument("--engine", default="data/engine")
@@ -413,6 +421,43 @@ def main(argv: list[str] | None = None) -> int:
         print("\n  o que muda ao trocar o produto pelo mercado:")
         for frase in veredito(tabela) or ["  nenhum veredito inverte"]:
             print(f"  - {frase}" if veredito(tabela) else frase)
+        return 0
+
+    if args.command == "modern-alternative":
+        from pathlib import Path
+
+        import capallo.analysis.modern_alternative as ma
+
+        res, cur = Path(args.results), Path(args.curated)
+        print("  Modern Alternative (§7) — o produto que existe hoje e nao existia em 2006.")
+        print("  Os tres tipos de experimento NAO se misturam; aparecem juntos so aqui.\n")
+        print(f"  {'estrategia':<34}{'experimento':<24}{'R$/R$':>7}{'real a.a.':>11}"
+              f"{'vol':>8}{'maxDD':>8}{'Sharpe':>8}")
+        for _, r in ma.comparar(res, cur).iterrows():
+            print(f"  {r.estrategia:<34}{r.experimento:<24}{r.reais_por_real:6.2f}x"
+                  f"{r.real_aa * 100:10.2f}%{r.volatilidade * 100:7.2f}%"
+                  f"{r.max_drawdown * 100:7.1f}%{r.sharpe:8.2f}")
+
+        p = ma.premio_sobre_a_alternativa_moderna(res, cur)
+        print(f"\n  carteira ativa contra o ACWI: {p['premio_pp']:+.2f} p.p. ao ano,"
+              f" com {p['vol_extra_pp']:+.2f} p.p. de volatilidade")
+        print(f"  Sharpe {p['delta_sharpe']:+.2f}, drawdown maximo {p['delta_maxdd_pp']:+.1f} p.p.")
+        print("  vitorias em janelas moveis: " + "  ".join(
+            f"{anos}a {taxa:.0%}" for anos, taxa in p["vitorias"].items()))
+
+        pior = ma.pior_periodo_relativo(res, cur)
+        print(f"\n  entre {pior['janelas']} janelas de 5 anos, a pior para a carteira ativa"
+              f" comeca em {pior['pior_janela']}")
+        print(f"  e custa {pior['pior_diferenca_pp']:.1f} p.p.; a melhor comeca em"
+              f" {pior['melhor_janela']} e rende {pior['melhor_diferenca_pp']:+.1f} p.p.")
+
+        if not args.skip_ter:
+            print("\n  a taxa do produto moderno e premissa — o experimento em tres niveis:")
+            d = ma.sensibilidade_da_taxa(cur, Path(args.engine_dir), Path(args.strategies))
+            print(f"    {'taxa':>7}{'moderna a.a.':>15}{'R$/R$':>8}{'premio da ativa':>18}")
+            for _, r in d.iterrows():
+                print(f"    {r.ter:>6.2%}{r.moderna_aa * 100:>14.2f}%"
+                      f"{r.reais_por_real:>7.2f}x{r.premio_da_ativa_pp:>15.2f} p.p.")
         return 0
 
     if args.command == "decompose":

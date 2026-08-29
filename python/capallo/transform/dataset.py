@@ -34,6 +34,8 @@ CURRENCY = {
     # também a moeda em que os três ETFs estrangeiros liquidam: as duas pernas
     # atravessam o mesmo câmbio, e a comparação entre elas não vira aposta cambial.
     "IBXL": "BRL", "MXUS": "USD", "MXEU": "USD", "MXJP": "USD",
+    # Modern Alternative: o mundo num ticker só, liquidado em dólar.
+    "ACWI": "USD",
 }
 
 
@@ -84,6 +86,14 @@ def build(curated: Path, fx_side: str = "ask") -> pd.DataFrame:
 
     panel = pd.concat(frames, ignore_index=True)
     panel["currency"] = panel.ticker.map(CURRENCY)
+
+    # Ticker sem moeda vira NaN, e `groupby` descarta NaN sem avisar: o ativo
+    # simplesmente não chega ao motor, que só reclama quando uma estratégia pede
+    # por ele. Aconteceu ao entrar o ACWI. A guarda transforma o sumiço silencioso
+    # em erro no lugar certo.
+    orfaos = sorted(set(panel.ticker[panel.currency.isna()]))
+    if orfaos:
+        raise ValueError(f"tickers sem moeda declarada em CURRENCY: {orfaos}")
 
     # Conversão para BRL pela PTAX de venda da mesma data, moeda a moeda.
     # O `merge_asof` volta no tempo até a última PTAX publicada: o fim de mês de

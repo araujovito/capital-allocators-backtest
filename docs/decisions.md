@@ -479,3 +479,66 @@ comparou o índice a partir de 31/12/2005 com o ETF a partir de 02/01/2006 e
 produziu diferenças que embutiam **um mês inteiro de bolsa** — maior que o custo
 anual de qualquer ETF. Toda comparação do módulo passa agora por uma grade mensal
 comum, e a base é a mesma para as duas séries.
+
+## 2026-08-29 — Modern Alternative: o benchmark mais duro, e o allocator ainda vence
+
+Terceiro e último tipo de experimento da §7. O contrafactual é um fundo global de
+índice — MSCI ACWI, o mundo ponderado por capitalização num ticker só, em reais,
+sem conta no exterior. Em 2006 o investidor brasileiro não tinha isso; hoje é a
+recomendação padrão.
+
+### Por que é o benchmark mais duro do estudo
+
+A perna passiva do placar principal tem quatro ETFs em **pesos iguais**, espelhando
+a construção da perna ativa — oito empresas, duas por região. É uma comparação
+justa, e é uma comparação que **subponderou os Estados Unidos exatamente no período
+em que os Estados Unidos ganharam de todo mundo**. O ACWI carrega o peso de mercado
+de cada região a cada data e por isso rende 6,56% ao ano real contra 5,21% dos ETFs
+de 2006 e 5,79% dos índices regionais.
+
+Contra ele, a carteira ativa entrega **+2,31 p.p. ao ano, com 2,13 p.p. menos de
+volatilidade e drawdown máximo 8,3 p.p. mais raso** — vitórias em 55% / 61% / 67% /
+62% das janelas de 1, 3, 5 e 10 anos.
+
+Não é dominância confortável, e o número que mostra isso é o pior caso relativo:
+entre 180 janelas de cinco anos, a que começa em set/2015 custa **−7,6 p.p. ao ano**
+contra o ACWI. Cinco anos de arrependimento é tempo suficiente para a maioria das
+pessoas abandonar a estratégia — e quem abandona não colhe os vinte anos.
+
+### O anacronismo está no acesso, não na regra do índice
+
+Vale separar duas coisas que se confundem num contrafactual. Os pesos do ACWI em
+2006 são os de 2006: **não há lookahead na regra do índice**. E escolher "global
+ponderado por capitalização" como o padrão moderno também não é hindsight — era
+recomendação de manual em 2006. Ao investidor brasileiro faltava o **veículo**, e é
+isso que o experimento torna disponível.
+
+O que é escolha nossa é a taxa de administração, e ela ficou em 0,30% ao ano: a
+ponta cara da faixa dos produtos globais acessíveis hoje. A ponta barata
+favoreceria o lado contra o qual a tese está sendo testada, e não é assim que se
+testa uma tese. Medida em três níveis, a taxa move o prêmio entre +2,05 e +2,52
+p.p. — não decide veredito.
+
+### Um sumiço silencioso, achado por acaso
+
+Ao entrar no painel, o ACWI simplesmente **não chegou ao motor**. A causa: o mapa
+`CURRENCY` de `transform.dataset` não tinha o ticker, o `map` devolveu NaN, e o
+`groupby` por moeda descarta NaN sem avisar. O erro só apareceu adiante, como
+"sem preço para ACWI em 2006-01" — mensagem que aponta para o motor quando o
+problema estava três passos antes.
+
+Ficou uma guarda que transforma o sumiço em erro no lugar certo. Vale a
+generalização: **`groupby` silencioso sobre chave derivada é um lugar onde dado
+some sem deixar rastro**, e o pipeline já tinha uma coluna derivada por `map` em
+cada camada.
+
+### O estudo respondeu às três perguntas que se propôs
+
+- **Historical Reality** — venceu o produto que dava para comprar em 2006: +3,66 p.p.
+- **Index Benchmark** — venceu o mercado: +3,08 p.p., exceto nos EUA, onde o prêmio
+  inteiro era o produto.
+- **Modern Alternative** — venceria o produto de hoje: +2,31 p.p., com menos risco.
+
+Os três números caem nessa ordem, e a ordem é informativa: cada experimento
+sucessivo remove uma vantagem do lado ativo, e o que sobra depois dos três é o que
+o estudo pode chamar de gestão de capital.

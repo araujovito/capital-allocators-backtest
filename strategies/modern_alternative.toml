@@ -1,0 +1,36 @@
+# Modern Alternative (metodologia §7) — o contrafactual do produto que existe hoje
+# e nao existia em 2006: o mundo inteiro, ponderado por capitalizacao, num ticker
+# so, comprado em reais sem conta no exterior.
+#
+# O MSCI ACWI usa os pesos CONTEMPORANEOS de cada data: em 2006 ele carregava a
+# participacao americana de 2006, nao a de hoje. Nao ha lookahead na regra do
+# indice — o anacronismo esta no ACESSO ao produto, que e justamente o
+# contrafactual. Comprar o mundo ponderado por capitalizacao ja era recomendacao
+# de manual em 2006; ao investidor brasileiro faltava o veiculo.
+#
+# A serie ja entra liquida da retencao de 30% da §4 e da taxa de administracao do
+# produto — ver `transform.build_indices`.
+#
+# ⚠️ Viola a regra anti-cherry-picking DE PROPOSITO. Resultados dos tipos de
+# experimento nunca se misturam (§7): isto nao entra no placar principal.
+[strategy]
+name = "Modern Alternative"
+start = "2006-01-01"
+end = "2025-12-31"
+base_currency = "BRL"
+dividends = "reinvest"
+
+[strategy.contribution]
+amount = 1000.0
+frequency = "monthly"
+mode = "real"
+inflation_index = "IPCA"
+adjustment = "annual"
+
+[strategy.rebalance]
+method = "none"
+allow_selling = false
+
+[[strategy.weights]]
+ticker = "ACWI"
+weight = 1.0

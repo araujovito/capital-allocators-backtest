@@ -434,6 +434,7 @@ FIGURAS = {
     "decomposicao": "quanto do retorno veio da empresa e quanto da moeda",
     "janelas-moveis": "com que frequência os allocators venceram",
     "index-benchmark": "quanto do prêmio era o mercado e quanto era o produto",
+    "tres-experimentos": "a mesma poupança pelos cinco caminhos possíveis",
 }
 
 
@@ -457,6 +458,8 @@ def build_all(
         from capallo.analysis.index_benchmark import comparar
 
         saidas += index_benchmark(comparar(resultados, curated), out_dir)
+    if (resultados / "modern_alternative.csv").exists():
+        saidas += tres_experimentos(resultados, curated, out_dir)
     if premios is not None:
         saidas += janelas_de_inicio(premios, out_dir)
     return saidas
@@ -526,4 +529,63 @@ def index_benchmark(tabela: pd.DataFrame, out_dir: Path) -> list[Path]:
                  color=t.muted, fontsize=9.5, ha="left")
         fig.tight_layout()
         saidas.append(_salvar(fig, out_dir, "index-benchmark", t))
+    return saidas
+
+
+#: Rótulo → arquivo de resultado, na ordem em que as linhas terminam. Cor segue a
+#: entidade: a carteira ativa fica no slot 1, como em todas as outras figuras.
+CAMINHOS = (
+    ("Capital Allocators", "capital_allocators"),
+    ("ACWI global, produto de hoje", "modern_alternative"),
+    ("Índices regionais", "passive_indices"),
+    ("ETFs de 2006", "passive_etfs"),
+    ("CDI", "cdi"),
+)
+
+
+def tres_experimentos(resultados: Path, curated: Path, out_dir: Path) -> list[Path]:
+    """A mesma poupança por cinco caminhos, entre os três tipos de experimento.
+
+    É a única figura em que os três tipos aparecem juntos, e por isso cada linha
+    carrega no rótulo de qual deles ela vem. A §7 proíbe **misturar resultados**
+    — tratar um número de um tipo como se fosse de outro —, não mostrá-los lado a
+    lado com o rótulo à vista, que é justamente o contrário de misturar.
+    """
+    series = {arq: poder_de_compra(resultados / f"{arq}.csv", curated)
+              for _, arq in CAMINHOS}
+
+    saidas = []
+    for t in TEMAS:
+        fig, ax = plt.subplots(figsize=(10.0, 5.8))
+        _base(t, fig, [ax])
+
+        x = next(iter(series.values())).index.to_timestamp()
+        for i, (rotulo, arq) in enumerate(CAMINHOS):
+            v = series[arq].to_numpy()
+            ax.plot(x, v, color=t.series[i], linewidth=2.0,
+                    solid_joinstyle="round", solid_capstyle="round", zorder=3)
+            ax.plot([x[-1]], [v[-1]], marker="o", markersize=5, color=t.series[i],
+                    markeredgecolor=t.surface, markeredgewidth=2.0, zorder=5)
+            ax.annotate(f"{_num(v[-1], 2, 'x')}  {rotulo}", xy=(x[-1], v[-1]),
+                        xytext=(10, -4), textcoords="offset points", ha="left",
+                        fontsize=9.5, color=t.ink2, fontweight="bold")
+
+        ax.axhline(1.0, color=t.axis, linewidth=1.0, zorder=1)
+        ax.set_xlim(x[0], x[-1] + (x[-1] - x[0]) * 0.42)
+        anos = list(range(2008, 2025, 4))
+        # Rótulo explícito: sem ele o eixo escreve a data inteira, e "2008-01-01"
+        # é ruído — o dia não significa nada numa série mensal de vinte anos.
+        ax.set_xticks([pd.Timestamp(f"{a}-01-01") for a in anos],
+                      [str(a) for a in anos])
+        ax.set_ylabel("reais de poder de compra por real aportado",
+                      color=t.muted, fontsize=9.5)
+
+        fig.suptitle("A mesma poupança, cinco caminhos",
+                     color=t.ink, fontsize=13, x=0.02, ha="left", y=1.03)
+        fig.text(0.02, 0.965,
+                 "aportes mensais corrigidos pelo IPCA, 2006-2025 · a linha fina marca "
+                 "1,00x, onde o poder de compra apenas se preserva",
+                 color=t.muted, fontsize=9.5, ha="left")
+        fig.tight_layout()
+        saidas.append(_salvar(fig, out_dir, "tres-experimentos", t))
     return saidas
