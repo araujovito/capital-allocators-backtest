@@ -2,7 +2,6 @@
 
 import pandas as pd
 import pytest
-
 from capallo.transform.total_return import WITHHOLDING, build_series, next_session
 
 

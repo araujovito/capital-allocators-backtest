@@ -779,3 +779,64 @@ trabalho direito são pagas e carregam o viés do item 3.
 
 Fica como limitação declarada, no mesmo formato das outras: não é experimento
 omitido por conveniência, é experimento sem insumo que o sustente.
+
+## 2026-08-31 — CI: o que o portão verifica, e o que ele declaradamente não verifica
+
+Até aqui o repositório tinha um único workflow, `probe.yml`, que testa se as
+fontes de dados respondem — e nada que verificasse se a árvore compila e passa
+nos testes fora desta máquina. Um estudo cuja conclusão depende de código é uma
+afirmação sobre código; sem CI, a única evidência de que ele roda é a palavra de
+quem escreveu.
+
+### A separação que tornou o CI possível
+
+O obstáculo era que 73 dos 154 testes leem `data/`, que não vai para o git — os
+painéis são grandes e parte das fontes não permite redistribuição. Sem separação,
+o CI só teria duas saídas ruins: vermelho permanente, ou uma suíte inteira pulada
+em silêncio.
+
+A saída foi a marca `dados`, registrada em `pytest.ini` na raiz (e não no
+`pyproject` do pacote — o rootdir do pytest é o repositório, e registrada no lugar
+errado a marca vira `PytestUnknownMarkWarning` e o filtro não seleciona nada). O
+CI roda `pytest -m "not dados"`: 81 testes de lógica pura. A suíte completa roda
+na máquina de quem já coletou.
+
+Marcar é melhor que pular condicionalmente: o teste continua existindo, some da
+contagem só onde o insumo não existe, e a razão fica escrita no módulo.
+
+### Lint: o conjunto de regras é declarado por extenso
+
+O `ruff.toml` da raiz substitui o `[tool.ruff]` que morava no `pyproject` do
+pacote — `tests/` fica fora do pacote e precisava da mesma regra, e duas fontes de
+verdade divergem sem avisar. As regras são listadas uma a uma porque o default do
+ruff muda entre versões, e um lint que muda sozinho de opinião produz CI vermelho
+em commit que não encostou no código.
+
+Duas famílias ficam de fora por decisão: `E501` (os docstrings em português são o
+produto principal de vários módulos, e quebrar frase para caber em 100 colunas
+piora o texto) e `RUF001-003` (`×` e `−` estão na notação de propósito).
+
+Os 12 achados que a limpeza corrigiu eram quase todos cosméticos, com uma exceção
+que valia o exercício: seis `zip()` sem `strict=`. Todos casavam colunas do mesmo
+DataFrame ou dois arrays do mesmo JSON — pares de mesmo comprimento *por
+suposição*. `strict=True` transforma a suposição em verificação. O caso do
+`onvista` é o que dói: `datetimeLast` e `last` chegando com tamanhos diferentes
+alinharia preço com a data errada, em silêncio, e o erro apareceria como retorno.
+
+No motor, `cargo clippy -- -D warnings` acusou seis campos nunca lidos. Eles ficam,
+porque o parse os valida: um `base_currency` inválido no TOML falha na leitura da
+estratégia, e não doze meses depois no resultado. Levam `#[expect(dead_code)]` com
+o motivo escrito — `expect` e não `allow`, para o compilador avisar quando o motor
+passar a ler o campo e a anotação sobrar.
+
+### mypy fica de fora, e isso é dívida declarada
+
+`mypy python/capallo` acusa 114 erros em 37 arquivos. A maioria não é bug: os
+subcomandos da CLI importam funções localmente, e mypy vê o mesmo nome com
+assinaturas diferentes no mesmo escopo de módulo.
+
+Não entra no portão porque pagar a dívida é trabalho de refatoração da CLI, e um
+CI que vive vermelho não é sinal de nada — vira ruído que se aprende a ignorar,
+e aí o teste que quebrou de verdade passa despercebido. Fica registrado aqui como
+dívida, no mesmo formato das outras limitações do estudo: não é esquecimento, é
+uma escolha com prazo em aberto.

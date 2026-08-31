@@ -57,8 +57,8 @@ def render(probes: list[Probe]) -> str:
             continue
         covers = "sim" if p.first_date and p.first_date <= STUDY_START else "NAO"
         lines.append(
-            f"{p.symbol:<12}{p.currency or '?':<7}{str(p.first_date):<12}{covers:<13}"
-            f"{p.n_dividends:<7}{str(p.first_dividend or '-'):<12}{p.n_splits:<8}"
+            f"{p.symbol:<12}{p.currency or '?':<7}{p.first_date!s:<12}{covers:<13}"
+            f"{p.n_dividends:<7}{p.first_dividend or '-'!s:<12}{p.n_splits:<8}"
             f"{'sim' if p.has_adjclose else 'NAO':<5}"
         )
 

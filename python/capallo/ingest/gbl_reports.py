@@ -41,7 +41,7 @@ REPORTS: tuple[tuple[str, int], ...] = (
     ("https://www.gbl.com/en/media/2754/GBL_RA2015_EN_LR.pdf", 2015),
 )
 
-ROW_LABEL = re.compile(r"Gross dividend\s*\(in EUR\)\s*(.+)", re.I)
+ROW_LABEL = re.compile(r"Gross dividend\s*\(in EUR\)\s*(.+)", re.IGNORECASE)
 YEARS_PER_TABLE = 10
 
 
@@ -64,7 +64,7 @@ def extract(pdf: Path, latest_year: int) -> pd.DataFrame:
             text = page.extract_text() or ""
         except Exception:  # página com fonte que o extrator não abre
             continue
-        for line in (l.strip() for l in text.splitlines() if l.strip()):
+        for line in (ln.strip() for ln in text.splitlines() if ln.strip()):
             m = ROW_LABEL.match(line)
             if not m:
                 continue

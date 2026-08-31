@@ -4,9 +4,14 @@ from datetime import date
 
 import pandas as pd
 import pytest
-
 from capallo.ingest.bacen import PTAX_CURRENCIES, SGS_SERIES
 from capallo.ingest.macro import DEFAULT_START, validate
+
+#: Este módulo lê `data/`, que não é versionado — ver o `.gitignore`. O CI roda
+#: `pytest -m "not dados"` e cobre a lógica pura; a suíte inteira roda na máquina
+#: de quem já coletou. Marcar é melhor que pular em silêncio: o teste continua
+#: existindo e some da contagem só onde o insumo não existe.
+pytestmark = pytest.mark.dados
 
 
 def test_series_necessarias_mapeadas():
@@ -16,7 +21,7 @@ def test_series_necessarias_mapeadas():
 
 def test_janela_comeca_antes_do_estudo():
     """O primeiro reajuste do aporte precisa do IPCA do periodo anterior."""
-    assert DEFAULT_START < date(2006, 1, 1)
+    assert date(2006, 1, 1) > DEFAULT_START
 
 
 def test_validate_detecta_ipca_incompleto(tmp_path):
@@ -61,8 +66,8 @@ def test_curated_real_se_existir(path):
 
 def test_equities_us_validate_detecta_meses_faltando(tmp_path):
     import pandas as pd
-
-    from capallo.ingest.equities import US_LISTED, validate as eq_validate
+    from capallo.ingest.equities import US_LISTED
+    from capallo.ingest.equities import validate as eq_validate
 
     meses = pd.date_range("2006-01-01", "2025-12-01", freq="MS")
     frames = []
@@ -82,7 +87,6 @@ def test_equities_us_reais_se_existirem():
     from pathlib import Path
 
     import pytest
-
     from capallo.ingest.equities import validate as eq_validate
 
     curated = Path(__file__).resolve().parents[1] / "data" / "curated"
@@ -95,12 +99,11 @@ def test_b3_aceita_codbdi_de_etf():
     """PIBB11 e classificado como certificado de investimento (14), nao lote padrao."""
     from capallo.ingest.b3 import CODBDI_ACEITOS
 
-    assert CODBDI_ACEITOS == {"02", "14"}
+    assert {"02", "14"} == CODBDI_ACEITOS
 
 
 def test_b3_validate_detecta_divergencia_entre_tickers(tmp_path):
     import pandas as pd
-
     from capallo.ingest.b3 import validate as b3_validate
 
     dias = pd.bdate_range("2006-01-02", "2025-12-30")
@@ -117,7 +120,6 @@ def test_b3_real_se_existir():
     from pathlib import Path
 
     import pytest
-
     from capallo.ingest.b3 import validate as b3_validate
 
     curated = Path(__file__).resolve().parents[1] / "data" / "curated"
@@ -138,7 +140,6 @@ def test_b3_events_converte_numero_brasileiro():
 def test_detecta_desdobramento_e_ignora_alta_de_mercado(tmp_path):
     """Queda de 50% e evento; alta de 25% em crise nao e."""
     import pandas as pd
-
     from capallo.ingest.b3_events import detect_unrecorded_events, reconcile
 
     dias = pd.bdate_range("2007-01-01", periods=10)
@@ -164,7 +165,6 @@ def test_detecta_desdobramento_e_ignora_alta_de_mercado(tmp_path):
 def test_kabutan_converte_ano_de_dois_digitos():
     """Kabutan usa AA/MM/DD: 06/01/31 e janeiro de 2006, nao de 1906."""
     import pandas as pd
-
     from capallo.ingest.kabutan import _to_date
 
     assert _to_date("06/01/31") == pd.Timestamp("2006-01-31")
@@ -173,7 +173,6 @@ def test_kabutan_converte_ano_de_dois_digitos():
 
 def test_intl_validate_flagra_mes_faltando(tmp_path):
     import pandas as pd
-
     from capallo.ingest.international import validate as intl_validate
 
     meses = pd.date_range("2006-01-31", periods=239, freq="ME")

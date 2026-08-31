@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass, field
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 
 import requests
 
@@ -46,13 +46,13 @@ class Probe:
 
 
 def _to_date(ts: int) -> date:
-    return datetime.fromtimestamp(ts, tz=timezone.utc).date()
+    return datetime.fromtimestamp(ts, tz=UTC).date()
 
 
 def probe(symbol: str, start: str = "1995-01-01", session: requests.Session | None = None) -> Probe:
     """Interroga um símbolo e resume a evidência disponível."""
     sess = session or requests.Session()
-    period1 = int(datetime.fromisoformat(start).replace(tzinfo=timezone.utc).timestamp())
+    period1 = int(datetime.fromisoformat(start).replace(tzinfo=UTC).timestamp())
     params = {
         "period1": period1,
         "period2": int(time.time()),

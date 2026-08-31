@@ -146,7 +146,7 @@ def accumulate(
         liquido[dia] = liquido.get(dia, 0.0) + float(r.value) * (1 - withholding)
 
     units, rows = 1.0, []
-    for dia, preco in zip(px.date, px.close):
+    for dia, preco in zip(px.date, px.close, strict=True):
         pago = liquido.get(dia, 0.0)
         if pago and preco > 0:
             units += units * pago / preco

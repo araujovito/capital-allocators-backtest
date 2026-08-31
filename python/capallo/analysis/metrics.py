@@ -118,9 +118,8 @@ def sortino(returns: pd.Series, rf_monthly: pd.Series) -> float:
     # apareceria como se não tivesse risco algum.
     downside = np.minimum(excess, 0.0)
     dd = float(np.sqrt((downside ** 2).mean()))
-    if dd < NOISE_FLOOR:
-        if abs(float(excess.mean())) < NOISE_FLOOR:
-            return 0.0
+    if dd < NOISE_FLOOR and abs(float(excess.mean())) < NOISE_FLOOR:
+        return 0.0
     if dd == 0.0:
         # Nenhum mês abaixo do CDI: o risco de baixa medido é zero. Infinito diz
         # "não houve downside"; NaN diria "não sei", que é informação diferente.

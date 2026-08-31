@@ -6,17 +6,17 @@ resultado ruim não é motivo para remover um ativo.
 """
 
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 
 
-class Region(str, Enum):
+class Region(StrEnum):
     BR = "BR"
     US = "US"
     EU = "EU"
     JP = "JP"
 
 
-class Currency(str, Enum):
+class Currency(StrEnum):
     BRL = "BRL"
     USD = "USD"
     SEK = "SEK"

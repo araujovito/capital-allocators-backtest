@@ -24,8 +24,6 @@ sugere.
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import pandas as pd
 
 #: Retenção na fonte por tipo de provento, na ótica do investidor pessoa física.
@@ -64,7 +62,7 @@ def build_series(
     if px.empty:
         raise ValueError(f"sem preços para {ticker}")
     sessions = pd.DatetimeIndex(px.date)
-    price_of = dict(zip(px.date, px.close))
+    price_of = dict(zip(px.date, px.close, strict=True))
 
     # A série de preço é da classe PN; só proventos dessa classe contam.
     # astype(str) protege o caso sem proventos, em que a coluna vem sem dtype de texto.
@@ -92,7 +90,7 @@ def build_series(
                 kind_by_day[ex] = kind_by_day.get(ex, 0.0) + float(r.value_per_share)
 
     units_add = div.groupby("ex").apply(
-        lambda g: sum(v * (1 - WITHHOLDING.get(k, 0.0)) for v, k in zip(g.value, g.kind)),
+        lambda g: sum(v * (1 - WITHHOLDING.get(k, 0.0)) for v, k in zip(g.value, g.kind, strict=True)),
         include_groups=False,
     ).to_dict()
     unit_mult = ev.groupby("ex").apply(

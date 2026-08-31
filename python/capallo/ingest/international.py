@@ -19,9 +19,12 @@ from pathlib import Path
 
 import pandas as pd
 
-from capallo.ingest.avanza import ORDERBOOKS, fetch_monthly as fetch_se
-from capallo.ingest.kabutan import TOKYO_CODES, fetch_monthly as fetch_jp
-from capallo.ingest.onvista import INSTRUMENTS, fetch_daily as fetch_be
+from capallo.ingest.avanza import ORDERBOOKS
+from capallo.ingest.avanza import fetch_monthly as fetch_se
+from capallo.ingest.kabutan import TOKYO_CODES
+from capallo.ingest.kabutan import fetch_monthly as fetch_jp
+from capallo.ingest.onvista import INSTRUMENTS
+from capallo.ingest.onvista import fetch_daily as fetch_be
 
 EXPECTED_MONTHS = 240
 WINDOW = ("2006-01", "2025-12")

@@ -26,8 +26,5 @@ capallo = "capallo.cli:main"
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
-[tool.ruff]
-line-length = 100
-
-[tool.pytest.ini_options]
-testpaths = ["../tests"]
+# Lint e pytest sao configurados na raiz do repositorio (`ruff.toml`, `pytest.ini`),
+# porque ambos precisam enxergar `tests/`, que fica fora deste pacote.

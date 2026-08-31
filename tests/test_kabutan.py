@@ -7,7 +7,14 @@ maior prêmio do estudo.
 """
 
 import pandas as pd
+import pytest
 from capallo.ingest.kabutan import veredito_da_serie
+
+#: Este módulo lê `data/`, que não é versionado — ver o `.gitignore`. O CI roda
+#: `pytest -m "not dados"` e cobre a lógica pura; a suíte inteira roda na máquina
+#: de quem já coletou. Marcar é melhor que pular em silêncio: o teste continua
+#: existindo e some da contagem só onde o insumo não existe.
+pytestmark = pytest.mark.dados
 
 
 def _conf(razoes, ticker="8058"):

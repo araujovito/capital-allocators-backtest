@@ -107,7 +107,11 @@ fn split_contribution(
 pub fn run(strategy: &Strategy, ds: &Dataset) -> Result<Vec<MonthState>> {
     let months = ds.window(&strategy.start, &strategy.end);
     if months.is_empty() {
-        bail!("nenhum mês no dataset dentro de {} a {}", strategy.start, strategy.end);
+        bail!(
+            "nenhum mês no dataset dentro de {} a {}",
+            strategy.start,
+            strategy.end
+        );
     }
 
     let rebalancing_enabled = matches!(strategy.rebalance.method, RebalanceMethod::ViaContribution);
@@ -242,7 +246,10 @@ mod tests {
             dividends: crate::strategy::DividendPolicy::Reinvest,
             weights: weights
                 .into_iter()
-                .map(|(t, w)| Weight { ticker: t.into(), weight: w })
+                .map(|(t, w)| Weight {
+                    ticker: t.into(),
+                    weight: w,
+                })
                 .collect(),
         }
     }
@@ -260,7 +267,10 @@ mod tests {
     fn rebalanceamento_direciona_ao_subponderado() {
         // Carteira 900/100 com alvo 50/50: o aporte deve ir todo para B, que está
         // muito abaixo do alvo, sem que nada precise ser vendido.
-        let s = strategy(vec![("A", 0.5), ("B", 0.5)], RebalanceMethod::ViaContribution);
+        let s = strategy(
+            vec![("A", 0.5), ("B", 0.5)],
+            RebalanceMethod::ViaContribution,
+        );
         let values = HashMap::from([("A".to_string(), 900.0), ("B".to_string(), 100.0)]);
         let split = split_contribution(&s, &values, 1000.0, 100.0, true);
         assert!((split["B"] - 100.0).abs() < 1e-9);
@@ -270,11 +280,17 @@ mod tests {
     #[test]
     fn rebalanceamento_com_sobra_distribui_pelos_pesos() {
         // Déficit de B é 10; o aporte de 100 cobre e sobra 90, rateado 50/50.
-        let s = strategy(vec![("A", 0.5), ("B", 0.5)], RebalanceMethod::ViaContribution);
+        let s = strategy(
+            vec![("A", 0.5), ("B", 0.5)],
+            RebalanceMethod::ViaContribution,
+        );
         let values = HashMap::from([("A".to_string(), 550.0), ("B".to_string(), 450.0)]);
         let split = split_contribution(&s, &values, 1000.0, 100.0, true);
         let total: f64 = split.values().sum();
-        assert!((total - 100.0).abs() < 1e-9, "o aporte inteiro precisa ser alocado");
+        assert!(
+            (total - 100.0).abs() < 1e-9,
+            "o aporte inteiro precisa ser alocado"
+        );
         assert!(split["B"] > split["A"], "o subponderado recebe mais");
     }
 
@@ -298,12 +314,21 @@ mod tests {
         // Invariante: o patrimônio publicado tem de ser a soma das posições.
         // Sem isso, a contribuição individual de cada ativo (seção 20) não
         // reconciliaria com o resultado da carteira.
-        let s = strategy(vec![("A", 0.5), ("B", 0.5)], RebalanceMethod::ViaContribution);
+        let s = strategy(
+            vec![("A", 0.5), ("B", 0.5)],
+            RebalanceMethod::ViaContribution,
+        );
         let ds = dataset_plano(&["2006-01", "2006-02", "2006-03"], &["A", "B"], 10.0);
         let states = run(&s, &ds).expect("simulação");
         for st in &states {
             let soma: f64 = st.positions.iter().map(|p| p.value).sum();
-            assert!((soma - st.value).abs() < 1e-6, "mês {}: {} != {}", st.month, soma, st.value);
+            assert!(
+                (soma - st.value).abs() < 1e-6,
+                "mês {}: {} != {}",
+                st.month,
+                soma,
+                st.value
+            );
         }
     }
 
@@ -322,7 +347,10 @@ mod tests {
 
     #[test]
     fn carteira_vazia_nao_quebra_o_rebalanceamento() {
-        let s = strategy(vec![("A", 0.5), ("B", 0.5)], RebalanceMethod::ViaContribution);
+        let s = strategy(
+            vec![("A", 0.5), ("B", 0.5)],
+            RebalanceMethod::ViaContribution,
+        );
         let split = split_contribution(&s, &HashMap::new(), 0.0, 100.0, true);
         let total: f64 = split.values().sum();
         assert!((total - 100.0).abs() < 1e-9);

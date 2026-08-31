@@ -41,7 +41,7 @@ def test_os_dois_temas_tem_a_mesma_quantidade_de_slots():
 
 def test_a_lista_de_allocators_acompanha_o_universo():
     """Se o universo mudasse, o halter pintaria um allocator com a cor de ETF."""
-    assert ALLOCATORS == {a.ticker for a in CAPITAL_ALLOCATORS}
+    assert {a.ticker for a in CAPITAL_ALLOCATORS} == ALLOCATORS
 
 
 def test_as_regioes_das_figuras_sao_as_mesmas_em_toda_parte():
@@ -57,6 +57,7 @@ def test_toda_figura_declarada_tem_um_proposito_escrito():
     assert all(v and not v.endswith(".") for v in FIGURAS.values())
 
 
+@pytest.mark.dados
 def test_a_curva_desenhada_termina_no_numero_da_tabela(tmp_path):
     """A figura e o placar do README têm de contar a mesma coisa.
 
@@ -74,6 +75,7 @@ def test_a_curva_desenhada_termina_no_numero_da_tabela(tmp_path):
     )
 
 
+@pytest.mark.dados
 def test_gera_os_dois_temas_em_arquivos_separados(tmp_path):
     """Fumaça: a figura renderiza de ponta a ponta e sai nos dois modos."""
     from pathlib import Path
@@ -84,6 +86,7 @@ def test_gera_os_dois_temas_em_arquivos_separados(tmp_path):
     assert all(p.stat().st_size > 5_000 for p in saidas)
 
 
+@pytest.mark.dados
 def test_win_rate_alimenta_a_matriz_com_percentuais_plausiveis():
     """Uma fração virando percentual duas vezes daria 0,49% em vez de 49%."""
     from pathlib import Path
@@ -96,6 +99,7 @@ def test_win_rate_alimenta_a_matriz_com_percentuais_plausiveis():
     assert v > 50, "a Europa é a região em que a gestão ativa mais venceu"
 
 
+@pytest.mark.dados
 def test_a_serie_do_grafico_e_uma_serie_mensal_continua():
     """Buraco no meio viraria linha reta atravessando anos, sem aviso."""
     from pathlib import Path

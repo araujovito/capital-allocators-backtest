@@ -86,7 +86,7 @@ def fetch_daily(
         r.raise_for_status()
         payload = r.json()
         stamps, closes = payload.get("datetimeLast") or [], payload.get("last") or []
-        for ts, close in zip(stamps, closes):
+        for ts, close in zip(stamps, closes, strict=True):
             rows.append(
                 {"date": dt.datetime.fromtimestamp(ts, dt.UTC).date(), "close": close}
             )

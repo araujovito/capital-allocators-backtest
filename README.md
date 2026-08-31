@@ -1,5 +1,7 @@
 # Capital Allocators vs Passive Investing
 
+[![ci](https://github.com/araujovito/capital-allocators-backtest/actions/workflows/ci.yml/badge.svg)](https://github.com/araujovito/capital-allocators-backtest/actions/workflows/ci.yml)
+
 Sistema de backtesting que compara, sob a ótica de um **investidor brasileiro** com
 aportes mensais entre **jan/2006 e dez/2025** (240 meses), três caminhos:
 
@@ -811,7 +813,8 @@ capallo build-indices       # aplica a retencao da §4 aos indices
 capallo fetch-se-dividends  # proventos de INVE-B e o teste de data-ex da serie sueca
 capallo build-intl      # monta e valida o total return de Europa e Japao
 capallo export-dataset  # painel mensal em BRL para o motor Rust
-pytest tests/
+pytest              # a suite inteira (154 testes; exige `data/` coletado)
+pytest -m "not dados"   # so a logica pura (81 testes) — e o que o CI roda
 
 # Motor
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh

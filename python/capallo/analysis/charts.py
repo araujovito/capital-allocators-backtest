@@ -167,7 +167,7 @@ def crescimento(resultados: Path, curated: Path, out_dir: Path) -> list[Path]:
         fig, axes = plt.subplots(2, 2, figsize=FIGSIZE, sharex=True, sharey=True)
         _base(t, fig, axes.ravel())
 
-        for ax, (regiao, alloc, etf) in zip(axes.ravel(), REGIOES):
+        for ax, (regiao, alloc, etf) in zip(axes.ravel(), REGIOES, strict=True):
             x = series[alloc].index.to_timestamp()
             for chave, slot in ((alloc, ALLOC), (etf, ETF), ("cdi", CDI)):
                 ax.plot(x, series[chave].to_numpy(), color=t.series[slot],

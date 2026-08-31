@@ -6,11 +6,11 @@ rolagem, e a separação entre retorno ponderado por tempo e por dinheiro, que �
 achado desta perna.
 """
 
+import tomllib
 from pathlib import Path
 
 import pandas as pd
 import pytest
-import tomllib
 from capallo.analysis.renda_fixa import (
     PERIODOS,
     inversoes,
@@ -20,6 +20,12 @@ from capallo.analysis.renda_fixa import (
 from capallo.ingest.tesouro import TITULO
 from capallo.transform.build_tesouro import REGRAS, build_index, comparar_regras
 from capallo.universe import BY_TICKER, RENDA_FIXA
+
+#: Este módulo lê `data/`, que não é versionado — ver o `.gitignore`. O CI roda
+#: `pytest -m "not dados"` e cobre a lógica pura; a suíte inteira roda na máquina
+#: de quem já coletou. Marcar é melhor que pular em silêncio: o teste continua
+#: existindo e some da contagem só onde o insumo não existe.
+pytestmark = pytest.mark.dados
 
 CURATED, RESULTS, STRATEGIES = Path("data/curated"), Path("data/results"), Path("strategies")
 

@@ -15,6 +15,12 @@ import pandas as pd
 import pytest
 from capallo.analysis.scoreboard import evaluate
 
+#: Este módulo lê `data/`, que não é versionado — ver o `.gitignore`. O CI roda
+#: `pytest -m "not dados"` e cobre a lógica pura; a suíte inteira roda na máquina
+#: de quem já coletou. Marcar é melhor que pular em silêncio: o teste continua
+#: existindo e some da contagem só onde o insumo não existe.
+pytestmark = pytest.mark.dados
+
 RESULTS, CURATED = Path("data/results"), Path("data/curated")
 
 

@@ -6,11 +6,11 @@ generosa. As guardas aqui são sobre isso — e sobre a §7, que proíbe mistura
 resultados de tipos de experimento diferentes.
 """
 
+import tomllib
 from pathlib import Path
 
 import pandas as pd
 import pytest
-import tomllib
 from capallo.analysis.modern_alternative import (
     ATIVA,
     MODERNA,
@@ -20,6 +20,12 @@ from capallo.analysis.modern_alternative import (
 )
 from capallo.transform.build_indices import TER_MODERN, build
 from capallo.universe import BY_TICKER, INDICES, MODERN_ALTERNATIVE
+
+#: Este módulo lê `data/`, que não é versionado — ver o `.gitignore`. O CI roda
+#: `pytest -m "not dados"` e cobre a lógica pura; a suíte inteira roda na máquina
+#: de quem já coletou. Marcar é melhor que pular em silêncio: o teste continua
+#: existindo e some da contagem só onde o insumo não existe.
+pytestmark = pytest.mark.dados
 
 CURATED, RESULTS, STRATEGIES = Path("data/curated"), Path("data/results"), Path("strategies")
 

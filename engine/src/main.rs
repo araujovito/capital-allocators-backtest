@@ -50,9 +50,20 @@ fn main() -> anyhow::Result<()> {
     match cli.command {
         Command::Validate { strategy } => {
             let s = load(&strategy)?;
-            println!("ok: {} ({} ativos, {} → {})", s.name, s.weights.len(), s.start, s.end);
+            println!(
+                "ok: {} ({} ativos, {} → {})",
+                s.name,
+                s.weights.len(),
+                s.start,
+                s.end
+            );
         }
-        Command::Run { strategy, data, out, positions } => {
+        Command::Run {
+            strategy,
+            data,
+            out,
+            positions,
+        } => {
             let s = load(&strategy)?;
             let ds = data::Dataset::load(&data)?;
             let states = engine::run(&s, &ds)?;
@@ -95,7 +106,11 @@ fn main() -> anyhow::Result<()> {
             let multiple = last.value / last.contributed_cum;
             println!(
                 "{}: {} meses | aportado R$ {:.2} | patrimônio R$ {:.2} | {:.2}x o aportado",
-                s.name, states.len(), last.contributed_cum, last.value, multiple
+                s.name,
+                states.len(),
+                last.contributed_cum,
+                last.value,
+                multiple
             );
         }
     }

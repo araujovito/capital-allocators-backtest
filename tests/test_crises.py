@@ -90,4 +90,4 @@ def test_toda_crise_declara_a_fonte_da_datacao():
     for c in CRISES:
         assert c.fonte.strip()
         assert c.inicio < c.fim
-        assert "2006-01" <= c.inicio and c.fim <= "2025-12"
+        assert c.inicio >= "2006-01" and c.fim <= "2025-12"

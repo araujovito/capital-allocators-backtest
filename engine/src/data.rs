@@ -46,8 +46,8 @@ impl Dataset {
         let mut ds = Dataset::default();
 
         let panel = dir.join("panel.csv");
-        let mut rdr = csv::Reader::from_path(&panel)
-            .with_context(|| format!("lendo {}", panel.display()))?;
+        let mut rdr =
+            csv::Reader::from_path(&panel).with_context(|| format!("lendo {}", panel.display()))?;
         for row in rdr.deserialize::<PanelRow>() {
             let r = row?;
             ds.tr.insert((r.month, r.ticker), r.tr_brl);
@@ -70,7 +70,9 @@ impl Dataset {
     }
 
     pub fn price(&self, month: &str, ticker: &str) -> Option<f64> {
-        self.tr.get(&(month.to_string(), ticker.to_string())).copied()
+        self.tr
+            .get(&(month.to_string(), ticker.to_string()))
+            .copied()
     }
 
     /// Meses da janela pedida, em ordem. `start` e `end` vêm como `AAAA-MM-DD`.

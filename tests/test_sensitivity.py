@@ -28,7 +28,7 @@ def test_troca_a_data_de_inicio_e_mais_nada(tmp_path):
     destino = _toml_com_inicio(origem, "2012-01-01", tmp_path / "novo.toml")
 
     antes, depois = origem.read_text().splitlines(), destino.read_text().splitlines()
-    diferentes = [(a, b) for a, b in zip(antes, depois) if a != b]
+    diferentes = [(a, b) for a, b in zip(antes, depois, strict=True) if a != b]
     assert diferentes == [('start = "2006-01-01"', 'start = "2012-01-01"')]
     assert 'end = "2025-12-31"' in destino.read_text()
 
@@ -83,6 +83,7 @@ def test_regiao_sem_as_duas_pernas_e_omitida(monkeypatch):
     assert out.empty
 
 
+@pytest.mark.dados
 def test_spread_da_ptax_encolheu_ao_longo_da_janela():
     """O motivo de o experimento existir: spread constante cancelaria no retorno.
 

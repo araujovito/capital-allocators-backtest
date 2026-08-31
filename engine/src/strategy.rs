@@ -15,9 +15,16 @@ pub struct Strategy {
     pub name: String,
     pub start: String,
     pub end: String,
+    // Campos declarados que o motor ainda nao le. Ficam porque o parse os
+    // valida: um `base_currency = "USB"` ou um `frequency` invalido no TOML
+    // falha na leitura da estrategia, e nao doze meses depois no resultado.
+    // `expect` em vez de `allow` — quando o motor passar a ler o campo, o
+    // compilador avisa que a anotacao sobrou.
+    #[expect(dead_code, reason = "validado no parse; ver nota acima")]
     pub base_currency: String,
     pub contribution: Contribution,
     pub rebalance: Rebalance,
+    #[expect(dead_code, reason = "validado no parse; ver nota acima")]
     pub dividends: DividendPolicy,
     /// Pesos-alvo por ticker. Devem somar 1.0.
     pub weights: Vec<Weight>,
@@ -32,13 +39,21 @@ pub struct Weight {
 #[derive(Debug, Deserialize)]
 pub struct Contribution {
     pub amount: f64,
+    // Campos declarados que o motor ainda nao le. Ficam porque o parse os
+    // valida: um `base_currency = "USB"` ou um `frequency` invalido no TOML
+    // falha na leitura da estrategia, e nao doze meses depois no resultado.
+    // `expect` em vez de `allow` — quando o motor passar a ler o campo, o
+    // compilador avisa que a anotacao sobrou.
+    #[expect(dead_code, reason = "validado no parse; ver nota acima")]
     pub frequency: Frequency,
     /// `nominal` mantém o valor fixo; `real` corrige pelo índice de inflação.
     pub mode: ContributionMode,
     /// Índice usado para corrigir o aporte no modo `real`.
+    #[expect(dead_code, reason = "validado no parse; ver nota acima")]
     pub inflation_index: Option<String>,
     /// Periodicidade do reajuste. Anual evita lookahead: o IPCA do mês corrente
     /// ainda não foi divulgado no dia do aporte.
+    #[expect(dead_code, reason = "validado no parse; ver nota acima")]
     pub adjustment: Option<Frequency>,
 }
 
@@ -63,6 +78,12 @@ pub struct Rebalance {
     pub frequency: Option<Frequency>,
     /// Rebalanceamento com venda dispara IR e distorce a comparação com o CDI.
     #[serde(default)]
+    // Campos declarados que o motor ainda nao le. Ficam porque o parse os
+    // valida: um `base_currency = "USB"` ou um `frequency` invalido no TOML
+    // falha na leitura da estrategia, e nao doze meses depois no resultado.
+    // `expect` em vez de `allow` — quando o motor passar a ler o campo, o
+    // compilador avisa que a anotacao sobrou.
+    #[expect(dead_code, reason = "validado no parse; ver nota acima")]
     pub allow_selling: bool,
 }
 

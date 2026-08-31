@@ -6,14 +6,20 @@ lados, série de índice classificada e não suposta, e os dois tipos de experim
 não se misturando.
 """
 
+import tomllib
 from pathlib import Path
 
 import pandas as pd
 import pytest
-import tomllib
 from capallo.analysis.index_benchmark import TRIOS, comparar, veredito
 from capallo.ingest.indices import MSCI_CODES, _mensal
 from capallo.universe import BY_TICKER, INDICE_DO_ETF, INDICES, PASSIVE_ETFS
+
+#: Este módulo lê `data/`, que não é versionado — ver o `.gitignore`. O CI roda
+#: `pytest -m "not dados"` e cobre a lógica pura; a suíte inteira roda na máquina
+#: de quem já coletou. Marcar é melhor que pular em silêncio: o teste continua
+#: existindo e some da contagem só onde o insumo não existe.
+pytestmark = pytest.mark.dados
 
 CURATED, RESULTS, STRATEGIES = Path("data/curated"), Path("data/results"), Path("strategies")
 
@@ -59,8 +65,8 @@ def _carregar(nome: str) -> dict:
 
 
 def _tickers(texto: str) -> list[str]:
-    return [l.split("=")[1].strip().strip('"')
-            for l in texto.splitlines() if l.strip().startswith("ticker")]
+    return [ln.split("=")[1].strip().strip('"')
+            for ln in texto.splitlines() if ln.strip().startswith("ticker")]
 
 
 def _regras(nome: str) -> dict:

@@ -245,7 +245,7 @@ def conferir_sobreposicao(df: pd.DataFrame, tol: float = 0.01) -> list[str]:
     for (ticker, ano), g in df.groupby(["ticker", "fiscal_year"]):
         vs = g.dps_ajustado.round(4).unique()
         if len(vs) > 1 and (vs.max() - vs.min()) > tol * max(abs(vs.max()), 1.0):
-            fontes = ", ".join(f"{s}={v:g}" for s, v in zip(g.source, g.dps_ajustado))
+            fontes = ", ".join(f"{s}={v:g}" for s, v in zip(g.source, g.dps_ajustado, strict=True))
             problemas.append(f"{ticker} {ano}: {fontes}")
     return problemas
 
@@ -285,7 +285,7 @@ def conferir_irbank(out_dir: Path) -> list[str]:
     for ticker in ("8058", "8031"):
         try:
             deles = fetch_dividends(ticker)
-        except Exception as e:  # noqa: BLE001 — fonte de terceiros, indisponível não é erro nosso
+        except Exception as e:
             problemas.append(f"{ticker}: IR Bank indisponível ({type(e).__name__})")
             continue
         meu = nosso[nosso.ticker == ticker].set_index("fiscal_year").dps_jpy

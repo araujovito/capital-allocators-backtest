@@ -77,7 +77,9 @@ def _binario(engine_dir: Path) -> Path:
 
 
 def _rodar(exe: Path, toml: Path, data_dir: Path, out: Path) -> None:
-    subprocess.run(
+    # S603: nenhum componente vem de entrada externa — `exe` e validado por
+    # `_binario`, e os demais caminhos sao construidos por este modulo.
+    subprocess.run(  # noqa: S603
         [str(exe), "run", str(toml), "--data", str(data_dir), "--out", str(out)],
         check=True, capture_output=True,
     )

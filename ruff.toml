@@ -1,0 +1,44 @@
+# O ruff roda da raiz do repositorio, e nao de `python/` — `tests/`, `engine/` e
+# `notebooks/` ficam fora do pacote e precisam da mesma regra. Por isso a
+# configuracao mora aqui, e o `pyproject.toml` do pacote nao tem mais secao de
+# lint: duas fontes de verdade divergem sem avisar.
+#
+# O conjunto de regras e declarado por extenso de proposito. O default do ruff
+# muda entre versoes, e um lint que muda sozinho de opiniao produz CI vermelho em
+# commit que nao encostou no codigo.
+
+line-length = 100
+target-version = "py311"
+
+[lint]
+# Regras que pegam defeito, e nao regras que discutem com a prosa. As duas
+# familias deixadas de fora sao decisao, nao esquecimento:
+#
+# - E501 (linha longa): os docstrings deste repositorio sao documentacao em
+#   portugues, e sao o produto principal de varios modulos. `line-length` acima
+#   segue valendo como orientacao de formatacao; quebrar frase para caber em 100
+#   colunas pioraria o texto sem melhorar o codigo.
+# - RUF001-003 (unicode ambiguo): `×`, `−` e `p.p.` aparecem de proposito nas
+#   explicacoes de metodo. Trocar por `x` e `-` seria degradar a notacao.
+select = [
+    "E4", "E7", "E9", "W",  # pycodestyle, menos o limite de coluna
+    "F",        # pyflakes
+    "I",        # ordem de import
+    "UP",       # sintaxe que a versao minima (3.11) ja permite
+    "B",        # bugbear
+    "SIM",      # simplificacoes
+    "FURB",
+    "RUF100",   # noqa que nao suprime mais nada
+    "S",        # bandit: entra porque o projeto baixa e faz parse de arquivo remoto
+    "BLE",      # except Exception sem motivo escrito
+]
+
+[lint.per-file-ignores]
+# Extratores de PDF: `page.extract_text()` estoura de formas que o pypdf nao
+# tipa, e a resposta correta e a mesma para todas — pular a pagina e seguir. O
+# except esta comentado no lugar onde acontece; logar por pagina ilegivel
+# encheria a saida de ruido em relatorio de 200 paginas.
+"python/capallo/ingest/gbl_reports.py" = ["BLE001", "S112"]
+"python/capallo/ingest/jp_reports.py" = ["BLE001", "S112"]
+# Testes usam assert, que e o ponto deles.
+"tests/*" = ["S101"]

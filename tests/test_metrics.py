@@ -7,7 +7,6 @@ percentuais nao destoa de nada. Aqui a resposta certa e sabida de antemao.
 import numpy as np
 import pandas as pd
 import pytest
-
 from capallo.analysis import metrics as m
 
 
@@ -153,9 +152,8 @@ def test_sharpe_de_estrategia_contra_ela_mesma_e_zero():
 
 def test_normalize_table_expande_rowspan():
     """Sem expandir rowspan, as colunas deslizam e o valor lido e o da coluna vizinha."""
-    from lxml import html as LH
-
     from capallo.ingest.irbank import normalize_table
+    from lxml import html as LH
 
     doc = LH.fromstring("""
       <table>
@@ -172,7 +170,6 @@ def test_normalize_table_expande_rowspan():
 
 def test_gbl_extrai_dez_anos_em_ordem_decrescente(tmp_path, monkeypatch):
     """A tabela do relatorio lista os anos do mais recente para o mais antigo."""
-    import pandas as pd
 
     from capallo.ingest import gbl_reports as g
 
@@ -195,7 +192,6 @@ def test_gbl_extrai_dez_anos_em_ordem_decrescente(tmp_path, monkeypatch):
 def test_gbl_validate_flagra_desalinhamento(tmp_path):
     """Salto acima de 3x entre anos consecutivos denuncia coluna errada."""
     import pandas as pd
-
     from capallo.ingest.gbl_reports import validate
 
     anos = list(range(2006, 2026))

@@ -1,0 +1,81 @@
+# Portao de qualidade do repositorio: lint e teste das duas linguagens.
+#
+# A pergunta que este workflow responde e "esta arvore compila e passa nos
+# testes numa maquina que nao e a minha?". Ele deliberadamente NAO tenta rodar
+# o backtest: `data/` nao vai para o git (paineis grandes, e parte das fontes
+# nao permite redistribuicao), entao os testes que leem `data/` estao marcados
+# `@pytest.mark.dados` e sao desmarcados aqui. Ver `pytest.ini`.
+#
+# O que fica de fora, e por que:
+#
+# - mypy. O pacote tem 114 erros hoje, quase todos vindos de imports locais
+#   dentro dos subcomandos da CLI, em que mypy ve o mesmo nome com assinaturas
+#   diferentes. E divida declarada, nao esquecimento: colocar mypy no portao sem
+#   pagar a divida deixaria o CI vermelho de forma permanente, e um CI que vive
+#   vermelho nao e sinal de nada.
+# - a coleta de dados. Mora em `probe.yml`, que roda no seu proprio horario e
+#   nao bloqueia commit.
+
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Push seguido de push no mesmo branch: o run antigo e cancelado.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Instalar
+        # `charts` entra porque `analysis.charts` e testado; `browser` nao, que
+        # so serve a coleta e traria o download do Chromium para dentro do CI.
+        run: pip install -e "./python[dev,charts]"
+
+      - name: Lint
+        run: ruff check .
+
+      - name: Testes que nao dependem de `data/`
+        run: pytest -m "not dados" -q
+
+  rust:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: engine
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: engine
+
+      - name: Formatacao
+        run: cargo fmt --check
+
+      # `-D warnings`: o motor e pequeno e a barra pode ser essa. Campo que o
+      # motor ainda nao le carrega `#[expect(dead_code)]` com o motivo escrito.
+      - name: Clippy
+        run: cargo clippy --all-targets -- -D warnings
+
+      - name: Testes
+        run: cargo test
