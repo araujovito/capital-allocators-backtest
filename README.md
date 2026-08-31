@@ -20,6 +20,51 @@ aportes mensais entre **jan/2006 e dez/2025** (240 meses), três caminhos:
 O sistema executa uma metodologia **definida previamente** e apresenta os resultados,
 inclusive se contradisserem a hipótese inicial.
 
+## A resposta, em trinta segundos
+
+Para cada R$ 1 de poder de compra aportado ao longo de vinte anos, o investidor
+terminou com:
+
+| | R$ por R$1 aportado | Retorno real a.a. | Vol. |
+|---|---|---|---|
+| **Capital Allocators** | **3,75** | **8,87%** | 13,2% |
+| ACWI global, o produto de hoje | 3,09 | 6,56% | 15,4% |
+| Índices regionais | 2,61 | 5,79% | 13,5% |
+| ETFs compráveis em 2006 | 2,49 | 5,21% | 19,6% |
+| CDI | 1,52 | 4,43% | 0,9% |
+| Tesouro IPCA+ longo | 1,41 | 6,85% | 21,8% |
+
+**Quatro coisas que este estudo achou, e que não são o placar:**
+
+1. **O resultado não é uniforme entre regiões — e é essa a descoberta.** Em janelas
+   de 10 anos o allocator venceu o índice em 100% delas na Europa e em 38% nos EUA.
+   Quem olhasse só o mercado americano concluiria o oposto de quem olhasse o japonês.
+2. **A vantagem americana não existe.** Ela aparece com +0,49 p.p. no placar, some
+   contra o índice (−0,01) e é positiva em apenas 1 de 10 datas de entrada. Era
+   artefato do ponto de partida e da taxa do ETF.
+3. **O placar de 3,75x teve sorte de sequência; o prêmio, não.** O múltiplo está no
+   percentil 96 de 4.000 reordenações — mas a razão contra o ETF fica na mediana,
+   porque a sequência levantou as duas pernas igual.
+4. **Um título público carregou risco de ação.** O Tesouro IPCA+ longo rendeu 6,85%
+   ao ano real e entregou menos poder de compra que o CDI, com volatilidade de
+   21,8%. Retorno alto e resultado ruim convivem quando a sequência é adversa.
+
+E o que **não** dá para afirmar está escrito com o mesmo cuidado: veja
+[a limitação que sobra](#a-limitação-que-sobra-e-por-que-ela-sobra).
+
+## Como ler este repositório
+
+| Se você quer… | Vá para |
+|---|---|
+| o desenho do estudo | [Universo](#universo) · [Arquitetura](#arquitetura) · `docs/methodology.md` |
+| o placar e as figuras | [Resultados](#resultados--universo-completo) |
+| a comparação contra o mercado, e não contra o produto | [Index Benchmark](#index-benchmark-o-allocator-venceu-o-mercado-ou-venceu-o-produto) |
+| o contrafactual com o produto de hoje | [Modern Alternative](#modern-alternative-e-se-ele-pudesse-comprar-o-produto-de-hoje) |
+| os testes que atacam o resultado | [janelas de início](#o-resultado-depende-de-ter-começado-em-2006) · [bootstrap](#quanto-disso-é-sinal-e-quanto-foi-a-mão-que-a-história-deu) · [escolhas de método](#as-escolhas-de-método-decidem-alguma-coisa) |
+| os erros que o projeto cometeu e corrigiu | [o erro sueco](#o-erro-que-estes-números-corrigem) · [a premissa japonesa](#e-a-premissa-simétrica-no-japão) · `docs/decisions.md` |
+| o que o estudo **não** consegue responder | [a limitação que sobra](#a-limitação-que-sobra-e-por-que-ela-sobra) |
+| rodar tudo | [Setup](#setup) |
+
 ## Universo
 
 ### Capital Allocators
@@ -47,6 +92,11 @@ misturados com os do placar principal.
 **Regra anti-cherry-picking:** todo ativo precisa ser justificável com informação
 que já existia aproximadamente em 31/12/2005. Depois de fechado o universo,
 resultado ruim **não** é motivo para remover um ativo.
+
+**Regra de acesso:** o placar principal é o experimento *Historical Reality*, e o
+critério de entrada nele é ser um produto **realmente comprável à época**, com
+aporte mensal — não é "ser gestão ativa". É por isso que hedge fund não aparece no
+placar, e a resposta completa à objeção está em `docs/decisions.md` (2026-08-30).
 
 ## Arquitetura
 
@@ -81,9 +131,13 @@ docs/               metodologia e decisões
 tests/              testes do pipeline
 ```
 
-## Estado
+## Estado dos dados
 
-**Pré-desenvolvimento.** Spike de dados concluído — ver `docs/spike-dados.md`.
+**Coleta encerrada e validada.** Os doze ativos do universo, os quatro índices, o
+contrafactual global e a perna de renda fixa estão no painel do motor. Cada linha
+abaixo passou por validação própria, e as três séries cuja classificação estava
+apenas suposta — Avanza, Kabutan e o `PU Base` do Tesouro — hoje são medidas. As
+rodadas de busca que falharam estão em `docs/spike-dados.md`.
 
 | Camada | Estado | Fonte |
 |---|---|---|

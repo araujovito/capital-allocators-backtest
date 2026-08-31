@@ -721,3 +721,61 @@ Decisões que ficam:
 É o segundo módulo do projeto cujo produto principal é um "não dá" — o primeiro
 foi `ingest.irbank`. Os dois ficam no repositório pelo mesmo motivo: o caminho
 descartado é informação, e refazê-lo custa mais que lê-lo.
+
+## 2026-08-30 — Hedge fund não entra no placar, e o motivo é a regra de acesso
+
+Crítica externa recebida a este estudo: o benchmark de um gestor ativo deveria ser
+outro gestor ativo, e comparar os allocators com ETF e índice seria erro de
+contexto. A objeção está registrada aqui porque é a primeira que veio de fora, e
+porque a resposta já estava congelada na §7 da metodologia — mas espalhada, e
+portanto não localizável por quem chega ao repositório sem contexto.
+
+### A regra que decide
+
+O placar principal é o experimento **Historical Reality**, cujo critério de
+inclusão é textual: *apenas produtos realmente compráveis à época*. O critério não
+é "é gestão ativa?" — é "o sujeito do estudo podia comprar isso, com aporte mensal,
+em jan/2006?". Hedge fund falha nele por três motivos independentes, e qualquer um
+dos três já bastaria:
+
+1. **Acesso.** Fundo offshore em 2006 exigia investidor qualificado, aporte mínimo
+   na casa das centenas de milhares de dólares e lockup com liquidez trimestral ou
+   anual. O sujeito deste estudo aporta todo mês. A incompatibilidade é estrutural,
+   não é uma questão de o produto ser caro.
+2. **Índice de hedge funds não é produto.** Mesmo usando HFRI ou equivalente, não
+   há o que comprar. No máximo ele seria candidato ao §7.2, o Index Benchmark —
+   nunca ao placar. Colocá-lo lá violaria "resultados nunca misturados entre tipos".
+3. **Viés de sobrevivência e de backfill.** Fundo ruim para de reportar e some da
+   série; fundo bom entra na base já com histórico retroativo. É o mesmo viés que
+   `analysis.sobrevivencia` tentou medir no universo brasileiro e **não fechou** —
+   e ali o projeto se recusou a publicar número sujo. Importar uma base cujo viés é
+   maior, e não corrigível sem base paga, abandonaria esse padrão para ganhar um
+   benchmark.
+
+### O que a crítica acerta, e onde isso já está respondido
+
+A observação de fundo — *este estudo mede alocação, não habilidade de gestor* — está
+correta, e o estudo concorda com ela desde antes de rodar. É exatamente por isso que
+o Index Benchmark existe: o placar responde "a gestão ativa venceu o produto de
+2006", e não "venceu o mercado". A separação não é retórica. Foi ela que derrubou o
+veredito americano — contra o índice, o prêmio dos EUA é −0,01 p.p., e o +0,49 do
+placar era o custo do produto.
+
+Ou seja: a distinção que a crítica pede já foi feita, e custou uma conclusão ao
+estudo em vez de proteger uma.
+
+### O experimento que sobraria, e por que não roda
+
+Uma versão menor e legítima da crítica sobrevive: comparar os allocators com um
+**peer group ativo**, como quarto experimento depois de ETF, índice e ACWI. Seria
+coerente com o padrão da §7, em que cada experimento remove uma vantagem do lado
+ativo (+3,66 → +3,08 → +2,31 p.p.).
+
+Não roda por dado. O único candidato público e gratuito seria um índice de fundos
+brasileiro, que cobriria **uma das quatro regiões** e mediria multimercado, classe
+de risco diferente de uma carteira de ações — comparação que precisaria de ajuste de
+risco antes de significar qualquer coisa. As bases internacionais que fariam o
+trabalho direito são pagas e carregam o viés do item 3.
+
+Fica como limitação declarada, no mesmo formato das outras: não é experimento
+omitido por conveniência, é experimento sem insumo que o sustente.
